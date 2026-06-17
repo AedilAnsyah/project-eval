@@ -32,7 +32,6 @@ export default function Home() {
   
   // States
   const [allMembers, setAllMembers] = useState([]);
-  const [filteredMembers, setFilteredMembers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDept, setSelectedDept] = useState("Semua");
   const [currentUser, setCurrentUser] = useState(null);
@@ -73,7 +72,6 @@ export default function Home() {
       try {
         const data = await getMembers();
         setAllMembers(data);
-        setFilteredMembers(data);
       } catch (err) {
         console.error("Failed to load members", err);
       }
@@ -84,26 +82,22 @@ export default function Home() {
     loadData();
   }, []);
 
-  // Handle Search and Filter
-  useEffect(() => {
-    let result = allMembers;
-
+  // Get filtered members directly during render to prevent double-renders and lint errors
+  const filteredMembers = allMembers.filter((m) => {
     // Filter by department
-    if (selectedDept !== "Semua") {
-      result = result.filter(m => m.departemen === selectedDept);
+    if (selectedDept !== "Semua" && m.departemen !== selectedDept) {
+      return false;
     }
-
     // Filter by name query
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
-      result = result.filter(m => 
+      return (
         m.nama.toLowerCase().includes(query) || 
         m.jabatan.toLowerCase().includes(query)
       );
     }
-
-    setFilteredMembers(result);
-  }, [searchQuery, selectedDept, allMembers]);
+    return true;
+  });
 
   const handleLogout = () => {
     clearSession();

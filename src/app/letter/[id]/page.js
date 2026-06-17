@@ -120,8 +120,8 @@ export default function LetterDetailPage() {
 
           // Fetch coordinator name for the member's department
           try {
-            const allMems = await getMembers();
-            const koorMember = allMems.find(m => m.departemen === data.departemen && m.role === 'koor');
+            const deptMems = await getMembers(data.departemen);
+            const koorMember = deptMems.find(m => m.role === 'koor');
             if (koorMember) {
               setKoorName(koorMember.nama);
             }

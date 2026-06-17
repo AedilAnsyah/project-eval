@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { 
   ArrowLeft, 
@@ -56,29 +56,7 @@ export default function DashboardPage() {
 
 
 
-  // Authentication and Data Loading
-  useEffect(() => {
-    async function loadDashboard() {
-      const session = getSession();
-      setCurrentUser(session);
-
-      if (!session || (session.role !== "admin" && session.role !== "koor")) {
-        setLoading(false);
-        return; // Non-admin/koor will be blocked in render
-      }
-
-      try {
-        await refreshData(session);
-      } catch (err) {
-        console.error("Failed to load dashboard data", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadDashboard();
-  }, []);
-
-  const refreshData = async (user = currentUser) => {
+  const refreshData = useCallback(async (user = getSession()) => {
     if (!user) return;
     
     // Determine filters based on user role to minimize payload (highly optimizes performance)
@@ -110,7 +88,29 @@ export default function DashboardPage() {
     
     setMembers(mems);
     setFeedbacks(feeds);
-  };
+  }, []);
+
+  // Authentication and Data Loading
+  useEffect(() => {
+    async function loadDashboard() {
+      const session = getSession();
+      setCurrentUser(session);
+
+      if (!session || (session.role !== "admin" && session.role !== "koor")) {
+        setLoading(false);
+        return; // Non-admin/koor will be blocked in render
+      }
+
+      try {
+        await refreshData(session);
+      } catch (err) {
+        console.error("Failed to load dashboard data", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadDashboard();
+  }, [refreshData]);
 
   // Open Edit Modal for a Member
   const handleOpenEdit = (member) => {
