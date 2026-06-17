@@ -209,12 +209,29 @@ export default function LetterDetailPage() {
       const element = photoboxRef.current;
       if (!element) return;
 
+      // Wait for all custom web fonts to be fully loaded
+      if (typeof document !== "undefined" && document.fonts) {
+        await document.fonts.ready;
+      }
+
       // Scan target HTML element with high scale for printing quality
       const canvas = await html2canvas(element, {
         scale: 3, // High DPI rendering
         useCORS: true, // Allow cross-origin images
         allowTaint: true,
-        backgroundColor: null
+        backgroundColor: null,
+        onclone: (clonedDoc) => {
+          // Copy fonts from main document to cloned document for correct character measurements
+          if (typeof document !== "undefined" && document.fonts && clonedDoc.fonts) {
+            document.fonts.forEach((font) => {
+              try {
+                clonedDoc.fonts.add(font);
+              } catch (e) {
+                console.error("Error copying font to cloned document", e);
+              }
+            });
+          }
+        }
       });
 
       const imgData = canvas.toDataURL("image/png");
@@ -251,12 +268,29 @@ export default function LetterDetailPage() {
       const element = letterPrintRef.current;
       if (!element) return;
 
+      // Wait for all custom web fonts to be fully loaded
+      if (typeof document !== "undefined" && document.fonts) {
+        await document.fonts.ready;
+      }
+
       // Scan target HTML element with high scale for printing quality
       const canvas = await html2canvas(element, {
         scale: 2.5, // High DPI rendering
         useCORS: true, // Allow cross-origin images
         allowTaint: true,
-        backgroundColor: null
+        backgroundColor: null,
+        onclone: (clonedDoc) => {
+          // Copy fonts from main document to cloned document for correct character measurements
+          if (typeof document !== "undefined" && document.fonts && clonedDoc.fonts) {
+            document.fonts.forEach((font) => {
+              try {
+                clonedDoc.fonts.add(font);
+              } catch (e) {
+                console.error("Error copying font to cloned document", e);
+              }
+            });
+          }
+        }
       });
 
       const imgData = canvas.toDataURL("image/png");
