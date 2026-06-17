@@ -15,9 +15,10 @@ import {
   Shield,
   MessageSquare,
   RefreshCw,
-  Search
+  Search,
+  Trash2
 } from "lucide-react";
-import { getMembers, getFeedbacks, updateMember } from "@/lib/db";
+import { getMembers, getFeedbacks, updateMember, deleteFeedback } from "@/lib/db";
 import { getSession } from "@/lib/session";
 
 export default function DashboardPage() {
@@ -278,6 +279,19 @@ export default function DashboardPage() {
     }
   };
 
+  // Handle Delete Feedback response (for Chairman & Vice Chairman / Admin)
+  const handleDeleteFeedback = async (id) => {
+    if (!window.confirm("Apakah Anda yakin ingin menghapus pesan feedback ini?")) return;
+    
+    try {
+      await deleteFeedback(id);
+      await refreshData();
+      alert("Pesan feedback berhasil dihapus!");
+    } catch (err) {
+      alert("Gagal menghapus feedback: " + err.message);
+    }
+  };
+
   // ----------------------------------------------------
   // CONDITIONAL RENDER: Loading / Role Guards
   // ----------------------------------------------------
@@ -462,7 +476,19 @@ export default function DashboardPage() {
                             timeStyle: "short" 
                           })}
                         </span>
-                        <span>ID #{feed.id}</span>
+                        <div className="flex items-center gap-2">
+                          <span>ID #{feed.id}</span>
+                          {currentUser.role === "admin" && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteFeedback(feed.id)}
+                              className="p-1 text-[#FF6B6B] hover:bg-red-50 hover:border-red-400 border border-transparent rounded cursor-pointer transition-all active:scale-95"
+                              title="Hapus Feedback"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );

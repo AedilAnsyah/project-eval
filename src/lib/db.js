@@ -242,3 +242,26 @@ export async function addFeedback(feedbackData) {
     return newFeedback;
   }
 }
+
+/**
+ * Deletes a feedback response by ID.
+ */
+export async function deleteFeedback(id) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from('feedback_surat')
+      .delete()
+      .eq('id', id)
+      .select()
+      .maybeSingle();
+      
+    if (error) throw new Error(error.message);
+    return data;
+  } else {
+    const feedbacks = getLocalFeedback();
+    const filtered = feedbacks.filter((f) => f.id !== id);
+    saveLocalFeedback(filtered);
+    return { id };
+  }
+}
+
