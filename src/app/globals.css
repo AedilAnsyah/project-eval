@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+:root {
+  --font-space-grotesk: 'Space Grotesk', sans-serif;
+  --font-lexend: 'Lexend', sans-serif;
+  --font-lilita-one: 'Lilita One', cursive;
+  --font-caveat: 'Caveat', cursive;
+  --font-architects-daughter: 'Architects Daughter', cursive;
+}
+
+@theme {
+  --font-sans: var(--font-lexend), ui-sans-serif, system-ui;
+  --font-space: var(--font-space-grotesk);
+  --font-lexend: var(--font-lexend);
+  --font-lilita: var(--font-lilita-one);
+  --font-caveat: var(--font-caveat);
+  --font-handwriting: var(--font-architects-daughter);
+
+  --color-brand-inti: #FF6B6B;
+  --color-brand-hc: #FFBE0B;
+  --color-brand-td: #3A86FF;
+  --color-brand-hi: #06D6A0;
+  --color-brand-fed: #8338EC;
+  --color-brand-cc: #FF006E;
+  --color-brand-er: #FB5607;
+  --color-brand-bg: #F9F6F0;
+  --color-brand-letter: #FFFDF0;
+  --color-brand-carbon: #1A1D20;
+
+  --shadow-neo-sm: 2px 2px 0px #000;
+  --shadow-neo-md: 4px 4px 0px #000;
+  --shadow-neo-lg: 8px 8px 0px #000;
+  --shadow-neo-xl: 12px 12px 0px #000;
+}
+
+/* Base Body Styles */
+body {
+  background-color: var(--color-brand-bg);
+  color: var(--color-brand-carbon);
+}
+
+/* Polka dot grid backdrop */
+.polka-dot-bg {
+  background-color: #F9F6F0;
+  background-image: radial-gradient(var(--color-brand-carbon) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  opacity: 0.85;
+}
+
+/* Soft blur overlay with colorful polka-dot */
+.overlay-polka-dot {
+  background-image: radial-gradient(#ff006e20 2px, transparent 2px), radial-gradient(#3a86ff20 2px, transparent 2px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}
+
+/* Animated gradient backgrounds for love letters */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-gradient {
+  background: linear-gradient(-45deg, #FF6B6B20, #3A86FF20, #8338EC20, #06D6A020);
+  background-size: 300% 300%;
+  animation: gradientMove 12s ease infinite;
+}
+
+/* Ruled notebook line styling */
+.ruled-paper {
+  background-image: linear-gradient(#e5e7eb 1.5px, transparent 1.5px);
+  background-size: 100% 2.25rem;
+  line-height: 2.25rem;
+}
+
+/* Custom styles for micro-animations */
+.sticker-shake:hover {
+  animation: shake 0.5s ease infinite alternate;
+}
+
+@keyframes shake {
+  0% { transform: rotate(-5deg); }
+  100% { transform: rotate(5deg); }
+}
+
+/* Y2K metallic gradient */
+.bg-y2k-cyber {
+  background: linear-gradient(135deg, #ff006e, #3a86ff, #06d6a0);
+}
+
+/* Retro checkerboard pattern */
+.bg-checkerboard {
+  background-color: #ffffff;
+  background-image: linear-gradient(45deg, #000000 25%, transparent 25%), 
+                    linear-gradient(-45deg, #000000 25%, transparent 25%), 
+                    linear-gradient(45deg, transparent 75%, #000000 75%), 
+                    linear-gradient(-45deg, transparent 75%, #000000 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+.bg-checkerboard-color {
+  background-color: #ffbe0b;
+  background-image: linear-gradient(45deg, #ff006e 25%, transparent 25%), 
+                    linear-gradient(-45deg, #ff006e 25%, transparent 25%), 
+                    linear-gradient(45deg, transparent 75%, #ff006e 75%), 
+                    linear-gradient(-45deg, transparent 75%, #ff006e 75%);
+  background-size: 30px 30px;
+  background-position: 0 0, 0 15px, 15px -15px, -15px 0px;
+}
