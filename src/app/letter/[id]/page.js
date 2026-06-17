@@ -493,7 +493,7 @@ export default function LetterDetailPage() {
             }
           }
         }
-        return <div className="absolute inset-0 pointer-events-none overflow-hidden">{squares}</div>;
+        return <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">{squares}</div>;
       }
       case "checker": {
         const squares = [];
@@ -516,14 +516,14 @@ export default function LetterDetailPage() {
             }
           }
         }
-        return <div className="absolute inset-0 pointer-events-none overflow-hidden">{squares}</div>;
+        return <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">{squares}</div>;
       }
       case "y2k":
-        return <div className="absolute inset-0 bg-[#0000000a] overlay-polka-dot pointer-events-none"></div>;
+        return <div className="absolute inset-0 bg-[#0000000a] overlay-polka-dot pointer-events-none z-0"></div>;
       case "holo":
-        return <div className="absolute inset-0 bg-white/20 backdrop-blur-[0.5px] pointer-events-none"></div>;
+        return <div className="absolute inset-0 bg-white/20 backdrop-blur-[0.5px] pointer-events-none z-0"></div>;
       case "comic":
-        return <div className="absolute inset-0 bg-repeat bg-[linear-gradient(45deg,#00000012_25%,transparent_25%,transparent_75%,#00000012_75%,#00000012)] bg-[length:20px_20px] bg-[position:0_0,10px_10px] pointer-events-none"></div>;
+        return <div className="absolute inset-0 bg-repeat bg-[linear-gradient(45deg,#00000012_25%,transparent_25%,transparent_75%,#00000012_75%,#00000012),linear-gradient(45deg,#00000012_25%,transparent_25%,transparent_75%,#00000012_75%,#00000012)] bg-[length:20px_20px] bg-[position:0_0,10px_10px] pointer-events-none z-0"></div>;
       default:
         return null;
     }
@@ -701,7 +701,7 @@ export default function LetterDetailPage() {
   // Render watermark/footer slot
   const renderWatermarkSlot = (extraClass = "", isLight = false) => {
     return (
-      <div className={`w-[190px] py-2 ${isLight ? 'bg-transparent' : 'bg-black border-2.5 border-black'} text-center flex flex-col justify-center items-center select-none shadow-sm rounded-sm ${extraClass}`}>
+      <div className={`w-[190px] py-2 ${isLight ? 'bg-transparent' : 'bg-black border-2.5 border-black'} text-center flex flex-col justify-center items-center select-none shadow-sm rounded-sm relative z-10 ${extraClass}`}>
         <div className="flex items-center gap-3 mb-1.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/hmif_logo.png" alt="HMIF Logo" className="w-5 h-5 object-contain" />
@@ -1344,7 +1344,7 @@ export default function LetterDetailPage() {
 
                     {/* Dynamic Layout Rendering */}
                     {photoboxLayout === "vertical_strip" && (
-                      <div className="flex flex-col items-center gap-4">
+                      <div className="flex flex-col items-center gap-4 relative z-10">
                         {renderPhotoSlot("rotate-[-2deg]")}
                         {renderDepartmentPhotoSlot("rotate-[1.5deg]")}
                         {renderCabinetPhotoSlot("rotate-[-1deg]")}
@@ -1353,7 +1353,7 @@ export default function LetterDetailPage() {
                     )}
 
                     {photoboxLayout === "trio_strip" && (
-                      <div className="flex flex-col items-center gap-4">
+                      <div className="flex flex-col items-center gap-4 relative z-10">
                         {renderPhotoSlot("rotate-[-1deg]")}
                         {renderCabinetPhotoSlot("rotate-[1.5deg]")}
                         {renderWatermarkSlot()}
@@ -1361,7 +1361,7 @@ export default function LetterDetailPage() {
                     )}
 
                     {photoboxLayout === "double_stack" && (
-                      <div className="flex flex-col items-center gap-4">
+                      <div className="flex flex-col items-center gap-4 relative z-10">
                         {renderPhotoSlot("rotate-[-1.5deg]")}
                         {renderDepartmentPhotoSlot("rotate-[1.5deg]")}
                         {renderWatermarkSlot()}
@@ -1369,7 +1369,7 @@ export default function LetterDetailPage() {
                     )}
 
                     {photoboxLayout === "classic_polaroid" && (
-                      <div className={`w-[210px] p-3 border-3 flex flex-col justify-between items-center shadow-lg rounded-sm ${getSlotBgClass()}`}>
+                      <div className={`w-[210px] p-3 border-3 flex flex-col justify-between items-center shadow-lg rounded-sm relative z-10 ${getSlotBgClass()}`}>
                         {/* Top Photo */}
                         <div className={`w-full aspect-square border border-black overflow-hidden relative ${photoSource !== 'profile' ? 'bg-white' : 'bg-gray-100'}`}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1395,7 +1395,7 @@ export default function LetterDetailPage() {
                     )}
 
                     {photoboxLayout === "asymmetric_collage" && (
-                      <div className="w-[300px] h-[480px] relative">
+                      <div className="w-[300px] h-[480px] relative z-10">
                         <div className="absolute top-2 left-2 z-10">
                           {renderPhotoSlot("rotate-[-3deg] shadow-lg")}
                         </div>
