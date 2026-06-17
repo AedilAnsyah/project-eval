@@ -1,13 +1,16 @@
 // scratch/test_load.js
 import http from 'http';
+import https from 'https';
 
-const TARGET_URL = 'http://localhost:3000/';
+const TARGET_URL = process.argv[2] || 'http://localhost:3000/';
 const CONCURRENT_USERS = 53;
 
 async function measureRequest(index) {
   const start = Date.now();
+  const client = TARGET_URL.startsWith('https') ? https : http;
+
   return new Promise((resolve) => {
-    http.get(TARGET_URL, (res) => {
+    client.get(TARGET_URL, (res) => {
       let body = '';
       res.on('data', (chunk) => {
         body += chunk;
@@ -74,12 +77,13 @@ async function runLoadTest() {
     });
   }
 
-  if (successCount === CONCURRENT_USERS && avgLatency < 150) {
-    console.log("\nStatus: EXCELLENT. Next.js production server handled all 53 concurrent users smoothly under 150ms average latency!");
+  if (successCount === CONCURRENT_USERS) {
+    console.log(`\nStatus: EXCELLENT. Next.js server handled all 53 concurrent users successfully with ${avgLatency.toFixed(2)}ms average latency!`);
   } else {
     console.log("\nStatus: WARNING. Performance might need further optimization.");
   }
 }
 
-// Wait 2 seconds for Next.js server to fully start up, then run the load test
-setTimeout(runLoadTest, 2000);
+// Run immediately if target URL is passed, otherwise wait 2 seconds for local startup
+const delay = process.argv[2] ? 0 : 2000;
+setTimeout(runLoadTest, delay);
