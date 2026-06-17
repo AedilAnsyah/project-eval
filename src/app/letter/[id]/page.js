@@ -676,14 +676,82 @@ export default function LetterDetailPage() {
   // Printable letter theme background pattern overlay
   const getPrintThemePattern = () => {
     switch (printTheme) {
-      case "kraft":
-        return <div className="absolute inset-0 pointer-events-none opacity-25" style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 19px,rgba(100,60,10,0.4) 19px,rgba(100,60,10,0.4) 20px),repeating-linear-gradient(90deg,transparent,transparent 19px,rgba(100,60,10,0.15) 19px,rgba(100,60,10,0.15) 20px)" }} />;
-      case "blueprint":
-        return <div className="absolute inset-0 pointer-events-none opacity-30" style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 19px,rgba(100,180,255,0.5) 19px,rgba(100,180,255,0.5) 20px),repeating-linear-gradient(90deg,transparent,transparent 19px,rgba(100,180,255,0.5) 19px,rgba(100,180,255,0.5) 20px)" }} />;
-      case "lined":
-        return <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 27px,#b0c4de 27px,#b0c4de 28px)", backgroundPositionY: "36px" }} />;
-      case "newspaper":
-        return <div className="absolute inset-0 pointer-events-none opacity-10" style={{ backgroundImage: "repeating-linear-gradient(0deg,transparent,transparent 14px,#555 14px,#555 15px)" }} />;
+      case "kraft": {
+        const lines = [];
+        // Horizontal lines: 100 lines (covers up to 2000px height)
+        for (let i = 0; i < 100; i++) {
+          lines.push(
+            <div 
+              key={`h-${i}`} 
+              className="absolute left-0 right-0 border-t border-amber-900/40 pointer-events-none" 
+              style={{ top: `${i * 20}px` }} 
+            />
+          );
+        }
+        // Vertical lines: 32 lines (covers 640px width)
+        for (let i = 0; i < 32; i++) {
+          lines.push(
+            <div 
+              key={`v-${i}`} 
+              className="absolute top-0 bottom-0 border-l border-amber-900/15 pointer-events-none" 
+              style={{ left: `${i * 20}px` }} 
+            />
+          );
+        }
+        return <div className="absolute inset-0 pointer-events-none opacity-25 overflow-hidden">{lines}</div>;
+      }
+      case "blueprint": {
+        const lines = [];
+        // Horizontal lines: 100 lines
+        for (let i = 0; i < 100; i++) {
+          lines.push(
+            <div 
+              key={`h-${i}`} 
+              className="absolute left-0 right-0 border-t border-blue-400/50 pointer-events-none" 
+              style={{ top: `${i * 20}px` }} 
+            />
+          );
+        }
+        // Vertical lines: 32 lines
+        for (let i = 0; i < 32; i++) {
+          lines.push(
+            <div 
+              key={`v-${i}`} 
+              className="absolute top-0 bottom-0 border-l border-blue-400/50 pointer-events-none" 
+              style={{ left: `${i * 20}px` }} 
+            />
+          );
+        }
+        return <div className="absolute inset-0 pointer-events-none opacity-30 overflow-hidden">{lines}</div>;
+      }
+      case "lined": {
+        const lines = [];
+        // Horizontal lines every 27px, starting at top offset (36px)
+        for (let i = 0; i < 75; i++) {
+          lines.push(
+            <div 
+              key={`h-${i}`} 
+              className="absolute left-0 right-0 border-t border-blue-200 pointer-events-none" 
+              style={{ top: `${36 + i * 27}px` }} 
+            />
+          );
+        }
+        return <div className="absolute inset-0 pointer-events-none overflow-hidden">{lines}</div>;
+      }
+      case "newspaper": {
+        const lines = [];
+        // Horizontal lines every 14px
+        for (let i = 0; i < 150; i++) {
+          lines.push(
+            <div 
+              key={`h-${i}`} 
+              className="absolute left-0 right-0 border-t border-gray-600/30 pointer-events-none" 
+              style={{ top: `${i * 14}px` }} 
+            />
+          );
+        }
+        return <div className="absolute inset-0 pointer-events-none opacity-10 overflow-hidden">{lines}</div>;
+      }
       default:
         return null;
     }
