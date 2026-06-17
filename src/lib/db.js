@@ -67,23 +67,32 @@ function saveLocalFeedback(feedback) {
 // ----------------------------------------------------
 
 /**
+// SHA-256 hashes of the admin & koor passwords (QA-01 Security Fix)
+const hashedPasswordsMap = {
+  "Fatir Gibran": "0729ed86c0352636f82128c395d6352134f50b3a2067b48d8610a5873b642649",
+  "Aedil Riski Ansyah": "b79faf8e688326e8990ebd1c1f6c465f3a37e39a8df89c11b51ed4a4bf0d31b3",
+  "Muhammad Fachri Auravyano Saka": "fa716147666babcf677cba4099df5ca98f6a0bbaf78ed62f9ccc9784f36e74df",
+  "Chilya Fadhilatin Nisa": "b68e84dfbf4fc6e3b0239860e02ac90e2f2b3170b95d71c5e9babcd397a26a4f",
+  "Syahla Kheisya Mayastria": "72f488e8c74f07a6bfb6b3643b56811afb8d78920768c4b6dbdde7db4912db72",
+  "Damanik, Yohanes Geovan Ondova": "48828bab5d0ab7cfe4303a3b505ca27b4bb16b6c937cb6104c8549341c7cfef6",
+  "Ridha Akifah": "1f00aa253f6d9d8fc27b2ed5cdd3b2cdb1a057f6948463e41b9016cb6a13a22d",
+  "Dafa Awal Wahyu Pambudi": "f0dd9b598dc192fcee2cb8fc9500dac94cdd1bad0b38e6477763b410bd64ed71"
+};
+
+// Helper to hash password using browser Web Crypto API
+async function hashPassword(pw) {
+  const msgBuffer = new TextEncoder().encode(pw);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
  * Validates credentials and returns user details.
  */
 export async function signIn(nim, dob, password) {
   const cleanNim = nim.trim();
   const cleanDob = dob.trim(); // Format: YYYY-MM-DD
-
-  // Passwords mapping for admin & koor roles
-  const passwordsMap = {
-    "Fatir Gibran": "akubiawak",
-    "Aedil Riski Ansyah": "goatsejati",
-    "Muhammad Fachri Auravyano Saka": "mynameispace",
-    "Chilya Fadhilatin Nisa": "emangakugaptek",
-    "Syahla Kheisya Mayastria": "umibatu",
-    "Damanik, Yohanes Geovan Ondova": "batakdongo",
-    "Ridha Akifah": "dudahunter",
-    "Dafa Awal Wahyu Pambudi": "cewemanalagiini"
-  };
 
   if (isSupabaseConfigured) {
     // Note: Since this is pre-registered authentication via NIM/DOB,
@@ -100,8 +109,9 @@ export async function signIn(nim, dob, password) {
 
     // If role is admin or koor, require password verification
     if (data.role === 'admin' || data.role === 'koor') {
-      const expectedPassword = passwordsMap[data.nama];
-      if (!expectedPassword || password !== expectedPassword) {
+      const expectedHash = hashedPasswordsMap[data.nama];
+      const inputHash = await hashPassword(password);
+      if (!expectedHash || inputHash !== expectedHash) {
         throw new Error('Password salah!');
       }
     }
@@ -118,8 +128,9 @@ export async function signIn(nim, dob, password) {
 
     // If role is admin or koor, require password verification
     if (found.role === 'admin' || found.role === 'koor') {
-      const expectedPassword = passwordsMap[found.nama];
-      if (!expectedPassword || password !== expectedPassword) {
+      const expectedHash = hashedPasswordsMap[found.nama];
+      const inputHash = await hashPassword(password);
+      if (!expectedHash || inputHash !== expectedHash) {
         throw new Error('Password salah!');
       }
     }
