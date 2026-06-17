@@ -454,8 +454,8 @@ export default function LetterDetailPage() {
   // Frame background class resolver for the theme variants
   const getFrameBgClass = () => {
     switch (frameTemplate) {
-      case "checker": return "bg-checkerboard-color";
-      case "checker_mono": return "bg-checkerboard";
+      case "checker": return "bg-[#ffbe0b]";
+      case "checker_mono": return "bg-white";
       case "pastel": return "bg-[#e0e7ff]";
       case "holo": return "bg-gradient-to-br from-pink-300 via-purple-300 via-indigo-200 to-yellow-100";
       case "comic": return "bg-[#FFBE0B]";
@@ -465,6 +465,67 @@ export default function LetterDetailPage() {
       case "y2k":
       default:
         return "bg-y2k-cyber";
+    }
+  };
+
+  // Photobox background pattern overlay
+  const getPhotoboxPattern = () => {
+    switch (frameTemplate) {
+      case "checker_mono": {
+        const squares = [];
+        // Width is 240px (asymmetric is 320px). Cover up to 16 columns (320px).
+        // Height is dynamic but let's cover up to 1200px (60 rows).
+        for (let row = 0; row < 60; row++) {
+          for (let col = 0; col < 16; col++) {
+            if ((row + col) % 2 === 1) {
+              squares.push(
+                <div 
+                  key={`sq-${row}-${col}`}
+                  className="absolute bg-black pointer-events-none"
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    left: `${col * 20}px`,
+                    top: `${row * 20}px`
+                  }}
+                />
+              );
+            }
+          }
+        }
+        return <div className="absolute inset-0 pointer-events-none overflow-hidden">{squares}</div>;
+      }
+      case "checker": {
+        const squares = [];
+        // Width is 320px (11 columns of 30px). Height is up to 1200px (40 rows).
+        for (let row = 0; row < 40; row++) {
+          for (let col = 0; col < 12; col++) {
+            if ((row + col) % 2 === 1) {
+              squares.push(
+                <div 
+                  key={`sq-${row}-${col}`}
+                  className="absolute bg-[#ff006e] pointer-events-none"
+                  style={{
+                    width: "30px",
+                    height: "30px",
+                    left: `${col * 30}px`,
+                    top: `${row * 30}px`
+                  }}
+                />
+              );
+            }
+          }
+        }
+        return <div className="absolute inset-0 pointer-events-none overflow-hidden">{squares}</div>;
+      }
+      case "y2k":
+        return <div className="absolute inset-0 bg-[#0000000a] overlay-polka-dot pointer-events-none"></div>;
+      case "holo":
+        return <div className="absolute inset-0 bg-white/20 backdrop-blur-[0.5px] pointer-events-none"></div>;
+      case "comic":
+        return <div className="absolute inset-0 bg-repeat bg-[linear-gradient(45deg,#00000012_25%,transparent_25%,transparent_75%,#00000012_75%,#00000012)] bg-[length:20px_20px] bg-[position:0_0,10px_10px] pointer-events-none"></div>;
+      default:
+        return null;
     }
   };
 
@@ -1272,9 +1333,7 @@ export default function LetterDetailPage() {
                     style={{ minHeight: photoboxLayout === "asymmetric_collage" ? "520px" : "auto" }}
                   >
                     {/* Background Pattern Overlays */}
-                    {frameTemplate === "y2k" && <div className="absolute inset-0 bg-[#0000000a] overlay-polka-dot"></div>}
-                    {frameTemplate === "holo" && <div className="absolute inset-0 bg-white/20 backdrop-blur-[0.5px]"></div>}
-                    {frameTemplate === "comic" && <div className="absolute inset-0 bg-repeat bg-[linear-gradient(45deg,#00000012_25%,transparent_25%,transparent_75%,#00000012_75%,#00000012),linear-gradient(45deg,#00000012_25%,transparent_25%,transparent_75%,#00000012_75%,#00000012)] bg-[length:20px_20px] bg-[position:0_0,10px_10px]"></div>}
+                    {getPhotoboxPattern()}
                     
                     {/* Retro Stamp */}
                     {photoboxLayout !== "classic_polaroid" && photoboxLayout !== "double_stack" && (
