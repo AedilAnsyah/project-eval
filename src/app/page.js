@@ -49,20 +49,20 @@ export default function Home() {
   const getDeptPhotoUrl = (dept) => {
     switch (dept) {
       case "Human Capital & Character Building":
-        return "/HCCB.jpg";
+        return "/HCCB.webp";
       case "Talent Development & Innovation":
-        return "/TDI.jpg";
+        return "/TDI.webp";
       case "Humanity Impact & Development":
-        return "/HID.jpg";
+        return "/HID.webp";
       case "Finance & Enterprise Development":
-        return "/FED.jpg";
+        return "/FED.webp";
       case "Creative Content & Outreach":
-        return "/CCO.jpg";
+        return "/CCO.webp";
       case "External Relations & Advocacy":
-        return "/ERA.jpg";
+        return "/ERA.webp";
       case "Executive Board":
       default:
-        return "/Foto Kabinet.jpg";
+        return "/Foto Kabinet.webp";
     }
   };
 

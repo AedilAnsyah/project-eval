@@ -1,6 +1,6 @@
 // Database client wrapper with automatic Mock Fallback
 import { createClient } from '@supabase/supabase-js';
-import { members as initialMembers } from './members_data';
+import { members as initialMembers } from './members_data.js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
