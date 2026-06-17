@@ -259,11 +259,12 @@ export default function DashboardPage() {
         updatedFields.role = editRole;
         updatedFields.departemen = editDept;
       } else if (currentUser.role === "koor") {
-        // Koor can ONLY edit pesan_koor for staff in their own department
+        // Koor can ONLY edit pesan_koor and foto_url for staff in their own department
         if (editingMember.departemen !== currentUser.departemen) {
           throw new Error("Anda hanya bisa mengubah data staf di departemen Anda sendiri.");
         }
         updatedFields.pesan_koor = editPesanKoor;
+        updatedFields.foto_url = editFotoUrl;
       }
 
       await updateMember(editingMember.id, updatedFields);
@@ -736,10 +737,42 @@ export default function DashboardPage() {
                   </div>
                 </>
               ) : (
-                // COORDINATOR INTERFACE (Can ONLY edit pesan_koor of staff in their department)
-                <div>
-                  <div className="mb-4 bg-blue-50 border-2 border-blue-400 p-3 rounded-lg text-xs text-blue-700 font-semibold leading-relaxed">
-                    💡 Sebagai Koordinator Departemen <strong>{currentUser.departemen}</strong>, Anda hanya berhak menulis atau mengedit pesan evaluasi (Pesan Koor) untuk anggota departemen Anda. Data kredensial (NIM, DOB) hanya bisa diedit oleh Admin (Chairman/Vice Chairman).
+                // COORDINATOR INTERFACE (Can edit pesan_koor and foto_url of staff in their department)
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border-2 border-blue-400 p-3 rounded-lg text-xs text-blue-700 font-semibold leading-relaxed">
+                    💡 Sebagai Koordinator Departemen <strong>{currentUser.departemen}</strong>, Anda berhak menulis atau mengedit pesan evaluasi (Pesan Koor) serta mengubah foto profil staf di departemen Anda. Data kredensial (NIM, DOB) hanya bisa diedit oleh Admin (Chairman/Vice Chairman).
+                  </div>
+
+                  <div>
+                    <label className="block font-lexend font-bold text-xs uppercase text-gray-700 mb-1">Foto Profil Staf</label>
+                    <div className="flex flex-col sm:flex-row gap-3 items-center bg-white border-2.5 border-black p-3 rounded-lg">
+                      <div className="w-16 h-16 rounded-xl border-2.5 border-black bg-white overflow-hidden shadow-neo-sm relative flex-shrink-0">
+                        {editFotoUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={editFotoUrl} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-400">Preview</div>
+                        )}
+                      </div>
+                      <div className="flex-grow w-full space-y-2">
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          className="w-full text-xs text-gray-500 file:mr-3 file:py-1 file:px-2.5 file:rounded-md file:border-2 file:border-black file:text-[10px] file:font-black file:bg-[#FFBE0B] file:text-black hover:file:bg-[#e6ab0a] file:cursor-pointer cursor-pointer"
+                        />
+                        <div className="flex gap-2 items-center">
+                          <span className="text-[10px] text-gray-500 font-semibold flex-shrink-0">Atau URL:</span>
+                          <input 
+                            type="text" 
+                            value={editFotoUrl}
+                            onChange={(e) => setEditFotoUrl(e.target.value)}
+                            placeholder="https://... atau data:image/..."
+                            className="flex-grow px-2 py-1 border-2 border-black rounded-md font-lexend text-[10px] text-black bg-white focus:outline-none focus:border-[#FFBE0B]"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div>
@@ -747,7 +780,7 @@ export default function DashboardPage() {
                       Pesan Evaluasi dari {currentUser.nama} ({currentUser.departemen})
                     </label>
                     <textarea 
-                      rows={6}
+                      rows={4}
                       value={editPesanKoor}
                       onChange={(e) => setEditPesanKoor(e.target.value)}
                       placeholder="Tulis pesan evaluasi/apresiasi tim internal untuk staf ini..."
