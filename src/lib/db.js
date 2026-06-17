@@ -66,7 +66,6 @@ function saveLocalFeedback(feedback) {
 // EXPORTED DB ACTIONS (AUTOMATIC MOCK/REAL SWITCH)
 // ----------------------------------------------------
 
-/**
 // SHA-256 hashes of the admin & koor passwords (QA-01 Security Fix)
 const hashedPasswordsMap = {
   "Fatir Gibran": "0729ed86c0352636f82128c395d6352134f50b3a2067b48d8610a5873b642649",
