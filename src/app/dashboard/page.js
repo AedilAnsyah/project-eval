@@ -79,29 +79,37 @@ export default function DashboardPage() {
   }, []);
 
   const refreshData = async (user = currentUser) => {
-    const mems = await getMembers();
-    const feeds = await getFeedbacks();
+    if (!user) return;
     
-    // Sort members by order
-    setMembers(mems);
+    // Determine filters based on user role to minimize payload (highly optimizes performance)
+    let mems;
+    let feeds;
 
-    // Apply role filters to feedbacks
     if (user.role === "admin") {
-      // Admin sees feedback directed to them specifically (Chairman/Vice Chairman split)
+      // Admins load all members to manage them
+      mems = await getMembers();
+      
+      // Load only relevant feedbacks for Chairman / Vice Chairman to optimize download size
       if (user.nama === 'Fatir Gibran' || user.jabatan === 'Chairman') {
-        setFeedbacks(feeds.filter(f => f.tujuan === "chairman"));
+        feeds = await getFeedbacks("chairman");
       } else if (user.nama === 'Aedil Riski Ansyah' || user.jabatan === 'Vice Chairman') {
-        setFeedbacks(feeds.filter(f => f.tujuan === "vice_chairman"));
+        feeds = await getFeedbacks("vice_chairman");
       } else {
-        setFeedbacks(feeds);
+        feeds = await getFeedbacks();
       }
     } else if (user.role === "koor") {
-      // Coordinator only sees feedback directed to Koor from their own department
-      const filteredFeeds = feeds.filter(
-        f => f.tujuan === "koor" && f.departemen_pengirim === user.departemen
-      );
-      setFeedbacks(filteredFeeds);
+      // Coordinators only load members of their own department to save bandwidth (base64 image size is large)
+      mems = await getMembers(user.departemen);
+      
+      // Coordinators only load feedback sent to 'koor' from their own department
+      feeds = await getFeedbacks("koor", user.departemen);
+    } else {
+      mems = [];
+      feeds = [];
     }
+    
+    setMembers(mems);
+    setFeedbacks(feeds);
   };
 
   // Open Edit Modal for a Member

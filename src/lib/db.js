@@ -130,17 +130,26 @@ export async function signIn(nim, dob, password) {
 /**
  * Fetches all members (for gallery or admin view).
  */
-export async function getMembers() {
+export async function getMembers(departemen = null) {
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase
+    let query = supabase
       .from('anggota')
       .select('*')
       .order('no_urut', { ascending: true });
+      
+    if (departemen) {
+      query = query.eq('departemen', departemen);
+    }
     
+    const { data, error } = await query;
     if (error) throw new Error(error.message);
     return data;
   } else {
-    return getLocalMembers();
+    const members = getLocalMembers();
+    if (departemen) {
+      return members.filter((m) => m.departemen === departemen);
+    }
+    return members;
   }
 }
 
@@ -192,13 +201,21 @@ export async function updateMember(id, updatedFields) {
 /**
  * Fetches all feedback entries.
  */
-export async function getFeedbacks() {
+export async function getFeedbacks(tujuan = null, departemen_pengirim = null) {
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase
+    let query = supabase
       .from('feedback_surat')
       .select('*, anggota:pengirim_id(nama, nim, departemen)')
       .order('created_at', { ascending: false });
       
+    if (tujuan) {
+      query = query.eq('tujuan', tujuan);
+    }
+    if (departemen_pengirim) {
+      query = query.eq('departemen_pengirim', departemen_pengirim);
+    }
+    
+    const { data, error } = await query;
     if (error) throw new Error(error.message);
     return data;
   } else {
@@ -206,13 +223,21 @@ export async function getFeedbacks() {
     const members = getLocalMembers();
     
     // Join with members to simulate the relation
-    return feedbacks.map(f => {
+    let joined = feedbacks.map(f => {
       const sender = members.find(m => m.id === f.pengirim_id);
       return {
         ...f,
         anggota: sender ? { nama: sender.nama, nim: sender.nim, departemen: sender.departemen } : null
       };
     }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    if (tujuan) {
+      joined = joined.filter(f => f.tujuan === tujuan);
+    }
+    if (departemen_pengirim) {
+      joined = joined.filter(f => f.departemen_pengirim === departemen_pengirim);
+    }
+    return joined;
   }
 }
 
