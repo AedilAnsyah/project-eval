@@ -216,7 +216,7 @@ export default function LetterDetailPage() {
 
       // Scan target HTML element with high scale for printing quality
       const canvas = await html2canvas(element, {
-        scale: 3, // High DPI rendering
+        scale: 5, // High DPI rendering (extremely sharp)
         useCORS: true, // Allow cross-origin images
         allowTaint: true,
         backgroundColor: null,
@@ -275,7 +275,7 @@ export default function LetterDetailPage() {
 
       // Scan target HTML element with high scale for printing quality
       const canvas = await html2canvas(element, {
-        scale: 2.5, // High DPI rendering
+        scale: 4, // High DPI rendering (extremely sharp)
         useCORS: true, // Allow cross-origin images
         allowTaint: true,
         backgroundColor: null,
