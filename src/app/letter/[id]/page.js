@@ -231,6 +231,27 @@ export default function LetterDetailPage() {
               }
             });
           }
+
+          // 1. Remove all scale and transform styles from parent elements in the cloned DOM to prevent layout distortion
+          const strip = clonedDoc.getElementById("photobox-strip");
+          if (strip) {
+            let parent = strip.parentElement;
+            while (parent) {
+              parent.style.transform = "none";
+              parent.style.scale = "none";
+              parent.style.zoom = "1";
+              parent = parent.parentElement;
+            }
+
+            // 2. Prevent space character collapse/overlapping by forcing positive letter-spacing and disabling ligatures
+            const textNodes = strip.querySelectorAll("span, div, p, h4, h3, h2");
+            textNodes.forEach((node) => {
+              node.style.letterSpacing = "0.3px";
+              node.style.wordSpacing = "normal";
+              node.style.fontVariantLigatures = "none";
+              node.style.fontFeatureSettings = '"liga" 0';
+            });
+          }
         }
       });
 
@@ -288,6 +309,27 @@ export default function LetterDetailPage() {
               } catch (e) {
                 console.error("Error copying font to cloned document", e);
               }
+            });
+          }
+
+          // 1. Remove all scale and transform styles from parent elements in the cloned DOM to prevent layout distortion
+          const card = clonedDoc.getElementById("letter-souvenir-card");
+          if (card) {
+            let parent = card.parentElement;
+            while (parent) {
+              parent.style.transform = "none";
+              parent.style.scale = "none";
+              parent.style.zoom = "1";
+              parent = parent.parentElement;
+            }
+
+            // 2. Prevent space character collapse/overlapping by forcing positive letter-spacing and disabling ligatures
+            const textNodes = card.querySelectorAll("span, div, p, h4, h3, h2");
+            textNodes.forEach((node) => {
+              node.style.letterSpacing = "0.3px";
+              node.style.wordSpacing = "normal";
+              node.style.fontVariantLigatures = "none";
+              node.style.fontFeatureSettings = '"liga" 0';
             });
           }
         }
