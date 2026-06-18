@@ -148,12 +148,7 @@ CREATE POLICY insert_sticky_policy ON sticky_notes
     FOR INSERT
     WITH CHECK (true);
 
--- Policy 3: Only admins can delete sticky notes
+-- Policy 3: Allow deletion of sticky notes
 CREATE POLICY delete_sticky_policy ON sticky_notes
     FOR DELETE
-    USING (
-        EXISTS (
-            SELECT 1 FROM anggota 
-            WHERE anggota.id = auth.uid() AND anggota.role = 'admin'
-        )
-    );
+    USING (true);
