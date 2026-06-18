@@ -11,11 +11,6 @@ import {
   Heart, 
   ArrowRight,
   Smile,
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  Music,
   Pin,
   Plus,
   Trash2
@@ -44,12 +39,6 @@ export default function Home() {
   const [selectedDept, setSelectedDept] = useState("Semua");
   const [currentUser, setCurrentUser] = useState(null);
   
-  // Audio Player States
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.5);
-  const [isMuted, setIsMuted] = useState(false);
-  const audioRef = useRef(null);
-
   // Sticky Notes States
   const [stickyNotes, setStickyNotes] = useState([]);
   const [newNoteText, setNewNoteText] = useState("");
@@ -108,38 +97,6 @@ export default function Home() {
     }
     loadData();
   }, []);
-
-  // Sync volume state to audio element
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume;
-    }
-  }, [volume, isMuted]);
-
-  // Audio Handlers
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch(err => {
-        console.error("Audio playback blocked by browser:", err);
-      });
-    }
-  };
-
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-  };
-
-  const handleVolumeChange = (e) => {
-    const v = parseFloat(e.target.value);
-    setVolume(v);
-    if (v > 0) setIsMuted(false);
-  };
 
   // Sticky Notes Handlers
   const handleAddNote = async (e) => {
@@ -650,61 +607,6 @@ export default function Home() {
 
       </div>
 
-      {/* FLOATING CASSETTE MUSIC PLAYER */}
-      <div className="fixed bottom-4 left-4 z-40 flex items-center gap-2 select-none group">
-        <audio ref={audioRef} src="https://assets.mixkit.co/music/preview/mixkit-lo-fi-dreams-141.mp3" loop />
-        
-        {/* Cassette Tape Shape */}
-        <div className="bg-[#1A1D20] text-white border-3 border-black p-2 rounded-xl shadow-neo-sm flex items-center gap-3 transition-all duration-300 transform group-hover:scale-105">
-          {/* Cassette Icon or Visual wheels */}
-          <div className="flex items-center justify-center w-10 h-6 bg-[#FFBE0B] border-2 border-black rounded relative overflow-hidden px-1">
-            <div className="w-full h-1 bg-black absolute top-0.5 left-0"></div>
-            {/* Spinning wheels inside cassette */}
-            <div className="flex justify-between w-full">
-              <div className={`w-3.5 h-3.5 bg-black rounded-full border border-white flex items-center justify-center ${isPlaying ? 'animate-spin' : ''}`}>
-                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-              </div>
-              <div className={`w-3.5 h-3.5 bg-black rounded-full border border-white flex items-center justify-center ${isPlaying ? 'animate-spin' : ''}`}>
-                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col text-left">
-            <span className="text-[7.5px] font-lexend font-black text-[#FF006E] uppercase tracking-wider leading-none">HMIF Lo-Fi Radios</span>
-            <span className="text-[10px] font-lexend font-extrabold text-white truncate w-24 leading-none mt-1">Retro Chill Tracks</span>
-          </div>
-
-          {/* Control Buttons */}
-          <div className="flex items-center gap-1.5 border-l border-white/20 pl-2">
-            <button
-              onClick={togglePlay}
-              className="w-6 h-6 rounded-full bg-white hover:bg-gray-100 text-black flex items-center justify-center border border-black cursor-pointer shadow-[1px_1px_0px_#000] active:translate-y-0.5 active:shadow-none"
-              title={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? <Pause className="w-3 h-3 fill-black text-black" /> : <Play className="w-3 h-3 fill-black text-black ml-0.5" />}
-            </button>
-
-            <button
-              onClick={toggleMute}
-              className="w-6 h-6 rounded-full bg-white hover:bg-gray-100 text-black flex items-center justify-center border border-black cursor-pointer shadow-[1px_1px_0px_#000] active:translate-y-0.5 active:shadow-none"
-              title={isMuted ? "Unmute" : "Mute"}
-            >
-              {isMuted ? <VolumeX className="w-3 h-3 text-black" /> : <Volume2 className="w-3 h-3 text-black" />}
-            </button>
-
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.05"
-              value={volume}
-              onChange={handleVolumeChange}
-              className="w-12 h-1 bg-gray-500 rounded-lg appearance-none cursor-pointer accent-[#FFBE0B] hidden group-hover:block"
-            />
-          </div>
-        </div>
-      </div>
 
 
 

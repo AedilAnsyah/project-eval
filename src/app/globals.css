@@ -116,20 +116,27 @@ body {
   position: relative;
   background-color: #FAF7F0;
   z-index: 1;
+  overflow: hidden; /* Prevent floating mesh from causing scrollbars */
 }
 
 .y2k-mesh-bg::before {
   content: "";
-  position: absolute;
-  inset: 0;
+  position: fixed; /* Fixed viewport positioning for parallax depth */
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
   background: 
-    radial-gradient(circle at 10% 15%, rgba(255, 107, 107, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 90% 10%, rgba(58, 134, 255, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 50% 85%, rgba(255, 190, 11, 0.15) 0%, transparent 45%),
-    radial-gradient(circle at 15% 75%, rgba(6, 214, 160, 0.12) 0%, transparent 35%),
-    radial-gradient(circle at 80% 80%, rgba(255, 0, 110, 0.12) 0%, transparent 40%);
+    radial-gradient(circle at 30% 35%, rgba(255, 107, 107, 0.16) 0%, transparent 40%),
+    radial-gradient(circle at 70% 30%, rgba(58, 134, 255, 0.16) 0%, transparent 40%),
+    radial-gradient(circle at 50% 70%, rgba(255, 190, 11, 0.16) 0%, transparent 45%),
+    radial-gradient(circle at 35% 65%, rgba(6, 214, 160, 0.13) 0%, transparent 35%),
+    radial-gradient(circle at 65% 65%, rgba(255, 0, 110, 0.13) 0%, transparent 40%);
   z-index: -2;
   pointer-events: none;
+  transform-origin: center center;
+  animation: rotateMesh 45s infinite linear;
+  will-change: transform;
 }
 
 .y2k-mesh-bg::after {
@@ -141,4 +148,16 @@ body {
   opacity: 0.65;
   z-index: -1;
   pointer-events: none;
+}
+
+@keyframes rotateMesh {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
 }
