@@ -39,6 +39,9 @@ export default function Home() {
   const [selectedDept, setSelectedDept] = useState("Semua");
   const [currentUser, setCurrentUser] = useState(null);
   
+  // Pagination State for Polaroid Gallery
+  const [visibleCount, setVisibleCount] = useState(16);
+  
   // Sticky Notes States
   const [stickyNotes, setStickyNotes] = useState([]);
   const [newNoteText, setNewNoteText] = useState("");
@@ -97,6 +100,11 @@ export default function Home() {
     }
     loadData();
   }, []);
+
+  // Reset pagination count on search or filter change
+  useEffect(() => {
+    setVisibleCount(16);
+  }, [selectedDept, searchQuery]);
 
   // Sticky Notes Handlers
   const handleAddNote = async (e) => {
@@ -208,6 +216,8 @@ export default function Home() {
     }
     return true;
   });
+
+  const visibleMembers = filteredMembers.slice(0, visibleCount);
 
   const handleLogout = () => {
     clearSession();
@@ -425,48 +435,61 @@ export default function Home() {
         {/* Polaroid Grid Layout */}
         <main className="max-w-6xl mx-auto">
           {filteredMembers.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filteredMembers.map((member, index) => {
-                const deptColor = DEPARTMENTS[member.departemen]?.color || "#FFFFFF";
-                // Alternate rotation angles for polaroids to look organic on a mading board
-                const rotation = index % 4 === 0 ? "hover:rotate-[4deg]" : index % 4 === 1 ? "hover:rotate-[-4deg]" : index % 4 === 2 ? "hover:rotate-[2deg]" : "hover:rotate-[-2deg]";
-                
-                return (
-                  <div
-                    key={member.id}
-                    onClick={() => handleCardClick(member)}
-                    style={{ backgroundColor: deptColor }}
-                    className={`relative p-3 border-4 border-black rounded-sm shadow-neo-md transition-all duration-300 transform hover:scale-[1.03] cursor-pointer flex flex-col justify-between select-none ${rotation}`}
+            <div className="space-y-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {visibleMembers.map((member, index) => {
+                  const deptColor = DEPARTMENTS[member.departemen]?.color || "#FFFFFF";
+                  // Alternate rotation angles for polaroids to look organic on a mading board
+                  const rotation = index % 4 === 0 ? "hover:rotate-[4deg]" : index % 4 === 1 ? "hover:rotate-[-4deg]" : index % 4 === 2 ? "hover:rotate-[2deg]" : "hover:rotate-[-2deg]";
+                  
+                  return (
+                    <div
+                      key={member.id}
+                      onClick={() => handleCardClick(member)}
+                      style={{ backgroundColor: deptColor }}
+                      className={`relative p-3 border-4 border-black rounded-sm shadow-neo-md transition-all duration-300 transform hover:scale-[1.03] cursor-pointer flex flex-col justify-between select-none ${rotation}`}
+                    >
+                      {/* Tape sticker on top of polaroid */}
+                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-20 h-7 bg-amber-200/80 border-2 border-black/20 rotate-[-3deg] shadow-sm flex items-center justify-center font-handwriting text-[9px] font-bold text-amber-900 pointer-events-none uppercase">
+                        ★ HMIF ★
+                      </div>
+                      
+                      {/* Photo container */}
+                      <div className="bg-white border-3 border-black w-full aspect-square relative overflow-hidden mt-1 mb-3 shadow-inner">
+                        {renderStamps(member.stamps)}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img 
+                          src={member.foto_url} 
+                          alt={member.nama} 
+                          loading="lazy"
+                          className="w-full h-full object-cover select-none"
+                        />
+                      </div>
+                      
+                      {/* Polaroid Text Area */}
+                      <div className="bg-[#FFFDF0] border-2 border-black p-2 rounded-sm text-center flex-grow flex flex-col justify-center">
+                        <h4 className="font-handwriting font-bold text-[#1A1D20] text-sm leading-tight line-clamp-2 mb-1">
+                          {member.nama}
+                        </h4>
+                        <p className="font-lexend font-black uppercase text-[9px] tracking-wide text-gray-500 leading-none">
+                          {member.jabatan}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {filteredMembers.length > visibleCount && (
+                <div className="flex justify-center mt-12 mb-6">
+                  <button
+                    onClick={() => setVisibleCount((prev) => prev + 12)}
+                    className="px-6 py-3 border-4 border-black rounded-xl bg-[#FFBE0B] text-black font-lilita text-lg uppercase cursor-pointer hover:bg-[#FFD000] hover:scale-105 active:scale-95 transition-all duration-150 shadow-neo-md"
                   >
-                    {/* Tape sticker on top of polaroid */}
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-20 h-7 bg-amber-200/80 border-2 border-black/20 rotate-[-3deg] shadow-sm flex items-center justify-center font-handwriting text-[9px] font-bold text-amber-900 pointer-events-none uppercase">
-                      ★ HMIF ★
-                    </div>
-                    
-                    {/* Photo container */}
-                    <div className="bg-white border-3 border-black w-full aspect-square relative overflow-hidden mt-1 mb-3 shadow-inner">
-                      {renderStamps(member.stamps)}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img 
-                        src={member.foto_url} 
-                        alt={member.nama} 
-                        loading="lazy"
-                        className="w-full h-full object-cover select-none"
-                      />
-                    </div>
-                    
-                    {/* Polaroid Text Area */}
-                    <div className="bg-[#FFFDF0] border-2 border-black p-2 rounded-sm text-center flex-grow flex flex-col justify-center">
-                      <h4 className="font-handwriting font-bold text-[#1A1D20] text-sm leading-tight line-clamp-2 mb-1">
-                        {member.nama}
-                      </h4>
-                      <p className="font-lexend font-black uppercase text-[9px] tracking-wide text-gray-500 leading-none">
-                        {member.jabatan}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+                    📂 Tampilkan Lebih Banyak ({filteredMembers.length - visibleCount} Anggota Tersisa)
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center py-16 bg-white border-4 border-black rounded-2xl shadow-neo-md max-w-lg mx-auto">
