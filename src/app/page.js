@@ -92,8 +92,8 @@ export default function Home() {
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
       return (
-        m.nama.toLowerCase().includes(query) || 
-        m.jabatan.toLowerCase().includes(query)
+        (m.nama || "").toLowerCase().includes(query) || 
+        (m.jabatan || "").toLowerCase().includes(query)
       );
     }
     return true;

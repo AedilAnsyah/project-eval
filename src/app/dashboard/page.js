@@ -348,8 +348,8 @@ export default function DashboardPage() {
     if (searchQuery.trim() !== "") {
       const q = searchQuery.toLowerCase();
       result = result.filter(m => 
-        m.nama.toLowerCase().includes(q) || 
-        m.jabatan.toLowerCase().includes(q)
+        (m.nama || "").toLowerCase().includes(q) || 
+        (m.jabatan || "").toLowerCase().includes(q)
       );
     }
     
