@@ -313,7 +313,7 @@ export default function DashboardPage() {
   // ----------------------------------------------------
   if (loading) {
     return (
-      <div className="min-h-screen polka-dot-bg flex items-center justify-center">
+      <div className="min-h-screen y2k-mesh-bg flex items-center justify-center">
         <div className="bg-white border-4 border-black p-6 rounded-xl shadow-neo-md text-center max-w-sm">
           <RefreshCw className="w-10 h-10 animate-spin mx-auto mb-4 text-[#3A86FF]" />
           <p className="font-lexend font-black">Memuat halaman pengurus...</p>
@@ -325,7 +325,7 @@ export default function DashboardPage() {
   // Denied Access Guard
   if (!currentUser || (currentUser.role !== "admin" && currentUser.role !== "koor")) {
     return (
-      <div className="min-h-screen polka-dot-bg flex items-center justify-center p-4">
+      <div className="min-h-screen y2k-mesh-bg flex items-center justify-center p-4">
         <div className="bg-[#FF6B6B] border-4 border-black p-8 rounded-2xl max-w-md text-center shadow-neo-lg">
           <Lock className="w-16 h-16 mx-auto text-black mb-4" />
           <h2 className="font-lilita text-2xl uppercase text-black mb-2">Akses Ditolak</h2>
@@ -367,7 +367,7 @@ export default function DashboardPage() {
   const visibleMembers = getVisibleMembers();
 
   return (
-    <div className="min-h-screen polka-dot-bg pb-20">
+    <div className="min-h-screen y2k-mesh-bg pb-20">
       
       {/* Top Header Bar */}
       <div className="bg-white border-b-4 border-black py-4 sticky top-0 z-30">

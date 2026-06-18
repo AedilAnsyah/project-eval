@@ -369,7 +369,7 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   // ----------------------------------------------------
   if (loading) {
     return (
-      <div className="min-h-screen polka-dot-bg flex items-center justify-center">
+      <div className="min-h-screen y2k-mesh-bg flex items-center justify-center">
         <div className="bg-white border-4 border-black p-6 rounded-xl shadow-neo-md text-center max-w-sm">
           <div className="w-12 h-12 border-4 border-t-brand-cc border-black rounded-full animate-spin mx-auto mb-4"></div>
           <p className="font-lexend font-black">Memuat lembar surat...</p>
@@ -381,7 +381,7 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   // Not Logged In Guard
   if (!currentUser) {
     return (
-      <div className="min-h-screen polka-dot-bg flex items-center justify-center p-4">
+      <div className="min-h-screen y2k-mesh-bg flex items-center justify-center p-4">
         <div className="bg-[#FF6B6B] border-4 border-black p-8 rounded-2xl max-w-md text-center shadow-neo-lg rotate-[-1deg]">
           <Lock className="w-16 h-16 mx-auto text-black mb-4 animate-bounce" />
           <h2 className="font-lilita text-2xl uppercase text-black mb-2">Akses Terkunci</h2>
@@ -403,7 +403,7 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   // Unauthorized Access Guard
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen polka-dot-bg flex items-center justify-center p-4">
+      <div className="min-h-screen y2k-mesh-bg flex items-center justify-center p-4">
         <div className="bg-[#FF6B6B] border-4 border-black p-8 rounded-2xl max-w-md text-center shadow-neo-lg rotate-[1deg]">
           <EyeOff className="w-16 h-16 mx-auto text-black mb-4" />
           <h2 className="font-lilita text-2xl uppercase text-black mb-2">Kerahasiaan Terjamin</h2>

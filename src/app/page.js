@@ -312,7 +312,7 @@ export default function Home() {
   const requiresPassword = !!(currentMemberInModal && (currentMemberInModal.role === 'admin' || currentMemberInModal.role === 'koor'));
 
   return (
-    <div className="min-h-screen polka-dot-bg flex flex-col relative overflow-hidden pb-16">
+    <div className="min-h-screen y2k-mesh-bg flex flex-col relative overflow-hidden pb-16">
       
       {/* Decorative Stickers (Neon Brutalism Elements) */}
       <div className="absolute top-8 left-6 w-24 h-24 bg-white rounded-full border-4 border-black rotate-[-12deg] shadow-neo-md flex items-center justify-center select-none hidden md:flex sticker-shake z-10">
@@ -652,7 +652,7 @@ export default function Home() {
 
       {/* FLOATING CASSETTE MUSIC PLAYER */}
       <div className="fixed bottom-4 left-4 z-40 flex items-center gap-2 select-none group">
-        <audio ref={audioRef} src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" loop />
+        <audio ref={audioRef} src="https://assets.mixkit.co/music/preview/mixkit-lo-fi-dreams-141.mp3" loop />
         
         {/* Cassette Tape Shape */}
         <div className="bg-[#1A1D20] text-white border-3 border-black p-2 rounded-xl shadow-neo-sm flex items-center gap-3 transition-all duration-300 transform group-hover:scale-105">
