@@ -297,14 +297,14 @@ export default function Home() {
       <div className="max-w-7xl w-full mx-auto px-4 md:px-8 pt-8 flex-grow">
         
         {/* Header Section */}
-        <header className="flex flex-col items-center text-center my-8 relative gap-4">
+        <header className="flex flex-col items-center text-center my-8 relative gap-4 w-full overflow-hidden px-2">
 
-          <div className="relative">
-            <h1 className="text-4xl md:text-6xl font-lilita uppercase tracking-tight text-[#1A1D20] drop-shadow-[4px_4px_0px_#000] leading-none mb-2">
+          <div className="relative w-full max-w-full">
+            <h1 className="text-[8.2vw] sm:text-4xl md:text-6xl font-lilita uppercase tracking-tight text-[#1A1D20] drop-shadow-[2px_2px_0px_#000] md:drop-shadow-[4px_4px_0px_#000] leading-none mb-2 whitespace-nowrap">
               Evaluasi & Apresiasi
             </h1>
             <div className="flex justify-center items-center gap-2">
-              <span className="text-2xl md:text-4xl font-lilita bg-[#3A86FF] text-white px-4 py-1 border-4 border-black rotate-[-2deg] shadow-neo-sm uppercase">
+              <span className="text-[4.8vw] sm:text-2xl md:text-4xl font-lilita bg-[#3A86FF] text-white px-3 sm:px-4 py-1 border-3 sm:border-4 border-black rotate-[-2deg] shadow-neo-sm uppercase">
                 Anggota HMIF 2026
               </span>
             </div>
