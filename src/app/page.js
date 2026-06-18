@@ -47,6 +47,7 @@ export default function Home() {
   const [newNoteText, setNewNoteText] = useState("");
   const [newNoteColor, setNewNoteColor] = useState("bg-[#FFFFB5]"); // Y2K neon yellow default
   const [noteLoading, setNoteLoading] = useState(false);
+  const [previewNote, setPreviewNote] = useState(null);
 
   // Login Modal State
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -578,7 +579,11 @@ export default function Home() {
                   stickyNotes.map((note) => (
                     <div
                       key={note.id}
-                      className={`p-4 border-2.5 border-black w-[180px] h-[180px] flex flex-col justify-between shadow-neo-sm transition-transform hover:scale-105 select-none relative ${note.color}`}
+                      onClick={(e) => {
+                        if (e.target.closest('.delete-btn')) return;
+                        setPreviewNote(note);
+                      }}
+                      className={`p-4 border-2.5 border-black w-[180px] h-[180px] flex flex-col justify-between shadow-neo-sm transition-all duration-200 hover:scale-105 hover:-translate-y-1 hover:shadow-neo-md cursor-pointer select-none relative ${note.color}`}
                       style={{ transform: `rotate(${note.rotation || 0}deg)` }}
                     >
                       {/* Tiny visual pin at the top center */}
@@ -590,7 +595,7 @@ export default function Home() {
                       {currentUser && currentUser.role === "admin" && (
                         <button
                           onClick={() => handleDeleteNote(note.id)}
-                          className="absolute top-1.5 right-1.5 text-gray-500 hover:text-red-500 transition-colors cursor-pointer"
+                          className="delete-btn absolute top-1.5 right-1.5 text-gray-500 hover:text-red-500 transition-colors cursor-pointer z-10"
                           title="Hapus Memo (Admin Only)"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -727,6 +732,73 @@ export default function Home() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MEMO PREVIEW MODAL */}
+      {previewNote && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 overlay-polka-dot transition-all duration-300"
+          onClick={() => setPreviewNote(null)}
+        >
+          <div 
+            className={`p-8 border-4 border-black w-[350px] min-h-[350px] flex flex-col justify-between shadow-neo-xl relative animate-in zoom-in duration-200 cursor-default ${previewNote.color}`}
+            onClick={(e) => e.stopPropagation()}
+            style={{ transform: 'rotate(0.5deg)' }}
+          >
+            {/* Y2K Header Tag */}
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-28 h-8 bg-amber-100/90 border-2 border-black rotate-[-2deg] shadow-sm flex items-center justify-center font-handwriting text-xs font-bold text-amber-900 select-none uppercase">
+              📌 Aspirasi
+            </div>
+
+            {/* Y2K styled cross button */}
+            <button
+              onClick={() => setPreviewNote(null)}
+              className="absolute -top-3.5 -right-3.5 w-8 h-8 rounded-full bg-red-500 text-white font-lilita border-3 border-black shadow-[2px_2px_0px_#000] hover:bg-red-600 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer text-sm"
+              title="Tutup"
+            >
+              ✕
+            </button>
+
+            {/* Memo Content */}
+            <div className="font-handwriting font-bold text-lg leading-relaxed text-gray-800 pt-3 select-text overflow-y-auto max-h-[220px] pr-1 scrollbar-thin">
+              {previewNote.content}
+            </div>
+
+            {/* Footer */}
+            <div className="border-t-2 border-black/10 pt-4 mt-4 flex justify-between items-end select-none">
+              <div className="flex flex-col text-left">
+                <span className="text-[10px] font-lexend font-black uppercase text-gray-500 leading-none">Dikirim Oleh</span>
+                <span className="font-lexend font-black text-sm text-black mt-1 uppercase">
+                  {previewNote.sender_name}
+                </span>
+                <span className="font-lexend text-[9px] text-gray-400 leading-none mt-1">
+                  {new Date(previewNote.created_at).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  })}
+                </span>
+              </div>
+
+              {/* Admin delete from modal */}
+              {currentUser && currentUser.role === "admin" && (
+                <button
+                  onClick={() => {
+                    handleDeleteNote(previewNote.id);
+                    setPreviewNote(null);
+                  }}
+                  className="px-3 py-1.5 rounded bg-red-100 hover:bg-red-200 border-2 border-red-600 text-red-700 font-lexend font-black text-[10px] uppercase cursor-pointer flex items-center gap-1 transition-all"
+                  title="Hapus Memo Selamanya (Admin)"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Hapus
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
