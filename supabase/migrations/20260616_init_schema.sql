@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS anggota (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     no_urut INT NOT NULL,
     nama VARCHAR(255) NOT NULL,
-    nim VARCHAR(20) UNIQUE NOT NULL,
+    nim VARCHAR(20) NOT NULL,
     tanggal_lahir DATE NOT NULL,
     role VARCHAR(20) CHECK (role IN ('admin', 'koor', 'staff')) DEFAULT 'staff',
     departemen VARCHAR(100) NOT NULL,

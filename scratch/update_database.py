@@ -323,8 +323,8 @@ def main():
         
         sql_content += f"INSERT INTO anggota (id, no_urut, nama, nim, tanggal_lahir, role, departemen, foto_url, pesan_fatir, pesan_aedil, pesan_koor) \n"
         sql_content += f"VALUES ('{m['id']}', {m['no_urut']}, '{esc_nama}', '{m['nim']}', '{m['tanggal_lahir']}', '{m['role']}', '{esc_dept}', '{esc_foto}', '{esc_fatir}', '{esc_aedil}', '{esc_koor}')\n"
-        sql_content += f"ON CONFLICT (nim) DO UPDATE SET \n"
-        sql_content += f"  nama = EXCLUDED.nama, role = EXCLUDED.role, departemen = EXCLUDED.departemen, foto_url = EXCLUDED.foto_url;\n\n"
+        sql_content += f"ON CONFLICT (id) DO UPDATE SET \n"
+        sql_content += f"  nama = EXCLUDED.nama, nim = EXCLUDED.nim, tanggal_lahir = EXCLUDED.tanggal_lahir, role = EXCLUDED.role, departemen = EXCLUDED.departemen, foto_url = EXCLUDED.foto_url;\n\n"
         
     sql_path = r"c:\Users\Acer\Documents\project-eval\supabase\seed_data.sql"
     with open(sql_path, "w", encoding="utf-8") as f:
