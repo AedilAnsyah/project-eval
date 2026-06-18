@@ -176,9 +176,9 @@ export default function Home() {
       <div className="max-w-7xl w-full mx-auto px-4 md:px-8 pt-8 flex-grow">
         
         {/* Header Section */}
-        <header className="text-center my-8 relative">
+        <header className="flex flex-col items-center text-center my-8 relative gap-4">
 
-          <div className="inline-block relative">
+          <div className="relative">
             <h1 className="text-4xl md:text-6xl font-lilita uppercase tracking-tight text-[#1A1D20] drop-shadow-[4px_4px_0px_#000] leading-none mb-2">
               Evaluasi & Apresiasi
             </h1>
@@ -189,7 +189,7 @@ export default function Home() {
             </div>
           </div>
           
-          <p className="max-w-xl mx-auto mt-6 text-sm md:text-base font-lexend font-medium text-gray-700 bg-white border-3 border-black p-3 rounded-lg shadow-neo-sm rotate-[1deg] inline-block">
+          <p className="max-w-xl mt-4 text-sm md:text-base font-lexend font-medium text-gray-700 bg-white border-3 border-black p-3 rounded-lg shadow-neo-sm rotate-[1deg]">
             🎁 Papan mading digital apresiasi triwulan dua. Cari polaroid foto Anda, masukkan NIM & tanggal lahir, lalu buka surat apresiasi Anda!
           </p>
         </header>
