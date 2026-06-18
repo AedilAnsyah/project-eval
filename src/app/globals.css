@@ -161,3 +161,12 @@ body {
     transform: rotate(360deg) scale(1);
   }
 }
+
+/* Hide scrollbar utility for horizontal selectors */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

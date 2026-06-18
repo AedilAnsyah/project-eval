@@ -387,7 +387,7 @@ export default function Home() {
           </div>
 
           {/* Department Filters */}
-          <div className="flex flex-wrap gap-2 pt-2 border-t-2 border-black/10">
+          <div className="flex overflow-x-auto md:flex-wrap gap-2 pb-2 md:pb-0 scrollbar-none -mx-4 px-4 md:mx-0 md:px-0 pt-2 border-t-2 border-black/10">
             {Object.keys(DEPARTMENTS).map((deptName) => {
               const active = selectedDept === deptName;
               const deptInfo = DEPARTMENTS[deptName];
@@ -397,7 +397,7 @@ export default function Home() {
                   key={deptName}
                   onClick={() => setSelectedDept(deptName)}
                   style={{ backgroundColor: active ? deptInfo.color : '#FFFFFF' }}
-                  className={`px-3 py-2 border-2.5 border-black rounded-lg font-lexend font-bold text-xs uppercase cursor-pointer transition-all duration-150
+                  className={`flex-shrink-0 px-3 py-2 border-2.5 border-black rounded-lg font-lexend font-bold text-xs uppercase cursor-pointer transition-all duration-150
                     ${active ? `${deptInfo.text} scale-105 shadow-neo-sm -translate-y-0.5` : 'bg-white hover:bg-gray-100 text-[#1A1D20] shadow-none'}
                   `}
                 >
@@ -437,7 +437,7 @@ export default function Home() {
         <main className="max-w-6xl mx-auto">
           {filteredMembers.length > 0 ? (
             <div className="space-y-10">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6">
                 {visibleMembers.map((member, index) => {
                   const deptColor = DEPARTMENTS[member.departemen]?.color || "#FFFFFF";
                   // Alternate rotation angles for polaroids to look organic on a mading board
@@ -448,15 +448,15 @@ export default function Home() {
                       key={member.id}
                       onClick={() => handleCardClick(member)}
                       style={{ backgroundColor: deptColor }}
-                      className={`relative p-3 border-4 border-black rounded-sm shadow-neo-md transition-all duration-300 transform hover:scale-[1.03] cursor-pointer flex flex-col justify-between select-none ${rotation}`}
+                      className={`relative p-2.5 sm:p-3 border-3 sm:border-4 border-black rounded-sm shadow-neo-sm sm:shadow-neo-md transition-all duration-300 transform hover:scale-[1.03] cursor-pointer flex flex-col justify-between select-none ${rotation}`}
                     >
                       {/* Tape sticker on top of polaroid */}
-                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-20 h-7 bg-amber-200/80 border-2 border-black/20 rotate-[-3deg] shadow-sm flex items-center justify-center font-handwriting text-[9px] font-bold text-amber-900 pointer-events-none uppercase">
+                      <div className="absolute -top-2.5 sm:-top-3.5 left-1/2 -translate-x-1/2 w-16 sm:w-20 h-5.5 sm:h-7 bg-amber-200/80 border-2 border-black/20 rotate-[-3deg] shadow-sm flex items-center justify-center font-handwriting text-[7px] sm:text-[9px] font-bold text-amber-900 pointer-events-none uppercase">
                         ★ HMIF ★
                       </div>
                       
                       {/* Photo container */}
-                      <div className="bg-white border-3 border-black w-full aspect-square relative overflow-hidden mt-1 mb-3 shadow-inner">
+                      <div className="bg-white border-2 sm:border-3 border-black w-full aspect-square relative overflow-hidden mt-1 mb-2 sm:mb-3 shadow-inner">
                         {renderStamps(member.stamps)}
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img 
@@ -468,11 +468,11 @@ export default function Home() {
                       </div>
                       
                       {/* Polaroid Text Area */}
-                      <div className="bg-[#FFFDF0] border-2 border-black p-2 rounded-sm text-center flex-grow flex flex-col justify-center">
-                        <h4 className="font-handwriting font-bold text-[#1A1D20] text-sm leading-tight line-clamp-2 mb-1">
+                      <div className="bg-[#FFFDF0] border-2 border-black p-1.5 sm:p-2 rounded-sm text-center flex-grow flex flex-col justify-center">
+                        <h4 className="font-handwriting font-bold text-[#1A1D20] text-xs sm:text-sm leading-tight line-clamp-2 mb-1">
                           {member.nama}
                         </h4>
-                        <p className="font-lexend font-black uppercase text-[9px] tracking-wide text-gray-500 leading-none">
+                        <p className="font-lexend font-black uppercase text-[8px] sm:text-[9px] tracking-wide text-gray-500 leading-none">
                           {member.jabatan}
                         </p>
                       </div>
@@ -574,7 +574,7 @@ export default function Home() {
               </div>
 
               {/* Corkboard Display Area */}
-              <div className="lg:col-span-4 min-h-[450px] border-3 border-dashed border-black/30 bg-[#FFFDF8] rounded-xl p-4 relative flex flex-wrap gap-4 items-start content-start overflow-y-auto max-h-[650px]">
+              <div className="lg:col-span-4 min-h-[450px] border-3 border-dashed border-black/30 bg-[#FFFDF8] rounded-xl p-3 sm:p-4 relative flex flex-wrap gap-3 sm:gap-4 items-start content-start overflow-y-auto max-h-[650px]">
                 {stickyNotes.length > 0 ? (
                   stickyNotes.map((note) => (
                     <div
@@ -583,7 +583,7 @@ export default function Home() {
                         if (e.target.closest('.delete-btn')) return;
                         setPreviewNote(note);
                       }}
-                      className={`p-4 border-2.5 border-black w-[180px] h-[180px] flex flex-col justify-between shadow-neo-sm transition-all duration-200 hover:scale-105 hover:-translate-y-1 hover:shadow-neo-md cursor-pointer select-none relative ${note.color}`}
+                      className={`p-3 sm:p-4 border-2.5 border-black w-[calc(50%-6px)] sm:w-[180px] h-[160px] sm:h-[180px] flex flex-col justify-between shadow-neo-sm transition-all duration-200 hover:scale-105 hover:-translate-y-1 hover:shadow-neo-md cursor-pointer select-none relative ${note.color}`}
                       style={{ transform: `rotate(${note.rotation || 0}deg)` }}
                     >
                       {/* Tiny visual pin at the top center */}
@@ -602,15 +602,15 @@ export default function Home() {
                         </button>
                       )}
 
-                      <div className="font-handwriting font-bold text-[13px] leading-snug text-gray-800 line-clamp-6 pt-1">
+                      <div className="font-handwriting font-bold text-[11px] sm:text-[13px] leading-snug text-gray-800 line-clamp-5 sm:line-clamp-6 pt-1">
                         {note.content}
                       </div>
 
-                      <div className="border-t border-black/10 pt-1.5 mt-1.5 flex flex-col justify-end text-left select-none">
-                        <span className="font-lexend font-black text-[9px] text-gray-600 truncate uppercase leading-none">
+                      <div className="border-t border-black/10 pt-1 mt-1 sm:pt-1.5 sm:mt-1.5 flex flex-col justify-end text-left select-none">
+                        <span className="font-lexend font-black text-[8px] sm:text-[9px] text-gray-600 truncate uppercase leading-none">
                           ~ {note.sender_name}
                         </span>
-                        <span className="font-lexend text-[7px] text-gray-400 leading-none mt-1">
+                        <span className="font-lexend text-[6px] sm:text-[7px] text-gray-400 leading-none mt-0.5 sm:mt-1">
                           {new Date(note.created_at).toLocaleDateString("id-ID", {
                             day: "numeric",
                             month: "short",
@@ -643,7 +643,7 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/50 overlay-polka-dot transition-all duration-300">
           <div className="bg-[#FFFDF0] border-4 border-black p-6 rounded-2xl max-w-md w-full relative shadow-neo-xl animate-in scale-in duration-200">
             {/* Modal Sticker Decorator */}
-            <div className="absolute -top-6 -right-6 w-16 h-16 bg-[#FFBE0B] border-4 border-black rounded-full shadow-neo-sm rotate-[12deg] flex items-center justify-center font-lilita text-black text-xs p-1 text-center select-none">
+            <div className="absolute -top-4 -right-2 sm:-top-6 sm:-right-6 w-12 sm:w-16 h-12 sm:h-16 bg-[#FFBE0B] border-3 sm:border-4 border-black rounded-full shadow-neo-sm rotate-[12deg] flex items-center justify-center font-lilita text-black text-[9px] sm:text-xs p-1 text-center select-none z-10">
               SECURE LOGIN
             </div>
 
@@ -743,7 +743,7 @@ export default function Home() {
           onClick={() => setPreviewNote(null)}
         >
           <div 
-            className={`p-8 border-4 border-black w-[350px] min-h-[350px] flex flex-col justify-between shadow-neo-xl relative animate-in zoom-in duration-200 cursor-default ${previewNote.color}`}
+            className={`p-6 sm:p-8 border-4 border-black w-[92vw] sm:w-[350px] min-h-[320px] sm:min-h-[350px] flex flex-col justify-between shadow-neo-xl relative animate-in zoom-in duration-200 cursor-default ${previewNote.color}`}
             onClick={(e) => e.stopPropagation()}
             style={{ transform: 'rotate(0.5deg)' }}
           >
