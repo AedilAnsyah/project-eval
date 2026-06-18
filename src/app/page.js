@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Search, 
@@ -10,9 +10,17 @@ import {
   Sparkles, 
   Heart, 
   ArrowRight,
-  Smile
+  Smile,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Music,
+  Pin,
+  Plus,
+  Trash2
 } from "lucide-react";
-import { getMembers, signIn } from "@/lib/db";
+import { getMembers, signIn, getStickyNotes, addStickyNote, deleteStickyNote } from "@/lib/db";
 import { getSession, clearSession, setSession } from "@/lib/session";
 
 // Department configuration for colors and branding
@@ -36,6 +44,18 @@ export default function Home() {
   const [selectedDept, setSelectedDept] = useState("Semua");
   const [currentUser, setCurrentUser] = useState(null);
   
+  // Audio Player States
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.5);
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef(null);
+
+  // Sticky Notes States
+  const [stickyNotes, setStickyNotes] = useState([]);
+  const [newNoteText, setNewNoteText] = useState("");
+  const [newNoteColor, setNewNoteColor] = useState("bg-[#FFFFB5]"); // Y2K neon yellow default
+  const [noteLoading, setNoteLoading] = useState(false);
+
   // Login Modal State
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [targetMember, setTargetMember] = useState(null);
@@ -66,7 +86,7 @@ export default function Home() {
     }
   };
 
-  // Load members and session on mount
+  // Load members, session, and sticky notes on mount
   useEffect(() => {
     async function loadData() {
       try {
@@ -76,11 +96,111 @@ export default function Home() {
         console.error("Failed to load members", err);
       }
       
+      try {
+        const notes = await getStickyNotes();
+        setStickyNotes(notes);
+      } catch (err) {
+        console.error("Failed to load sticky notes", err);
+      }
+      
       const session = getSession();
       setCurrentUser(session);
     }
     loadData();
   }, []);
+
+  // Sync volume state to audio element
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = isMuted ? 0 : volume;
+    }
+  }, [volume, isMuted]);
+
+  // Audio Handlers
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(err => {
+        console.error("Audio playback blocked by browser:", err);
+      });
+    }
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+  };
+
+  const handleVolumeChange = (e) => {
+    const v = parseFloat(e.target.value);
+    setVolume(v);
+    if (v > 0) setIsMuted(false);
+  };
+
+  // Sticky Notes Handlers
+  const handleAddNote = async (e) => {
+    e.preventDefault();
+    if (!newNoteText.trim() || noteLoading) return;
+
+    setNoteLoading(true);
+    try {
+      const newNote = await addStickyNote({
+        content: newNoteText,
+        color: newNoteColor,
+        sender_name: currentUser ? currentUser.nama : "Anonim"
+      });
+      setStickyNotes(prev => [...prev, newNote]);
+      setNewNoteText("");
+    } catch (err) {
+      alert("Gagal menambahkan memo: " + err.message);
+    } finally {
+      setNoteLoading(false);
+    }
+  };
+
+  const handleDeleteNote = async (id) => {
+    if (!confirm("Hapus memo aspirasi ini?")) return;
+    try {
+      await deleteStickyNote(id);
+      setStickyNotes(prev => prev.filter(n => n.id !== id));
+    } catch (err) {
+      alert("Gagal menghapus memo: " + err.message);
+    }
+  };
+
+  // Stamp Badge Overlay Renderer
+  const renderStamps = (stampsStr) => {
+    if (!stampsStr) return null;
+    const list = stampsStr.split(",").map(s => s.trim()).filter(Boolean);
+    
+    const STAMP_STYLES = {
+      "Bintang Utama": { bg: "bg-[#FFBE0B]", text: "text-black", border: "border-black", emoji: "⭐" },
+      "Sangat Aktif": { bg: "bg-[#FF006E]", text: "text-white", border: "border-black", emoji: "🔥" },
+      "Inovatif": { bg: "bg-[#3A86FF]", text: "text-white", border: "border-black", emoji: "💡" },
+      "Team Player": { bg: "bg-[#06D6A0]", text: "text-black", border: "border-black", emoji: "🤝" }
+    };
+    
+    return (
+      <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
+        {list.map((stampName, idx) => {
+          const style = STAMP_STYLES[stampName] || { bg: "bg-white", text: "text-black", border: "border-black", emoji: "📌" };
+          return (
+            <div 
+              key={idx} 
+              className={`px-1.5 py-0.5 border-2 ${style.border} ${style.bg} ${style.text} font-lilita text-[8px] uppercase tracking-wider shadow-neo-sm rotate-[-4deg] rounded-sm flex items-center gap-0.5`}
+            >
+              <span>{style.emoji}</span>
+              <span>{stampName}</span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   // Get filtered members directly during render to prevent double-renders and lint errors
   const filteredMembers = allMembers.filter((m) => {
@@ -335,6 +455,7 @@ export default function Home() {
                     
                     {/* Photo container */}
                     <div className="bg-white border-3 border-black w-full aspect-square relative overflow-hidden mt-1 mb-3 shadow-inner">
+                      {renderStamps(member.stamps)}
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img 
                         src={member.foto_url} 
@@ -365,6 +486,191 @@ export default function Home() {
             </div>
           )}
         </main>
+
+        {/* Sticky Notes Wall / Papan Aspirasi */}
+        <section className="max-w-6xl mx-auto mt-16 mb-8 px-4">
+          <div className="bg-[#FAF7F0] border-4 border-black p-6 rounded-2xl shadow-neo-lg relative overflow-hidden">
+            {/* Decorative corkboard tape */}
+            <div className="absolute top-0 left-0 right-0 h-4 bg-amber-800/20 border-b-2 border-black/10"></div>
+            
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pt-4 select-none">
+              <div>
+                <h2 className="font-lilita text-3xl text-black uppercase tracking-tight flex items-center gap-2">
+                  <Pin className="w-6 h-6 text-[#FF006E] rotate-[-25deg]" />
+                  Papan Aspirasi Pengurus HMIF
+                </h2>
+                <p className="font-lexend text-xs text-gray-500 font-bold mt-1">
+                  📌 Tinggalkan catatan semangat, candaan, atau kesan pesan Anda selama kepengurusan Kabinet Astravia!
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Sticky Note Form */}
+              <div className="lg:col-span-1 bg-white border-3 border-black p-4 rounded-xl shadow-neo-sm h-fit">
+                <h3 className="font-lilita text-sm text-black uppercase mb-3">Tulis Aspirasi Baru</h3>
+                <form onSubmit={handleAddNote} className="space-y-4">
+                  <div>
+                    <textarea
+                      rows={4}
+                      value={newNoteText}
+                      onChange={(e) => setNewNoteText(e.target.value)}
+                      placeholder="Tulis pesan penyemangat atau kesan di sini..."
+                      required
+                      maxLength={150}
+                      className="w-full p-2.5 border-2.5 border-black rounded-lg font-lexend text-xs text-black focus:outline-none focus:ring-3 focus:ring-[#FFBE0B]/30 bg-white placeholder-gray-400"
+                    />
+                    <div className="text-[10px] text-gray-400 font-lexend text-right mt-1">
+                      {newNoteText.length}/150 karakter
+                    </div>
+                  </div>
+
+                  {/* Color Selector */}
+                  <div>
+                    <label className="block font-lilita text-[10px] uppercase text-gray-500 mb-2">Pilih Warna Memo</label>
+                    <div className="flex gap-2">
+                      {[
+                        { class: "bg-[#FFFFB5]", label: "Kuning" },
+                        { class: "bg-[#FFD1DC]", label: "Pink" },
+                        { class: "bg-[#C1F0F6]", label: "Biru" },
+                        { class: "bg-[#D0F8B3]", label: "Hijau" }
+                      ].map((c) => (
+                        <button
+                          type="button"
+                          key={c.class}
+                          onClick={() => setNewNoteColor(c.class)}
+                          className={`w-7 h-7 rounded-full border-2 border-black cursor-pointer transition-transform ${c.class} ${
+                            newNoteColor === c.class ? "scale-110 ring-2 ring-black/40" : "hover:scale-105"
+                          }`}
+                          title={c.label}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={noteLoading}
+                    className="w-full bg-[#FFBE0B] hover:bg-[#e6ab0a] text-black font-lexend font-black py-2 border-2.5 border-black rounded-lg shadow-neo-sm text-xs flex items-center justify-center gap-1 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    {noteLoading ? "Menempel..." : "Tempel Memo"}
+                  </button>
+                </form>
+              </div>
+
+              {/* Corkboard Display Area */}
+              <div className="lg:col-span-3 min-h-[300px] border-3 border-dashed border-black/30 bg-[#FFFDF8] rounded-xl p-4 relative flex flex-wrap gap-4 items-start content-start overflow-y-auto max-h-[500px]">
+                {stickyNotes.length > 0 ? (
+                  stickyNotes.map((note) => (
+                    <div
+                      key={note.id}
+                      className={`p-4 border-2.5 border-black w-[180px] h-[180px] flex flex-col justify-between shadow-neo-sm transition-transform hover:scale-105 select-none relative ${note.color}`}
+                      style={{ transform: `rotate(${note.rotation || 0}deg)` }}
+                    >
+                      {/* Tiny visual pin at the top center */}
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-red-500 rounded-full border border-black/50 shadow-sm flex items-center justify-center font-bold text-[7px] text-white">
+                        📍
+                      </div>
+                      
+                      {/* Admin delete button */}
+                      {currentUser && currentUser.role === "admin" && (
+                        <button
+                          onClick={() => handleDeleteNote(note.id)}
+                          className="absolute top-1.5 right-1.5 text-gray-500 hover:text-red-500 transition-colors cursor-pointer"
+                          title="Hapus Memo (Admin Only)"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+
+                      <div className="font-handwriting font-bold text-[13px] leading-snug text-gray-800 line-clamp-6 pt-1">
+                        {note.content}
+                      </div>
+
+                      <div className="border-t border-black/10 pt-1.5 mt-1.5 flex flex-col justify-end text-left select-none">
+                        <span className="font-lexend font-black text-[9px] text-gray-600 truncate uppercase leading-none">
+                          ~ {note.sender_name}
+                        </span>
+                        <span className="font-lexend text-[7px] text-gray-400 leading-none mt-1">
+                          {new Date(note.created_at).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="w-full flex flex-col items-center justify-center py-16 text-center select-none">
+                    <span className="text-4xl mb-2">📌</span>
+                    <h4 className="font-lexend font-black text-sm text-gray-400">Papan Aspirasi Masih Kosong</h4>
+                    <p className="font-lexend text-[11px] text-gray-400 mt-0.5">Jadilah yang pertama menempelkan memo penyemangat!</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      {/* FLOATING CASSETTE MUSIC PLAYER */}
+      <div className="fixed bottom-4 left-4 z-40 flex items-center gap-2 select-none group">
+        <audio ref={audioRef} src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" loop />
+        
+        {/* Cassette Tape Shape */}
+        <div className="bg-[#1A1D20] text-white border-3 border-black p-2 rounded-xl shadow-neo-sm flex items-center gap-3 transition-all duration-300 transform group-hover:scale-105">
+          {/* Cassette Icon or Visual wheels */}
+          <div className="flex items-center justify-center w-10 h-6 bg-[#FFBE0B] border-2 border-black rounded relative overflow-hidden px-1">
+            <div className="w-full h-1 bg-black absolute top-0.5 left-0"></div>
+            {/* Spinning wheels inside cassette */}
+            <div className="flex justify-between w-full">
+              <div className={`w-3.5 h-3.5 bg-black rounded-full border border-white flex items-center justify-center ${isPlaying ? 'animate-spin' : ''}`}>
+                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+              </div>
+              <div className={`w-3.5 h-3.5 bg-black rounded-full border border-white flex items-center justify-center ${isPlaying ? 'animate-spin' : ''}`}>
+                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col text-left">
+            <span className="text-[7.5px] font-lexend font-black text-[#FF006E] uppercase tracking-wider leading-none">HMIF Lo-Fi Radios</span>
+            <span className="text-[10px] font-lexend font-extrabold text-white truncate w-24 leading-none mt-1">Retro Chill Tracks</span>
+          </div>
+
+          {/* Control Buttons */}
+          <div className="flex items-center gap-1.5 border-l border-white/20 pl-2">
+            <button
+              onClick={togglePlay}
+              className="w-6 h-6 rounded-full bg-white hover:bg-gray-100 text-black flex items-center justify-center border border-black cursor-pointer shadow-[1px_1px_0px_#000] active:translate-y-0.5 active:shadow-none"
+              title={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? <Pause className="w-3 h-3 fill-black text-black" /> : <Play className="w-3 h-3 fill-black text-black ml-0.5" />}
+            </button>
+
+            <button
+              onClick={toggleMute}
+              className="w-6 h-6 rounded-full bg-white hover:bg-gray-100 text-black flex items-center justify-center border border-black cursor-pointer shadow-[1px_1px_0px_#000] active:translate-y-0.5 active:shadow-none"
+              title={isMuted ? "Unmute" : "Mute"}
+            >
+              {isMuted ? <VolumeX className="w-3 h-3 text-black" /> : <Volume2 className="w-3 h-3 text-black" />}
+            </button>
+
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={volume}
+              onChange={handleVolumeChange}
+              className="w-12 h-1 bg-gray-500 rounded-lg appearance-none cursor-pointer accent-[#FFBE0B] hidden group-hover:block"
+            />
+          </div>
+        </div>
       </div>
 
 

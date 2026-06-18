@@ -60,9 +60,11 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   const [koorName, setKoorName] = useState("");
   
   // Photobox Editor State
-  const [frameTemplate, setFrameTemplate] = useState("y2k"); // 'y2k', 'checker', 'checker_mono', 'pastel', 'holo', 'comic', 'comic_mint', 'vintage', 'vintage_kraft'
+  const [frameTemplate, setFrameTemplate] = useState("y2k"); // 'y2k', 'checker', 'checker_mono', 'pastel', 'holo', 'comic', 'comic_mint', 'vintage', 'vintage_kraft', 'synthwave', 'grunge', 'stripes', 'polaroid'
   const [photoboxLayout, setPhotoboxLayout] = useState("vertical_strip"); // 'vertical_strip', 'classic_polaroid', 'double_stack', 'trio_strip', 'asymmetric_collage'
   const [photoboxFont, setPhotoboxFont] = useState("handwriting"); // 'handwriting', 'lexend', 'lilita', 'mono'
+  const [photoFilter, setPhotoFilter] = useState("normal"); // 'normal', 'grayscale', 'sepia', 'cool', 'vivid', 'vhs'
+  const [showStampsOverlay, setShowStampsOverlay] = useState(true);
   const [customBadge, setCustomBadge] = useState("MEMBER OF THE YEAR");
   const [customBadgeText, setCustomBadgeText] = useState("BEST MEMBER");
   const [customSubtitleText, setCustomSubtitleText] = useState("");
@@ -458,6 +460,51 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   );
 
   // Frame background class resolver for the theme variants
+  // Get CSS filter style string based on current selection
+  const getFilterStyle = () => {
+    switch (photoFilter) {
+      case "grayscale": return "grayscale(100%)";
+      case "sepia": return "sepia(100%)";
+      case "cool": return "saturate(130%) hue-rotate(180deg) brightness(95%)";
+      case "vivid": return "saturate(200%) contrast(120%)";
+      case "vhs": return "contrast(85%) brightness(110%) saturate(90%) sepia(20%)";
+      case "normal":
+      default:
+        return "none";
+    }
+  };
+
+  // Stamp Badge Overlay Renderer for Photobox Slots
+  const renderSlotStamps = (stampsStr) => {
+    if (!stampsStr || !showStampsOverlay) return null;
+    const list = stampsStr.split(",").map(s => s.trim()).filter(Boolean);
+    
+    const STAMP_STYLES = {
+      "Bintang Utama": { bg: "bg-[#FFBE0B]", text: "text-black", border: "border-black", emoji: "⭐" },
+      "Sangat Aktif": { bg: "bg-[#FF006E]", text: "text-white", border: "border-black", emoji: "🔥" },
+      "Inovatif": { bg: "bg-[#3A86FF]", text: "text-white", border: "border-black", emoji: "💡" },
+      "Team Player": { bg: "bg-[#06D6A0]", text: "text-black", border: "border-black", emoji: "🤝" }
+    };
+    
+    return (
+      <div className="absolute top-1 left-1 flex flex-col gap-0.5 z-20 pointer-events-none scale-75 origin-top-left">
+        {list.map((stampName, idx) => {
+          const style = STAMP_STYLES[stampName] || { bg: "bg-white", text: "text-black", border: "border-black", emoji: "📌" };
+          return (
+            <div 
+              key={idx} 
+              className={`px-1 py-0.5 border-1.5 ${style.border} ${style.bg} ${style.text} font-lilita text-[8px] uppercase tracking-wider shadow-sm rotate-[-3deg] rounded-sm flex items-center gap-0.5`}
+            >
+              <span>{style.emoji}</span>
+              <span>{stampName}</span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // Frame background class resolver for the theme variants
   const getFrameBgClass = () => {
     switch (frameTemplate) {
       case "checker": return "bg-[#ffbe0b]";
@@ -468,6 +515,10 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
       case "comic_mint": return "bg-[#06D6A0]";
       case "vintage": return "bg-[#F5EBE0] border-amber-900/10";
       case "vintage_kraft": return "bg-[#D0B49F] border-amber-950/20";
+      case "synthwave": return "bg-gradient-to-br from-[#1d0a34] via-[#5d0e41] to-[#e4007f]";
+      case "grunge": return "bg-[#16191e]";
+      case "stripes": return "bg-[#ffd6ff]";
+      case "polaroid": return "bg-[#f4f3ef]";
       case "y2k":
       default:
         return "bg-y2k-cyber";
@@ -524,6 +575,30 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
         }
         return <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">{squares}</div>;
       }
+      case "synthwave":
+        return (
+          <div 
+            className="absolute inset-0 pointer-events-none overflow-hidden z-0 bg-[linear-gradient(rgba(18,4,30,0)_95%,#ff007f_95%),linear-gradient(90deg,rgba(18,4,30,0)_95%,#ff007f_95%)] bg-[length:25px_25px] opacity-30"
+          />
+        );
+      case "grunge":
+        return (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-15">
+            <div className="absolute inset-0 bg-[linear-gradient(45deg,#39ff14_25%,transparent_25%),linear-gradient(-45deg,#39ff14_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#39ff14_75%),linear-gradient(-45deg,transparent_75%,#39ff14_75%)] bg-[length:10px_10px] bg-[position:0_0,0_5px,5px_-5px,5px_0px]"></div>
+          </div>
+        );
+      case "stripes":
+        return (
+          <div 
+            className="absolute inset-0 pointer-events-none overflow-hidden z-0 bg-[linear-gradient(45deg,#ffd6ff_25%,#f1e1f5_25%,#f1e1f5_50%,#ffd6ff_50%,#ffd6ff_75%,#f1e1f5_75%,#f1e1f5_100%)] bg-[length:30px_30px]"
+          />
+        );
+      case "polaroid":
+        return (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 bg-[#f4f3ef]">
+            <div className="absolute inset-0 shadow-[inset_0_0_15px_rgba(0,0,0,0.05)] border-4 border-white"></div>
+          </div>
+        );
       case "y2k":
         return <div className="absolute inset-0 bg-[#0000000a] overlay-polka-dot pointer-events-none z-0"></div>;
       case "holo":
@@ -538,6 +613,9 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   // Slot inner styling resolver
   const getSlotBgClass = () => {
     if (frameTemplate === 'vintage' || frameTemplate === 'vintage_kraft') return 'bg-[#FFFDF0] text-amber-950 border-amber-900/20';
+    if (frameTemplate === 'grunge') return 'bg-[#22252a] text-[#39ff14] border-[#39ff14]';
+    if (frameTemplate === 'synthwave') return 'bg-[#1a082e] text-[#f15bb5] border-[#00f0ff]';
+    if (frameTemplate === 'polaroid') return 'bg-white text-black border-gray-200 shadow-sm';
     return 'bg-white text-black border-black';
   };
 
@@ -603,7 +681,12 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
       <div className={`w-[190px] aspect-square border-3 p-1.5 flex flex-col justify-between shadow-md relative ${getSlotBgClass()} ${extraClass}`}>
         <div className={`w-full aspect-square border border-black overflow-hidden relative ${isGroupPhoto ? 'bg-white' : 'bg-gray-100'}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={getPhotoboxPhotoUrl()} alt="photobox-avatar" className={`w-full h-full animate-fade-in ${isGroupPhoto ? 'object-contain' : 'object-cover'}`} />
+          <img 
+            src={getPhotoboxPhotoUrl()} 
+            alt="photobox-avatar" 
+            className={`w-full h-full animate-fade-in ${isGroupPhoto ? 'object-contain' : 'object-cover'}`} 
+            style={{ filter: getFilterStyle() }}
+          />
           
           {/* Floating Sticker Emoji */}
           {finalSlot1Emoji && finalSlot1Emoji !== "none" && (
@@ -611,6 +694,8 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
               {finalSlot1Emoji}
             </div>
           )}
+          {/* Stamp Overlays */}
+          {photoSource === "profile" && renderSlotStamps(member.stamps)}
         </div>
         <div className={`${getFontClass()} font-bold text-[10px] text-center py-0.5 leading-none overflow-hidden text-ellipsis whitespace-nowrap`}>
           {member.nama}
@@ -629,7 +714,12 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
       <div className={`w-[190px] aspect-square border-3 p-1.5 flex flex-col justify-between shadow-md relative ${getSlotBgClass()} ${extraClass}`}>
         <div className="w-full aspect-square border border-black overflow-hidden bg-white relative">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={deptPhotoUrl} alt="department-photo" className="w-full h-full object-contain animate-fade-in" />
+          <img 
+            src={deptPhotoUrl} 
+            alt="department-photo" 
+            className="w-full h-full object-contain animate-fade-in" 
+            style={{ filter: getFilterStyle() }}
+          />
           
           {/* Floating Sticker Emoji */}
           {finalSlot2Emoji && finalSlot2Emoji !== "none" && (
@@ -653,7 +743,12 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
       <div className={`w-[190px] aspect-square border-3 p-1.5 flex flex-col justify-between shadow-md relative ${getSlotBgClass()} ${extraClass}`}>
         <div className="w-full aspect-square border border-black overflow-hidden bg-white relative">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/Foto Kabinet.webp" alt="cabinet-photo" className="w-full h-full object-contain animate-fade-in" />
+          <img 
+            src="/Foto Kabinet.webp" 
+            alt="cabinet-photo" 
+            className="w-full h-full object-contain animate-fade-in" 
+            style={{ filter: getFilterStyle() }}
+          />
           
           {/* Floating Sticker Emoji */}
           {finalSlot3Emoji && finalSlot3Emoji !== "none" && (
@@ -706,18 +801,34 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
 
   // Render watermark/footer slot
   const renderWatermarkSlot = (extraClass = "", isLight = false) => {
+    let bgClass = isLight ? 'bg-transparent' : 'bg-black border-2.5 border-black';
+    let textTitle = isLight ? 'text-black' : 'text-white';
+    let textSub = isLight ? 'text-[#3A86FF]' : 'text-[#FFBE0B]';
+    
+    if (!isLight) {
+      if (frameTemplate === 'grunge') {
+        bgClass = 'bg-[#16191e] border-2.5 border-[#39ff14]';
+        textTitle = 'text-[#39ff14]';
+        textSub = 'text-white';
+      } else if (frameTemplate === 'synthwave') {
+        bgClass = 'bg-[#1a082e] border-2.5 border-[#00f0ff]';
+        textTitle = 'text-[#00f0ff]';
+        textSub = 'text-[#f15bb5]';
+      }
+    }
+
     return (
-      <div className={`w-[190px] py-2 ${isLight ? 'bg-transparent' : 'bg-black border-2.5 border-black'} text-center flex flex-col justify-center items-center select-none shadow-sm rounded-sm relative z-10 ${extraClass}`}>
+      <div className={`w-[190px] py-2 ${bgClass} text-center flex flex-col justify-center items-center select-none shadow-sm rounded-sm relative z-10 ${extraClass}`}>
         <div className="flex items-center gap-3 mb-1.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/hmif_logo.png" alt="HMIF Logo" className="w-5 h-5 object-contain" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/kabinet_logo.png" alt="Cabinet Logo" className="w-5 h-5 object-contain" />
         </div>
-        <div className={`font-lilita text-[11px] ${isLight ? 'text-black' : 'text-white'} tracking-wider leading-none`}>
+        <div className={`font-lilita text-[11px] ${textTitle} tracking-wider leading-none`}>
           HMIF 2026
         </div>
-        <div className={`text-[6.5px] font-lexend font-black ${isLight ? 'text-[#3A86FF]' : 'text-[#FFBE0B]'} tracking-widest uppercase mt-0.5`}>
+        <div className={`text-[6.5px] font-lexend font-black ${textSub} tracking-widest uppercase mt-0.5`}>
           KABINET ASTRAVIA
         </div>
       </div>
@@ -1273,6 +1384,37 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
                   </select>
                 </div>
 
+                {/* 6.5. Filter Foto & Stempel Prestasi */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div>
+                    <label className="block font-bold text-xs uppercase text-gray-700 mb-1.5">Pilih Filter Foto</label>
+                    <select
+                      value={photoFilter}
+                      onChange={(e) => setPhotoFilter(e.target.value)}
+                      className="w-full px-3 py-2 border-2.5 border-black rounded-lg text-xs text-black bg-white focus:outline-none focus:ring-3 focus:ring-[#FF006E]/30 cursor-pointer"
+                    >
+                      <option value="normal">Normal (Asli)</option>
+                      <option value="grayscale">Grayscale (B&W)</option>
+                      <option value="sepia">Sepia (Retro Hangat)</option>
+                      <option value="cool">Cool Cyan (Y2K Tint)</option>
+                      <option value="vivid">Vivid (Warna Tajam)</option>
+                      <option value="vhs">Vintage VHS (Pudar)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-xs uppercase text-gray-700 mb-1.5">Stempel Prestasi</label>
+                    <label className="flex items-center gap-2 px-3 py-2 border-2.5 border-black rounded-lg text-xs text-black bg-white focus:outline-none focus:ring-3 focus:ring-[#FF006E]/30 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={showStampsOverlay}
+                        onChange={(e) => setShowStampsOverlay(e.target.checked)}
+                        className="w-4 h-4 cursor-pointer accent-[#FFBE0B]"
+                      />
+                      <span>Tampilkan</span>
+                    </label>
+                  </div>
+                </div>
+
                 {/* 7. Theme Color Select */}
                 <div>
                   <label className="block font-bold text-xs uppercase text-gray-700 mb-2">7. Pilih Skema Bingkai & Tema</label>
@@ -1286,7 +1428,11 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
                       { key: "comic", label: "Comic Yellow", class: "bg-[#FFBE0B] text-black" },
                       { key: "comic_mint", label: "Comic Mint", class: "bg-[#06D6A0] text-black" },
                       { key: "vintage", label: "Vintage Cream", class: "bg-[#F5EBE0] text-amber-950" },
-                      { key: "vintage_kraft", label: "Vintage Kraft", class: "bg-[#D0B49F] text-amber-950" }
+                      { key: "vintage_kraft", label: "Vintage Kraft", class: "bg-[#D0B49F] text-amber-950" },
+                      { key: "synthwave", label: "Synthwave Dream", class: "bg-gradient-to-br from-[#1d0a34] via-[#5d0e41] to-[#e4007f] text-white" },
+                      { key: "grunge", label: "Cyber Grunge", class: "bg-[#16191e] text-[#39ff14] border border-[#39ff14]/30" },
+                      { key: "stripes", label: "Lollipop Stripes", class: "bg-[#ffd6ff] text-indigo-950" },
+                      { key: "polaroid", label: "Classic Polaroid", class: "bg-[#f4f3ef] text-black border border-gray-300" }
                     ].map((theme) => (
                       <button
                         key={theme.key}
@@ -1379,12 +1525,18 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
                         {/* Top Photo */}
                         <div className={`w-full aspect-square border border-black overflow-hidden relative ${photoSource !== 'profile' ? 'bg-white' : 'bg-gray-100'}`}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={getPhotoboxPhotoUrl()} alt="photobox-avatar" className={`w-full h-full ${photoSource !== 'profile' ? 'object-contain' : 'object-cover'}`} />
+                          <img 
+                            src={getPhotoboxPhotoUrl()} 
+                            alt="photobox-avatar" 
+                            className={`w-full h-full ${photoSource !== 'profile' ? 'object-contain' : 'object-cover'}`} 
+                            style={{ filter: getFilterStyle() }}
+                          />
                           {slot1Emoji && slot1Emoji !== "none" && (
                             <div className="absolute top-1 right-1 bg-white/80 border border-black rounded-full w-7 h-7 flex items-center justify-center text-sm shadow-sm select-none">
                               {slot1Emoji === "custom" ? slot1EmojiInput : slot1Emoji}
                             </div>
                           )}
+                          {photoSource === "profile" && renderSlotStamps(member.stamps)}
                         </div>
                         {/* bottom text area */}
                         <div className="w-full text-center mt-3 pt-3 border-t-2 border-dashed border-black/15 flex flex-col gap-2">

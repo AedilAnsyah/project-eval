@@ -19,24 +19,27 @@ const MOCK_MEMBERS_KEY = 'hmif_eval_members_db';
 const MOCK_FEEDBACK_KEY = 'hmif_eval_feedback_db';
 
 function getLocalMembers() {
-  if (typeof window === 'undefined') return initialMembers;
+  if (typeof window === 'undefined') return initialMembers.map(m => ({ ...m, stamps: m.stamps || "" }));
   let data = localStorage.getItem(MOCK_MEMBERS_KEY);
   if (!data) {
-    localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(initialMembers));
-    return initialMembers;
+    const normalizedInitial = initialMembers.map(m => ({ ...m, stamps: m.stamps || "" }));
+    localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(normalizedInitial));
+    return normalizedInitial;
   }
   try {
     const parsed = JSON.parse(data);
     const hasOldNims = parsed.some(m => m.nim.startsWith('101220'));
     const countMismatch = parsed.length !== initialMembers.length;
     if (hasOldNims || countMismatch) {
-      localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(initialMembers));
-      return initialMembers;
+      const normalizedInitial = initialMembers.map(m => ({ ...m, stamps: m.stamps || "" }));
+      localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(normalizedInitial));
+      return normalizedInitial;
     }
-    return parsed;
+    return parsed.map(m => ({ ...m, stamps: m.stamps || "" }));
   } catch (e) {
-    localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(initialMembers));
-    return initialMembers;
+    const normalizedInitial = initialMembers.map(m => ({ ...m, stamps: m.stamps || "" }));
+    localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(normalizedInitial));
+    return normalizedInitial;
   }
 }
 
@@ -296,6 +299,91 @@ export async function deleteFeedback(id) {
     const feedbacks = getLocalFeedback();
     const filtered = feedbacks.filter((f) => f.id !== id);
     saveLocalFeedback(filtered);
+    return { id };
+  }
+}
+
+// ----------------------------------------------------
+// STICKY NOTES IMPLEMENTATION (MOCK & SUPABASE)
+// ----------------------------------------------------
+const MOCK_STICKY_NOTES_KEY = 'hmif_eval_sticky_notes_db';
+
+function getLocalStickyNotes() {
+  if (typeof window === 'undefined') return [];
+  let data = localStorage.getItem(MOCK_STICKY_NOTES_KEY);
+  if (!data) {
+    localStorage.setItem(MOCK_STICKY_NOTES_KEY, JSON.stringify([]));
+    return [];
+  }
+  return JSON.parse(data);
+}
+
+function saveLocalStickyNotes(notes) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(MOCK_STICKY_NOTES_KEY, JSON.stringify(notes));
+  }
+}
+
+export async function getStickyNotes() {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from('sticky_notes')
+      .select('*')
+      .order('created_at', { ascending: true });
+    if (error) throw new Error(error.message);
+    return data;
+  } else {
+    return getLocalStickyNotes().sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  }
+}
+
+export async function addStickyNote(noteData) {
+  const randomRotation = Math.floor(Math.random() * 12) - 6; // -6 to 5 degrees
+  const randomX = Math.floor(Math.random() * 80) + 10; // 10% to 90%
+  const randomY = Math.floor(Math.random() * 60) + 10; // 10% to 70%
+  
+  const finalNote = {
+    ...noteData,
+    rotation: randomRotation,
+    x_pos: randomX,
+    y_pos: randomY
+  };
+
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from('sticky_notes')
+      .insert([finalNote])
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  } else {
+    const notes = getLocalStickyNotes();
+    const newNote = {
+      id: Date.now(),
+      created_at: new Date().toISOString(),
+      ...finalNote
+    };
+    notes.push(newNote);
+    saveLocalStickyNotes(notes);
+    return newNote;
+  }
+}
+
+export async function deleteStickyNote(id) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from('sticky_notes')
+      .delete()
+      .eq('id', id)
+      .select()
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return data;
+  } else {
+    const notes = getLocalStickyNotes();
+    const filtered = notes.filter((n) => n.id !== id);
+    saveLocalStickyNotes(filtered);
     return { id };
   }
 }

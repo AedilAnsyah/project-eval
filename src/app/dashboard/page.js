@@ -43,6 +43,7 @@ export default function DashboardPage() {
   const [editFotoUrl, setEditFotoUrl] = useState("");
   const [editRole, setEditRole] = useState("");
   const [editDept, setEditDept] = useState("");
+  const [editStamps, setEditStamps] = useState([]);
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Cropper Modal States
@@ -138,6 +139,7 @@ export default function DashboardPage() {
     setEditFotoUrl(member.foto_url || "");
     setEditRole(member.role || "staff");
     setEditDept(member.departemen || "");
+    setEditStamps(member.stamps ? member.stamps.split(",").map(s => s.trim()).filter(Boolean) : []);
     setEditModalOpen(true);
   };
 
@@ -267,13 +269,15 @@ export default function DashboardPage() {
         updatedFields.foto_url = editFotoUrl;
         updatedFields.role = editRole;
         updatedFields.departemen = editDept;
+        updatedFields.stamps = editStamps.join(", ");
       } else if (currentUser.role === "koor") {
-        // Koor can ONLY edit pesan_koor and foto_url for staff in their own department
+        // Koor can ONLY edit pesan_koor, foto_url and stamps for staff in their own department
         if (editingMember.departemen !== currentUser.departemen) {
           throw new Error("Anda hanya bisa mengubah data staf di departemen Anda sendiri.");
         }
         updatedFields.pesan_koor = editPesanKoor;
         updatedFields.foto_url = editFotoUrl;
+        updatedFields.stamps = editStamps.join(", ");
       }
 
       await updateMember(editingMember.id, updatedFields);
@@ -824,6 +828,44 @@ export default function DashboardPage() {
                   </div>
                 </div>
               )}
+
+              {/* Apresiasi Stempel / Achievement Stamps (Shared) */}
+              <div className="border-t-2 border-black/5 pt-4">
+                <label className="block font-lexend font-black text-xs uppercase text-[#FF006E] mb-2">
+                  🏆 Apresiasi Stempel (Achievement Stamps)
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { name: "Bintang Utama", emoji: "⭐", bg: "bg-[#FFBE0B]", border: "border-black" },
+                    { name: "Sangat Aktif", emoji: "🔥", bg: "bg-[#FF006E] text-white", border: "border-black" },
+                    { name: "Inovatif", emoji: "💡", bg: "bg-[#3A86FF] text-white", border: "border-black" },
+                    { name: "Team Player", emoji: "🤝", bg: "bg-[#06D6A0]", border: "border-black" }
+                  ].map((stamp) => {
+                    const isChecked = editStamps.includes(stamp.name);
+                    const handleToggle = () => {
+                      if (isChecked) {
+                        setEditStamps(prev => prev.filter(s => s !== stamp.name));
+                      } else {
+                        setEditStamps(prev => [...prev, stamp.name]);
+                      }
+                    };
+
+                    return (
+                      <button
+                        type="button"
+                        key={stamp.name}
+                        onClick={handleToggle}
+                        className={`p-2 border-2 rounded-lg font-lilita text-xs uppercase flex items-center justify-center gap-1.5 transition-all select-none cursor-pointer
+                          ${isChecked ? `${stamp.bg} ${stamp.border} translate-y-0.5 shadow-none` : 'bg-white text-gray-400 border-dashed border-gray-300 hover:border-gray-500'}
+                        `}
+                      >
+                        <span>{stamp.emoji}</span>
+                        <span>{stamp.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
               {/* Action Buttons */}
               <div className="flex gap-2 pt-4 border-t-2 border-black/10">

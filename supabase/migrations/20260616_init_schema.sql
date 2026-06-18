@@ -114,5 +114,46 @@ CREATE POLICY select_feedback_policy ON feedback_surat
                   AND anggota.role = 'koor' 
                   AND anggota.departemen = feedback_surat.departemen_pengirim
             )
+    );
+
+-- --------------------------------------------------
+-- ADDITIONAL FEATURES SCHEMA (STAMPS & STICKY NOTES)
+-- --------------------------------------------------
+
+-- Add stamps column to anggota table
+ALTER TABLE anggota ADD COLUMN IF NOT EXISTS stamps TEXT DEFAULT '';
+
+-- Create sticky_notes table
+CREATE TABLE IF NOT EXISTS sticky_notes (
+    id BIGSERIAL PRIMARY KEY,
+    content TEXT NOT NULL,
+    color VARCHAR(50) NOT NULL,
+    sender_name VARCHAR(100) NOT NULL,
+    rotation INT DEFAULT 0,
+    x_pos INT DEFAULT 0,
+    y_pos INT DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable Row Level Security on sticky_notes
+ALTER TABLE sticky_notes ENABLE ROW LEVEL SECURITY;
+
+-- Policy 1: Anyone can read sticky notes
+CREATE POLICY select_sticky_policy ON sticky_notes
+    FOR SELECT
+    USING (true);
+
+-- Policy 2: Anyone can insert sticky notes
+CREATE POLICY insert_sticky_policy ON sticky_notes
+    FOR INSERT
+    WITH CHECK (true);
+
+-- Policy 3: Only admins can delete sticky notes
+CREATE POLICY delete_sticky_policy ON sticky_notes
+    FOR DELETE
+    USING (
+        EXISTS (
+            SELECT 1 FROM anggota 
+            WHERE anggota.id = auth.uid() AND anggota.role = 'admin'
         )
     );
