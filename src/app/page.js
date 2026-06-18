@@ -183,18 +183,51 @@ export default function Home() {
       "Inovatif": { bg: "bg-[#3A86FF]", text: "text-white", border: "border-black", emoji: "💡" },
       "Team Player": { bg: "bg-[#06D6A0]", text: "text-black", border: "border-black", emoji: "🤝" }
     };
+
+    const COLORS = [
+      { bg: "bg-[#FFBE0B]", text: "text-black" },
+      { bg: "bg-[#FF006E]", text: "text-white" },
+      { bg: "bg-[#3A86FF]", text: "text-white" },
+      { bg: "bg-[#06D6A0]", text: "text-black" }
+    ];
+
+    const parseStamp = (stampStr) => {
+      const trimmed = stampStr.trim();
+      const spaceIdx = trimmed.indexOf(" ");
+      if (spaceIdx === -1) {
+        if (STAMP_STYLES[trimmed]) {
+          return { emoji: STAMP_STYLES[trimmed].emoji, text: trimmed };
+        }
+        return { emoji: "📌", text: trimmed };
+      }
+      const firstToken = trimmed.slice(0, spaceIdx);
+      const remaining = trimmed.slice(spaceIdx + 1).trim();
+      const isWord = /^[A-Za-z0-9]+$/.test(firstToken);
+      if (isWord) {
+        if (STAMP_STYLES[trimmed]) {
+          return { emoji: STAMP_STYLES[trimmed].emoji, text: trimmed };
+        }
+        return { emoji: "📌", text: trimmed };
+      }
+      return { emoji: firstToken, text: remaining };
+    };
     
     return (
       <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
-        {list.map((stampName, idx) => {
-          const style = STAMP_STYLES[stampName] || { bg: "bg-white", text: "text-black", border: "border-black", emoji: "📌" };
+        {list.map((stampStr, idx) => {
+          const parsed = parseStamp(stampStr);
+          const style = STAMP_STYLES[parsed.text] || { 
+            ...COLORS[idx % COLORS.length], 
+            border: "border-black", 
+            emoji: parsed.emoji 
+          };
           return (
             <div 
               key={idx} 
-              className={`px-1.5 py-0.5 border-2 ${style.border} ${style.bg} ${style.text} font-lilita text-[8px] uppercase tracking-wider shadow-neo-sm rotate-[-4deg] rounded-sm flex items-center gap-0.5`}
+              className={`px-1.5 py-0.5 border-2 ${style.border || 'border-black'} ${style.bg} ${style.text} font-lilita text-[8px] uppercase tracking-wider shadow-neo-sm rotate-[-4deg] rounded-sm flex items-center gap-0.5`}
             >
-              <span>{style.emoji}</span>
-              <span>{stampName}</span>
+              <span>{parsed.emoji}</span>
+              <span>{parsed.text}</span>
             </div>
           );
         })}

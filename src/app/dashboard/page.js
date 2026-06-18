@@ -44,6 +44,8 @@ export default function DashboardPage() {
   const [editRole, setEditRole] = useState("");
   const [editDept, setEditDept] = useState("");
   const [editStamps, setEditStamps] = useState([]);
+  const [customStampEmoji, setCustomStampEmoji] = useState("");
+  const [customStampText, setCustomStampText] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Cropper Modal States
@@ -140,6 +142,8 @@ export default function DashboardPage() {
     setEditRole(member.role || "staff");
     setEditDept(member.departemen || "");
     setEditStamps(member.stamps ? member.stamps.split(",").map(s => s.trim()).filter(Boolean) : []);
+    setCustomStampEmoji("");
+    setCustomStampText("");
     setEditModalOpen(true);
   };
 
@@ -834,26 +838,28 @@ export default function DashboardPage() {
                 <label className="block font-lexend font-black text-xs uppercase text-[#FF006E] mb-2">
                   🏆 Apresiasi Stempel (Achievement Stamps)
                 </label>
+                
+                {/* Predefined Stamps Checkbox Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[
-                    { name: "Bintang Utama", emoji: "⭐", bg: "bg-[#FFBE0B]", border: "border-black" },
-                    { name: "Sangat Aktif", emoji: "🔥", bg: "bg-[#FF006E] text-white", border: "border-black" },
-                    { name: "Inovatif", emoji: "💡", bg: "bg-[#3A86FF] text-white", border: "border-black" },
-                    { name: "Team Player", emoji: "🤝", bg: "bg-[#06D6A0]", border: "border-black" }
+                    { fullName: "⭐ Bintang Utama", name: "Bintang Utama", emoji: "⭐", bg: "bg-[#FFBE0B]", border: "border-black" },
+                    { fullName: "🔥 Sangat Aktif", name: "Sangat Aktif", emoji: "🔥", bg: "bg-[#FF006E] text-white", border: "border-black" },
+                    { fullName: "💡 Inovatif", name: "Inovatif", emoji: "💡", bg: "bg-[#3A86FF] text-white", border: "border-black" },
+                    { fullName: "🤝 Team Player", name: "Team Player", emoji: "🤝", bg: "bg-[#06D6A0]", border: "border-black" }
                   ].map((stamp) => {
-                    const isChecked = editStamps.includes(stamp.name);
+                    const isChecked = editStamps.includes(stamp.fullName);
                     const handleToggle = () => {
                       if (isChecked) {
-                        setEditStamps(prev => prev.filter(s => s !== stamp.name));
+                        setEditStamps(prev => prev.filter(s => s !== stamp.fullName));
                       } else {
-                        setEditStamps(prev => [...prev, stamp.name]);
+                        setEditStamps(prev => [...prev, stamp.fullName]);
                       }
                     };
 
                     return (
                       <button
                         type="button"
-                        key={stamp.name}
+                        key={stamp.fullName}
                         onClick={handleToggle}
                         className={`p-2 border-2 rounded-lg font-lilita text-xs uppercase flex items-center justify-center gap-1.5 transition-all select-none cursor-pointer
                           ${isChecked ? `${stamp.bg} ${stamp.border} translate-y-0.5 shadow-none` : 'bg-white text-gray-400 border-dashed border-gray-300 hover:border-gray-500'}
@@ -865,6 +871,91 @@ export default function DashboardPage() {
                     );
                   })}
                 </div>
+
+                {/* Custom Stamp Creator Form */}
+                <div className="mt-4 p-3 bg-white border-2 border-black rounded-lg shadow-neo-sm">
+                  <span className="block font-lilita text-[10px] uppercase text-gray-500 mb-2">Tambah Stempel Kustom</span>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Emoji (Contoh: 🚀)" 
+                      value={customStampEmoji}
+                      onChange={(e) => setCustomStampEmoji(e.target.value)}
+                      maxLength={4}
+                      className="w-20 px-2 py-1 border-2 border-black rounded text-xs text-black text-center"
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Teks Stempel (Contoh: Super Koor)" 
+                      value={customStampText}
+                      onChange={(e) => setCustomStampText(e.target.value)}
+                      maxLength={15}
+                      className="flex-grow px-2 py-1 border-2 border-black rounded text-xs text-black"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const text = customStampText.trim();
+                        const emoji = customStampEmoji.trim() || "📌";
+                        if (!text) {
+                          alert("Masukkan teks stempel!");
+                          return;
+                        }
+                        const fullStampName = `${emoji} ${text}`;
+                        if (editStamps.includes(fullStampName)) {
+                          alert("Stempel ini sudah ditambahkan!");
+                          return;
+                        }
+                        setEditStamps(prev => [...prev, fullStampName]);
+                        setCustomStampText("");
+                        setCustomStampEmoji("");
+                      }}
+                      className="bg-[#06D6A0] hover:bg-[#05b889] text-black font-lexend font-black px-3 py-1 border-2 border-black rounded text-xs cursor-pointer shadow-neo-sm active:translate-y-0.5 active:shadow-none"
+                    >
+                      Tambah
+                    </button>
+                  </div>
+                </div>
+
+                {/* Installed Stamps list */}
+                {editStamps.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-3 p-2 bg-[#FAF7F0] border-2 border-black/10 rounded-lg">
+                    {editStamps.map((stampName) => {
+                      const parseStamp = (stampStr) => {
+                        const trimmed = stampStr.trim();
+                        const spaceIdx = trimmed.indexOf(" ");
+                        if (spaceIdx === -1) {
+                          return { emoji: "📌", text: trimmed };
+                        }
+                        const firstToken = trimmed.slice(0, spaceIdx);
+                        const remaining = trimmed.slice(spaceIdx + 1).trim();
+                        const isWord = /^[A-Za-z0-9]+$/.test(firstToken);
+                        if (isWord) {
+                          return { emoji: "📌", text: trimmed };
+                        }
+                        return { emoji: firstToken, text: remaining };
+                      };
+                      const parsed = parseStamp(stampName);
+                      return (
+                        <div 
+                          key={stampName}
+                          className="px-2 py-1 bg-white border border-black rounded-md text-[10px] font-lilita uppercase flex items-center gap-1 shadow-sm select-none"
+                        >
+                          <span>{parsed.emoji}</span>
+                          <span>{parsed.text}</span>
+                          <button
+                            type="button"
+                            onClick={() => setEditStamps(prev => prev.filter(s => s !== stampName))}
+                            className="ml-1 text-red-500 hover:text-red-700 font-bold text-[10px]"
+                            title="Hapus Stempel"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
