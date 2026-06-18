@@ -521,7 +521,7 @@ export default function Home() {
         </main>
 
         {/* Sticky Notes Wall / Papan Aspirasi */}
-        <section className="max-w-6xl mx-auto mt-16 mb-8 px-4">
+        <section className="max-w-[95%] mx-auto mt-16 mb-8 px-4">
           <div className="bg-[#FAF7F0] border-4 border-black p-6 rounded-2xl shadow-neo-lg relative overflow-hidden">
             {/* Decorative corkboard tape */}
             <div className="absolute top-0 left-0 right-0 h-4 bg-amber-800/20 border-b-2 border-black/10"></div>
@@ -538,7 +538,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
               {/* Sticky Note Form */}
               <div className="lg:col-span-1 bg-white border-3 border-black p-4 rounded-xl shadow-neo-sm h-fit">
                 <h3 className="font-lilita text-sm text-black uppercase mb-3">Tulis Aspirasi Baru</h3>
@@ -593,7 +593,7 @@ export default function Home() {
               </div>
 
               {/* Corkboard Display Area */}
-              <div className="lg:col-span-3 min-h-[300px] border-3 border-dashed border-black/30 bg-[#FFFDF8] rounded-xl p-4 relative flex flex-wrap gap-4 items-start content-start overflow-y-auto max-h-[500px]">
+              <div className="lg:col-span-4 min-h-[450px] border-3 border-dashed border-black/30 bg-[#FFFDF8] rounded-xl p-4 relative flex flex-wrap gap-4 items-start content-start overflow-y-auto max-h-[650px]">
                 {stickyNotes.length > 0 ? (
                   stickyNotes.map((note) => (
                     <div
