@@ -46,6 +46,7 @@ export default function DashboardPage() {
   const [editStamps, setEditStamps] = useState([]);
   const [customStampEmoji, setCustomStampEmoji] = useState("");
   const [customStampText, setCustomStampText] = useState("");
+  const [editBukaPesanPada, setEditBukaPesanPada] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Cropper Modal States
@@ -144,6 +145,7 @@ export default function DashboardPage() {
     setEditStamps(member.stamps ? member.stamps.split(",").map(s => s.trim()).filter(Boolean) : []);
     setCustomStampEmoji("");
     setCustomStampText("");
+    setEditBukaPesanPada(member.buka_pesan_pada ? convertToWIBDatetimeLocal(member.buka_pesan_pada) : "");
     setEditModalOpen(true);
   };
 
@@ -274,6 +276,7 @@ export default function DashboardPage() {
         updatedFields.role = editRole;
         updatedFields.departemen = editDept;
         updatedFields.stamps = editStamps.join(", ");
+        updatedFields.buka_pesan_pada = editBukaPesanPada ? `${editBukaPesanPada}:00+07:00` : null;
       } else if (currentUser.role === "koor") {
         // Koor can ONLY edit pesan_koor, foto_url and stamps for staff in their own department
         if (editingMember.departemen !== currentUser.departemen) {
@@ -282,6 +285,7 @@ export default function DashboardPage() {
         updatedFields.pesan_koor = editPesanKoor;
         updatedFields.foto_url = editFotoUrl;
         updatedFields.stamps = editStamps.join(", ");
+        updatedFields.buka_pesan_pada = editBukaPesanPada ? `${editBukaPesanPada}:00+07:00` : null;
       }
 
       await updateMember(editingMember.id, updatedFields);
@@ -556,6 +560,7 @@ export default function DashboardPage() {
                     <th className="p-3">Departemen & Jabatan</th>
                     <th className="p-3 w-32">NIM</th>
                     <th className="p-3 w-36">Tanggal Lahir</th>
+                    <th className="p-3 w-40">Status Rilis (WIB)</th>
                     {currentUser.role === "admin" && <th className="p-3 w-24">Role</th>}
                     <th className="p-3 text-center w-28">Aksi</th>
                   </tr>
@@ -582,6 +587,47 @@ export default function DashboardPage() {
                       </td>
                       <td className="p-3 font-mono font-bold">{m.nim}</td>
                       <td className="p-3 font-mono">{m.tanggal_lahir}</td>
+                      <td className="p-3 font-semibold">
+                        {(() => {
+                          if (!m.buka_pesan_pada) {
+                            return (
+                              <span className="text-[10px] font-extrabold text-[#06D6A0] bg-[#06D6A0]/10 border border-[#06D6A0]/30 px-2 py-0.5 rounded-md flex items-center gap-1 w-max">
+                                🔓 Terbuka langsung
+                              </span>
+                            );
+                          }
+                          const releaseTime = new Date(m.buka_pesan_pada);
+                          const isPast = releaseTime <= new Date();
+                          
+                          const formattedDate = releaseTime.toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            timeZone: "Asia/Jakarta"
+                          }) + " WIB";
+
+                          if (isPast) {
+                            return (
+                              <div className="space-y-0.5">
+                                <span className="text-[10px] font-extrabold text-blue-500 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md flex items-center gap-1 w-max">
+                                  🔓 Terbuka (Jadwal)
+                                </span>
+                                <span className="text-[9px] text-gray-400 block font-semibold">{formattedDate}</span>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div className="space-y-0.5">
+                                <span className="text-[10px] font-extrabold text-red-500 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md flex items-center gap-1 w-max">
+                                  🔒 Terkunci
+                                </span>
+                                <span className="text-[9px] text-gray-500 block font-semibold">{formattedDate}</span>
+                              </div>
+                            );
+                          }
+                        })()}
+                      </td>
                       {currentUser.role === "admin" && (
                         <td className="p-3">
                           <span className="uppercase text-[10px] font-black px-2 py-0.5 bg-gray-100 border border-black/20 rounded">
@@ -612,7 +658,7 @@ export default function DashboardPage() {
                   ))}
                   {visibleMembers.length === 0 && (
                     <tr>
-                      <td colSpan={currentUser.role === "admin" ? 7 : 6} className="p-8 text-center text-gray-400 font-extrabold">
+                      <td colSpan={currentUser.role === "admin" ? 8 : 7} className="p-8 text-center text-gray-400 font-extrabold">
                         Tidak ada anggota terdaftar.
                       </td>
                     </tr>
@@ -731,6 +777,33 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
+                  <div>
+                    <label className="block font-lexend font-bold text-xs uppercase text-gray-700 mb-1 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-[#3A86FF]" />
+                      Jadwal Buka Surat Evaluasi (WIB)
+                    </label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="datetime-local" 
+                        value={editBukaPesanPada}
+                        onChange={(e) => setEditBukaPesanPada(e.target.value)}
+                        className="flex-grow px-3 py-1.5 border-2.5 border-black rounded-lg font-lexend text-xs text-black bg-white"
+                      />
+                      {editBukaPesanPada && (
+                        <button
+                          type="button"
+                          onClick={() => setEditBukaPesanPada("")}
+                          className="bg-[#FF6B6B] hover:bg-[#e05656] text-black font-lexend font-black px-3 py-1.5 border-2.5 border-black rounded-lg text-xs cursor-pointer shadow-neo-sm active:translate-y-0.5 active:shadow-none"
+                          title="Hapus batasan waktu"
+                        >
+                          Hapus
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[9px] text-gray-500 font-semibold mt-1">
+                      Waktu dalam WIB (Waktu Indonesia Barat). Kosongkan agar surat dapat langsung dibuka penerima.
+                    </p>
+                  </div>
 
                   <div className="space-y-3 pt-2 border-t-2 border-black/5">
                     <div>
@@ -829,6 +902,34 @@ export default function DashboardPage() {
                       required
                       className="w-full p-4 border-2.5 border-black rounded-lg font-lexend text-xs text-black bg-white"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block font-lexend font-bold text-xs uppercase text-gray-700 mb-1 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-[#06D6A0]" />
+                      Jadwal Buka Surat Evaluasi (WIB)
+                    </label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="datetime-local" 
+                        value={editBukaPesanPada}
+                        onChange={(e) => setEditBukaPesanPada(e.target.value)}
+                        className="flex-grow px-3 py-1.5 border-2.5 border-black rounded-lg font-lexend text-xs text-black bg-white"
+                      />
+                      {editBukaPesanPada && (
+                        <button
+                          type="button"
+                          onClick={() => setEditBukaPesanPada("")}
+                          className="bg-[#FF6B6B] hover:bg-[#e05656] text-black font-lexend font-black px-3 py-1.5 border-2.5 border-black rounded-lg text-xs cursor-pointer shadow-neo-sm active:translate-y-0.5 active:shadow-none"
+                          title="Hapus batasan waktu"
+                        >
+                          Hapus
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[9px] text-gray-500 font-semibold mt-1">
+                      Waktu dalam WIB (Waktu Indonesia Barat). Kosongkan agar surat dapat langsung dibuka penerima.
+                    </p>
                   </div>
                 </div>
               )}
@@ -1091,5 +1192,30 @@ export default function DashboardPage() {
       })()}
     </div>
   );
+}
+
+// Convert UTC/ISO timestamp to local datetime-local string format representing WIB (UTC+7)
+function convertToWIBDatetimeLocal(isoString) {
+  if (!isoString) return "";
+  try {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return "";
+    
+    // Add WIB offset (UTC+7) relative to the UTC time
+    const utcOffsetMs = date.getTime() + (date.getTimezoneOffset() * 60000);
+    const wibTimeMs = utcOffsetMs + (7 * 3600000);
+    const wibDate = new Date(wibTimeMs);
+    
+    const yyyy = wibDate.getFullYear();
+    const mm = String(wibDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(wibDate.getDate()).padStart(2, '0');
+    const hh = String(wibDate.getHours()).padStart(2, '0');
+    const min = String(wibDate.getMinutes()).padStart(2, '0');
+    
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+  } catch (e) {
+    console.error("Error converting timestamp to WIB: ", e);
+    return "";
+  }
 }
 

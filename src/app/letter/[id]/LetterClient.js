@@ -146,6 +146,32 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     init();
   }, [memberId, initialMember, initialKoorName]);
 
+  const [timeLeft, setTimeLeft] = useState(null);
+
+  // Calculate countdown time left
+  useEffect(() => {
+    if (!member?.buka_pesan_pada) return;
+
+    const calculateTimeLeft = () => {
+      const difference = new Date(member.buka_pesan_pada).getTime() - new Date().getTime();
+      if (difference <= 0) {
+        setTimeLeft(null);
+        return;
+      }
+
+      const d = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const h = Math.floor((difference / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((difference / 1000 / 60) % 60);
+      const s = Math.floor((difference / 1000) % 60);
+
+      setTimeLeft({ days: d, hours: h, minutes: m, seconds: s });
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(timer);
+  }, [member?.buka_pesan_pada]);
+
   // Trigger Confetti when envelope is opened
   const handleOpenEnvelope = () => {
     setEnvelopeState("opening");
@@ -432,6 +458,132 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
             </button>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // WIB Display Time Formatter Helper
+  const getWIBDisplayTime = (isoString) => {
+    if (!isoString) return "";
+    try {
+      const date = new Date(isoString);
+      return date.toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Asia/Jakarta"
+      }) + " WIB";
+    } catch (e) {
+      return "";
+    }
+  };
+
+  const releaseDate = member?.buka_pesan_pada ? new Date(member.buka_pesan_pada) : null;
+  const isLockedForRecipient = releaseDate && new Date() < releaseDate;
+  const isRecipient = currentUser?.id === member?.id;
+  const showLockedScreen = isLockedForRecipient && isRecipient;
+
+  if (showLockedScreen) {
+    return (
+      <div className="min-h-screen y2k-mesh-bg flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Floating background retro elements */}
+        <div className="absolute top-10 left-10 w-20 h-20 bg-[#FFBE0B] rounded-full border-4 border-black rotate-[-12deg] shadow-neo-md flex items-center justify-center select-none hidden md:flex sticker-shake z-0">
+          <span className="font-lilita text-black text-xs uppercase text-center p-1 font-bold">SOON!</span>
+        </div>
+        <div className="absolute bottom-10 right-10 w-24 h-24 bg-[#FF006E] rounded-lg border-4 border-black rotate-[15deg] shadow-neo-md flex items-center justify-center select-none hidden md:flex sticker-shake z-0">
+          <span className="font-lilita text-white text-xs uppercase text-center p-1 font-bold">HMIF 2026</span>
+        </div>
+
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="bg-[#FFFDF0] border-4 border-black p-6 sm:p-8 rounded-2xl max-w-lg w-full text-center shadow-neo-lg relative z-10 my-8"
+        >
+          {/* Top Sealed Stamp Badge */}
+          <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-[#FF6B6B] text-black font-lilita text-xs sm:text-sm uppercase tracking-wider px-4 py-1.5 border-3 border-black shadow-neo-sm rotate-[-2deg] rounded-md flex items-center gap-1.5 select-none whitespace-nowrap">
+            <Lock className="w-3.5 h-3.5" />
+            <span>Surat Evaluasi Tersegel</span>
+          </div>
+
+          <div className="mt-4 mb-6">
+            <motion.div
+              animate={{ 
+                y: [0, -8, 0],
+                rotate: [0, -3, 3, 0]
+              }}
+              transition={{ 
+                repeat: Infinity, 
+                duration: 4,
+                ease: "easeInOut"
+              }}
+              className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white border-4 border-black shadow-neo-sm text-[#FF006E]"
+            >
+              <Lock className="w-10 h-10 animate-pulse" />
+            </motion.div>
+          </div>
+
+          <h2 className="font-lilita text-2xl sm:text-3xl uppercase text-black mb-1">
+            BELUM WAKTUNYA, {member.nama}!
+          </h2>
+          <p className="text-xs font-lexend font-bold text-gray-500 uppercase tracking-wide mb-4">
+            {member.jabatan} • DEPARTEMEN {member.departemen}
+          </p>
+
+          <p className="font-lexend font-medium text-xs sm:text-sm text-gray-700 bg-white border-2.5 border-black p-3 rounded-lg shadow-neo-sm leading-relaxed mb-6">
+            🔑 Surat evaluasi dan apresiasi Anda dari pengurus (Chairman, Vice Chairman, dan Koordinator) saat ini masih disegel dan baru akan terbuka secara otomatis pada:
+            <span className="block mt-2 font-bold text-black text-sm bg-yellow-100 border border-yellow-300 py-1.5 px-3 rounded">
+              📅 {getWIBDisplayTime(member.buka_pesan_pada)}
+            </span>
+          </p>
+
+          {/* Countdown Counters */}
+          {timeLeft ? (
+            <div className="grid grid-cols-4 gap-2 sm:gap-3.5 mb-8">
+              {[
+                { label: "Hari", value: timeLeft.days },
+                { label: "Jam", value: timeLeft.hours },
+                { label: "Menit", value: timeLeft.minutes },
+                { label: "Detik", value: timeLeft.seconds }
+              ].map((item, idx) => (
+                <motion.div 
+                  key={idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="bg-[#FFBE0B] border-3 border-black p-2 sm:p-3 rounded-xl shadow-neo-sm flex flex-col items-center justify-center rotate-[-1deg]"
+                >
+                  <span className="font-lilita text-2xl sm:text-4xl text-black leading-none drop-shadow-[1.5px_1.5px_0px_#fff]">
+                    {String(item.value).padStart(2, '0')}
+                  </span>
+                  <span className="font-lexend font-black uppercase text-[8px] sm:text-[9px] tracking-wider text-black/70 mt-1 select-none">
+                    {item.label}
+                  </span>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-4 font-lilita text-lg text-emerald-600 animate-pulse mb-6">
+              Mengurai segel... Surat akan terbuka sekarang!
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <button 
+              onClick={() => router.push("/")}
+              className="w-full bg-[#3A86FF] hover:bg-[#206be6] text-white font-lexend font-black py-3 border-3 border-black rounded-lg shadow-neo-sm text-sm active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Kembali ke Galeri Polaroid
+            </button>
+            <p className="text-[9.5px] font-lexend text-gray-400 font-semibold leading-relaxed">
+              *Jika Anda merasa ini adalah kesalahan konfigurasi jadwal rilis, silakan hubungi Chairman atau Vice Chairman Kabinet Astravia.
+            </p>
+          </div>
+        </motion.div>
       </div>
     );
   }
@@ -1005,6 +1157,13 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
 
   return (
     <div className="min-h-screen animated-gradient flex flex-col pb-20 relative overflow-x-hidden">
+      {/* Release lock warning for admins/coordinators */}
+      {isLockedForRecipient && !isRecipient && (
+        <div className="bg-[#FF6B6B] border-b-4 border-black py-2.5 px-4 text-center text-black font-lexend font-black text-xs sm:text-sm shadow-neo-sm relative z-20 flex items-center justify-center gap-2">
+          <Lock className="w-4 h-4 text-black animate-pulse" />
+          <span>⚠️ PRATINJAU PENGURUS: Surat ini saat ini masih TERSEGEL untuk penerima hingga {getWIBDisplayTime(member.buka_pesan_pada)}.</span>
+        </div>
+      )}
       
       {/* Top Header Bar */}
       <div className="max-w-6xl w-full mx-auto px-4 pt-6 flex justify-between items-center z-10">

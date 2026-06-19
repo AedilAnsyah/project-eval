@@ -19,10 +19,10 @@ const MOCK_MEMBERS_KEY = 'hmif_eval_members_db';
 const MOCK_FEEDBACK_KEY = 'hmif_eval_feedback_db';
 
 function getLocalMembers() {
-  if (typeof window === 'undefined') return initialMembers.map(m => ({ ...m, stamps: m.stamps || "" }));
+  if (typeof window === 'undefined') return initialMembers.map(m => ({ ...m, stamps: m.stamps || "", buka_pesan_pada: m.buka_pesan_pada || null }));
   let data = localStorage.getItem(MOCK_MEMBERS_KEY);
   if (!data) {
-    const normalizedInitial = initialMembers.map(m => ({ ...m, stamps: m.stamps || "" }));
+    const normalizedInitial = initialMembers.map(m => ({ ...m, stamps: m.stamps || "", buka_pesan_pada: m.buka_pesan_pada || null }));
     localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(normalizedInitial));
     return normalizedInitial;
   }
@@ -31,13 +31,13 @@ function getLocalMembers() {
     const hasOldNims = parsed.some(m => m.nim.startsWith('101220'));
     const countMismatch = parsed.length !== initialMembers.length;
     if (hasOldNims || countMismatch) {
-      const normalizedInitial = initialMembers.map(m => ({ ...m, stamps: m.stamps || "" }));
+      const normalizedInitial = initialMembers.map(m => ({ ...m, stamps: m.stamps || "", buka_pesan_pada: m.buka_pesan_pada || null }));
       localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(normalizedInitial));
       return normalizedInitial;
     }
-    return parsed.map(m => ({ ...m, stamps: m.stamps || "" }));
+    return parsed.map(m => ({ ...m, stamps: m.stamps || "", buka_pesan_pada: m.buka_pesan_pada || null }));
   } catch (e) {
-    const normalizedInitial = initialMembers.map(m => ({ ...m, stamps: m.stamps || "" }));
+    const normalizedInitial = initialMembers.map(m => ({ ...m, stamps: m.stamps || "", buka_pesan_pada: m.buka_pesan_pada || null }));
     localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(normalizedInitial));
     return normalizedInitial;
   }

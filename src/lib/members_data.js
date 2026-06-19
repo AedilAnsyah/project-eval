@@ -13,7 +13,8 @@ export const members = [
     "pesan_fatir": "Halo Fatir Gibran, terima kasih banyak atas kontribusimu sebagai Chairman di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Fatir Gibran! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Chairman, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Fatir Gibran, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Executive Board. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Chairman"
+    "jabatan": "Chairman",
+    "buka_pesan_pada": null
   },
   {
     "id": "61dc13cb-8798-4b58-a88b-c93407368672",
@@ -27,7 +28,8 @@ export const members = [
     "pesan_fatir": "Halo Aedil Riski Ansyah, terima kasih banyak atas kontribusimu sebagai Vice Chairman di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Aedil Riski Ansyah! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Vice Chairman, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Aedil Riski Ansyah, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Executive Board. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Vice Chairman"
+    "jabatan": "Vice Chairman",
+    "buka_pesan_pada": null
   },
   {
     "id": "3e825be9-b15e-4fc6-9d1b-205b38e838c2",
@@ -41,7 +43,8 @@ export const members = [
     "pesan_fatir": "Halo Fidela Marshallwa Abelvio Santoso, terima kasih banyak atas kontribusimu sebagai General Secretary di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Fidela Marshallwa Abelvio Santoso! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai General Secretary, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Fidela Marshallwa Abelvio Santoso, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Executive Board. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "General Secretary"
+    "jabatan": "General Secretary",
+    "buka_pesan_pada": null
   },
   {
     "id": "bd90d7fa-35df-4d5b-9fcc-8570e16483a7",
@@ -55,7 +58,8 @@ export const members = [
     "pesan_fatir": "Halo Salsadilla Hanny Azizah, terima kasih banyak atas kontribusimu sebagai Associate Secretary di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Salsadilla Hanny Azizah! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Associate Secretary, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Salsadilla Hanny Azizah, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Executive Board. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Associate Secretary"
+    "jabatan": "Associate Secretary",
+    "buka_pesan_pada": null
   },
   {
     "id": "ed9ff7a4-b3f2-4ad5-af3b-b9a38ede7230",
@@ -69,7 +73,8 @@ export const members = [
     "pesan_fatir": "Halo Alya Maghfira Pratiwi, terima kasih banyak atas kontribusimu sebagai General Treasure di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Alya Maghfira Pratiwi! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai General Treasure, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Alya Maghfira Pratiwi, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Executive Board. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "General Treasure"
+    "jabatan": "General Treasure",
+    "buka_pesan_pada": null
   },
   {
     "id": "3e9753d1-d5f7-4023-b761-5f4729f61255",
@@ -83,7 +88,8 @@ export const members = [
     "pesan_fatir": "Halo Sarah Maulidya Natasyah, terima kasih banyak atas kontribusimu sebagai Associate Treasure di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Sarah Maulidya Natasyah! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Associate Treasure, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Sarah Maulidya Natasyah, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Executive Board. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Associate Treasure"
+    "jabatan": "Associate Treasure",
+    "buka_pesan_pada": null
   },
   {
     "id": "d12ba161-f47b-421b-8ad4-698eb936b4cd",
@@ -97,7 +103,8 @@ export const members = [
     "pesan_fatir": "Halo Chilya Fadhilatin Nisa, terima kasih banyak atas kontribusimu sebagai Core of Human Capital & Character Building di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Chilya Fadhilatin Nisa! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Core of Human Capital & Character Building, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Chilya Fadhilatin Nisa, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Human Capital & Character Building. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Core of Human Capital & Character Building"
+    "jabatan": "Core of Human Capital & Character Building",
+    "buka_pesan_pada": null
   },
   {
     "id": "55815ffa-a38e-40aa-a8c0-86635f230070",
@@ -111,7 +118,8 @@ export const members = [
     "pesan_fatir": "Halo Tio Armani, terima kasih banyak atas kontribusimu sebagai Staff of Human Capital & Character Building di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Tio Armani! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Human Capital & Character Building, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Tio Armani, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Human Capital & Character Building. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Human Capital & Character Building"
+    "jabatan": "Staff of Human Capital & Character Building",
+    "buka_pesan_pada": null
   },
   {
     "id": "0f3b375d-8626-40d9-950e-fc21e91a6a8c",
@@ -125,7 +133,8 @@ export const members = [
     "pesan_fatir": "Halo Diva Zahrah Nabila, terima kasih banyak atas kontribusimu sebagai Staff of Human Capital & Character Building di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Diva Zahrah Nabila! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Human Capital & Character Building, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Diva Zahrah Nabila, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Human Capital & Character Building. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Human Capital & Character Building"
+    "jabatan": "Staff of Human Capital & Character Building",
+    "buka_pesan_pada": null
   },
   {
     "id": "59c9acee-ca25-493c-918b-6273d07879e8",
@@ -139,7 +148,8 @@ export const members = [
     "pesan_fatir": "Halo Barret Fairuz Azizah, terima kasih banyak atas kontribusimu sebagai Staff of Human Capital & Character Building di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Barret Fairuz Azizah! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Human Capital & Character Building, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Barret Fairuz Azizah, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Human Capital & Character Building. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Human Capital & Character Building"
+    "jabatan": "Staff of Human Capital & Character Building",
+    "buka_pesan_pada": null
   },
   {
     "id": "c9dc8469-a654-4689-b75a-ba6b325cc976",
@@ -153,7 +163,8 @@ export const members = [
     "pesan_fatir": "Halo Amanda Septiana Salsabila, terima kasih banyak atas kontribusimu sebagai Staff of Human Capital & Character Building di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Amanda Septiana Salsabila! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Human Capital & Character Building, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Amanda Septiana Salsabila, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Human Capital & Character Building. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Human Capital & Character Building"
+    "jabatan": "Staff of Human Capital & Character Building",
+    "buka_pesan_pada": null
   },
   {
     "id": "37326e54-a29e-4aa7-a3a6-b65cd3cdae26",
@@ -167,7 +178,8 @@ export const members = [
     "pesan_fatir": "Halo Adhara Faliya Utanti, terima kasih banyak atas kontribusimu sebagai Staff of Human Capital & Character Building di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Adhara Faliya Utanti! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Human Capital & Character Building, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Adhara Faliya Utanti, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Human Capital & Character Building. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Human Capital & Character Building"
+    "jabatan": "Staff of Human Capital & Character Building",
+    "buka_pesan_pada": null
   },
   {
     "id": "c4ae5054-c4a4-4ba9-90d0-a94fd5326c69",
@@ -181,7 +193,8 @@ export const members = [
     "pesan_fatir": "Halo Annisa Berliana Nindya Syah Putri, terima kasih banyak atas kontribusimu sebagai Staff of Human Capital & Character Building di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Annisa Berliana Nindya Syah Putri! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Human Capital & Character Building, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Annisa Berliana Nindya Syah Putri, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Human Capital & Character Building. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Human Capital & Character Building"
+    "jabatan": "Staff of Human Capital & Character Building",
+    "buka_pesan_pada": null
   },
   {
     "id": "0bd1bd74-6438-44cd-a656-36e5c3a2f6ed",
@@ -195,7 +208,8 @@ export const members = [
     "pesan_fatir": "Halo Nehemia Pandu Indragiri, terima kasih banyak atas kontribusimu sebagai Staff of Human Capital & Character Building di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Nehemia Pandu Indragiri! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Human Capital & Character Building, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Nehemia Pandu Indragiri, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Human Capital & Character Building. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Human Capital & Character Building"
+    "jabatan": "Staff of Human Capital & Character Building",
+    "buka_pesan_pada": null
   },
   {
     "id": "ef83af05-b741-4712-a72f-e742c591500f",
@@ -209,7 +223,8 @@ export const members = [
     "pesan_fatir": "Halo Ridha Akifah, terima kasih banyak atas kontribusimu sebagai Core of Talent Development & Innovation di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Ridha Akifah! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Core of Talent Development & Innovation, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Ridha Akifah, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Talent Development & Innovation. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Core of Talent Development & Innovation"
+    "jabatan": "Core of Talent Development & Innovation",
+    "buka_pesan_pada": null
   },
   {
     "id": "df49f82d-0852-40d8-bf80-fc266304c951",
@@ -223,7 +238,8 @@ export const members = [
     "pesan_fatir": "Halo Marzhendo Galang Saputra, terima kasih banyak atas kontribusimu sebagai Staff of Talent Development & Innovation di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Marzhendo Galang Saputra! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Talent Development & Innovation, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Marzhendo Galang Saputra, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Talent Development & Innovation. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Talent Development & Innovation"
+    "jabatan": "Staff of Talent Development & Innovation",
+    "buka_pesan_pada": null
   },
   {
     "id": "68bbcb50-381c-484e-8f7a-53623b749bd9",
@@ -237,7 +253,8 @@ export const members = [
     "pesan_fatir": "Halo Rizky Al Kahfi, terima kasih banyak atas kontribusimu sebagai Staff of Talent Development & Innovation di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Rizky Al Kahfi! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Talent Development & Innovation, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Rizky Al Kahfi, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Talent Development & Innovation. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Talent Development & Innovation"
+    "jabatan": "Staff of Talent Development & Innovation",
+    "buka_pesan_pada": null
   },
   {
     "id": "cc38acaa-053a-43bc-923f-675c7f1764d1",
@@ -251,7 +268,8 @@ export const members = [
     "pesan_fatir": "Halo Rista Sania Putri, terima kasih banyak atas kontribusimu sebagai Staff of Talent Development & Innovation di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Rista Sania Putri! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Talent Development & Innovation, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Rista Sania Putri, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Talent Development & Innovation. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Talent Development & Innovation"
+    "jabatan": "Staff of Talent Development & Innovation",
+    "buka_pesan_pada": null
   },
   {
     "id": "50c95d81-512e-411b-91a8-6720027ce8c0",
@@ -265,7 +283,8 @@ export const members = [
     "pesan_fatir": "Halo Nawwar Ulayya Frodine, terima kasih banyak atas kontribusimu sebagai Staff of Talent Development & Innovation di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Nawwar Ulayya Frodine! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Talent Development & Innovation, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Nawwar Ulayya Frodine, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Talent Development & Innovation. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Talent Development & Innovation"
+    "jabatan": "Staff of Talent Development & Innovation",
+    "buka_pesan_pada": null
   },
   {
     "id": "2af292c9-3c1b-4b08-9d9e-851ebb8732f5",
@@ -279,7 +298,8 @@ export const members = [
     "pesan_fatir": "Halo Ahmad Luthfi Habibie, terima kasih banyak atas kontribusimu sebagai Staff of Talent Development & Innovation di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Ahmad Luthfi Habibie! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Talent Development & Innovation, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Ahmad Luthfi Habibie, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Talent Development & Innovation. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Talent Development & Innovation"
+    "jabatan": "Staff of Talent Development & Innovation",
+    "buka_pesan_pada": null
   },
   {
     "id": "c9cfaabd-9939-4452-a1d3-4938b21c1b0d",
@@ -293,7 +313,8 @@ export const members = [
     "pesan_fatir": "Halo Raysa Rahma Irahim, terima kasih banyak atas kontribusimu sebagai Staff of Talent Development & Innovation di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Raysa Rahma Irahim! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Talent Development & Innovation, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Raysa Rahma Irahim, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Talent Development & Innovation. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Talent Development & Innovation"
+    "jabatan": "Staff of Talent Development & Innovation",
+    "buka_pesan_pada": null
   },
   {
     "id": "3b3b6d64-5f18-4e9e-a9d1-cd91caeb254a",
@@ -307,7 +328,8 @@ export const members = [
     "pesan_fatir": "Halo Brilyant Keyza Hidayat, terima kasih banyak atas kontribusimu sebagai Staff of Talent Development & Innovation di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Brilyant Keyza Hidayat! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Talent Development & Innovation, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Brilyant Keyza Hidayat, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Talent Development & Innovation. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Talent Development & Innovation"
+    "jabatan": "Staff of Talent Development & Innovation",
+    "buka_pesan_pada": null
   },
   {
     "id": "1d169c71-b055-4ff5-9559-ebdba24f9959",
@@ -321,7 +343,8 @@ export const members = [
     "pesan_fatir": "Halo Muhammad Fachri Auravyano Saka, terima kasih banyak atas kontribusimu sebagai Core of Humanity Impact & Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Muhammad Fachri Auravyano Saka! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Core of Humanity Impact & Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Muhammad Fachri Auravyano Saka, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Humanity Impact & Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Core of Humanity Impact & Development"
+    "jabatan": "Core of Humanity Impact & Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "48a96ebd-67ef-4de9-bcbc-5cdb5918e741",
@@ -335,7 +358,8 @@ export const members = [
     "pesan_fatir": "Halo Jahraa Syarifah Naqiyyah Salsabila, terima kasih banyak atas kontribusimu sebagai Staff of Humanity Impact & Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Jahraa Syarifah Naqiyyah Salsabila! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Humanity Impact & Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Jahraa Syarifah Naqiyyah Salsabila, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Humanity Impact & Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Humanity Impact & Development"
+    "jabatan": "Staff of Humanity Impact & Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "6b401cf2-5aea-4b2e-a26e-083bdaa363f2",
@@ -349,7 +373,8 @@ export const members = [
     "pesan_fatir": "Halo Shafira Shifa Azahra, terima kasih banyak atas kontribusimu sebagai Staff of Humanity Impact & Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Shafira Shifa Azahra! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Humanity Impact & Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Shafira Shifa Azahra, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Humanity Impact & Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Humanity Impact & Development"
+    "jabatan": "Staff of Humanity Impact & Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "de9a320d-3dce-452e-a497-448d1f7114e9",
@@ -363,7 +388,8 @@ export const members = [
     "pesan_fatir": "Halo Muhammad Farrel Argiyanto, terima kasih banyak atas kontribusimu sebagai Staff of Humanity Impact & Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Muhammad Farrel Argiyanto! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Humanity Impact & Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Muhammad Farrel Argiyanto, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Humanity Impact & Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Humanity Impact & Development"
+    "jabatan": "Staff of Humanity Impact & Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "d584d348-1508-4f60-bd04-e988114902f7",
@@ -377,7 +403,8 @@ export const members = [
     "pesan_fatir": "Halo Mukhammad Ari Trianirto, terima kasih banyak atas kontribusimu sebagai Staff of Humanity Impact & Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Mukhammad Ari Trianirto! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Humanity Impact & Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Mukhammad Ari Trianirto, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Humanity Impact & Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Humanity Impact & Development"
+    "jabatan": "Staff of Humanity Impact & Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "d67bfb41-8983-414b-b56d-cf17f1313ba0",
@@ -391,7 +418,8 @@ export const members = [
     "pesan_fatir": "Halo Assyifa Zahra, terima kasih banyak atas kontribusimu sebagai Staff of Humanity Impact & Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Assyifa Zahra! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Humanity Impact & Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Assyifa Zahra, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Humanity Impact & Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Humanity Impact & Development"
+    "jabatan": "Staff of Humanity Impact & Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "efedd595-61b7-4edf-9e9b-2ba1179d9dc8",
@@ -405,7 +433,8 @@ export const members = [
     "pesan_fatir": "Halo Hiliyati Aulia, terima kasih banyak atas kontribusimu sebagai Staff of Humanity Impact & Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Hiliyati Aulia! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Humanity Impact & Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Hiliyati Aulia, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Humanity Impact & Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Humanity Impact & Development"
+    "jabatan": "Staff of Humanity Impact & Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "9f148cdf-e7e2-417c-b136-360d8e0654a8",
@@ -419,7 +448,8 @@ export const members = [
     "pesan_fatir": "Halo Syahla Kheisya Mayastria, terima kasih banyak atas kontribusimu sebagai Core of Finance & Enterprise Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Syahla Kheisya Mayastria! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Core of Finance & Enterprise Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Syahla Kheisya Mayastria, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Finance & Enterprise Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Core of Finance & Enterprise Development"
+    "jabatan": "Core of Finance & Enterprise Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "c103d090-dd91-4344-a592-2fc4313b9a17",
@@ -433,7 +463,8 @@ export const members = [
     "pesan_fatir": "Halo Herdian Abdillah Purnomo, terima kasih banyak atas kontribusimu sebagai Staff of Finance & Enterprise Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Herdian Abdillah Purnomo! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Finance & Enterprise Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Herdian Abdillah Purnomo, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Finance & Enterprise Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Finance & Enterprise Development"
+    "jabatan": "Staff of Finance & Enterprise Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "661f5b78-e3f1-44f8-920a-e05c2c1692e2",
@@ -447,7 +478,8 @@ export const members = [
     "pesan_fatir": "Halo Nabella Rahmatus Sania, terima kasih banyak atas kontribusimu sebagai Staff of Finance & Enterprise Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Nabella Rahmatus Sania! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Finance & Enterprise Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Nabella Rahmatus Sania, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Finance & Enterprise Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Finance & Enterprise Development"
+    "jabatan": "Staff of Finance & Enterprise Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "78b517a2-d0c4-414f-8ad2-a01603fd4bab",
@@ -461,7 +493,8 @@ export const members = [
     "pesan_fatir": "Halo Amelia Candradewi, terima kasih banyak atas kontribusimu sebagai Staff of Finance & Enterprise Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Amelia Candradewi! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Finance & Enterprise Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Amelia Candradewi, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Finance & Enterprise Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Finance & Enterprise Development"
+    "jabatan": "Staff of Finance & Enterprise Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "09fa6600-2af2-4db1-b27b-ef52b7792f31",
@@ -475,7 +508,8 @@ export const members = [
     "pesan_fatir": "Halo Shasa Olivia Rose, terima kasih banyak atas kontribusimu sebagai Staff of Finance & Enterprise Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Shasa Olivia Rose! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Finance & Enterprise Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Shasa Olivia Rose, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Finance & Enterprise Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Finance & Enterprise Development"
+    "jabatan": "Staff of Finance & Enterprise Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "815ab59f-a25f-48c0-aa52-f21ef2423da6",
@@ -489,7 +523,8 @@ export const members = [
     "pesan_fatir": "Halo Aqilah Izani, terima kasih banyak atas kontribusimu sebagai Staff of Finance & Enterprise Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Aqilah Izani! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Finance & Enterprise Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Aqilah Izani, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Finance & Enterprise Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Finance & Enterprise Development"
+    "jabatan": "Staff of Finance & Enterprise Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "8692b2fb-386c-42f2-ba93-06df8809e43d",
@@ -503,7 +538,8 @@ export const members = [
     "pesan_fatir": "Halo Rafi Azis Faozan, terima kasih banyak atas kontribusimu sebagai Staff of Finance & Enterprise Development di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Rafi Azis Faozan! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Finance & Enterprise Development, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Rafi Azis Faozan, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Finance & Enterprise Development. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Finance & Enterprise Development"
+    "jabatan": "Staff of Finance & Enterprise Development",
+    "buka_pesan_pada": null
   },
   {
     "id": "8e002c8d-2b79-487d-90e1-fbb96b22ac16",
@@ -517,7 +553,8 @@ export const members = [
     "pesan_fatir": "Halo Dafa Awal Wahyu Pambudi, terima kasih banyak atas kontribusimu sebagai Core of Creative Content & Outreach di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Dafa Awal Wahyu Pambudi! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Core of Creative Content & Outreach, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Dafa Awal Wahyu Pambudi, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Creative Content & Outreach. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Core of Creative Content & Outreach"
+    "jabatan": "Core of Creative Content & Outreach",
+    "buka_pesan_pada": null
   },
   {
     "id": "562dc9ad-7a65-49e7-8193-0abd9a9fe780",
@@ -531,7 +568,8 @@ export const members = [
     "pesan_fatir": "Halo Chadafya Putra Zulfikar, terima kasih banyak atas kontribusimu sebagai Staff of Creative Content & Outreach di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Chadafya Putra Zulfikar! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Creative Content & Outreach, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Chadafya Putra Zulfikar, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Creative Content & Outreach. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Creative Content & Outreach"
+    "jabatan": "Staff of Creative Content & Outreach",
+    "buka_pesan_pada": null
   },
   {
     "id": "87f6cdc5-a9c2-444e-99ab-a95d1d93fd7c",
@@ -545,7 +583,8 @@ export const members = [
     "pesan_fatir": "Halo Muh. Haidar Az Zacky, terima kasih banyak atas kontribusimu sebagai Staff of Creative Content & Outreach di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Muh. Haidar Az Zacky! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Creative Content & Outreach, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Muh. Haidar Az Zacky, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Creative Content & Outreach. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Creative Content & Outreach"
+    "jabatan": "Staff of Creative Content & Outreach",
+    "buka_pesan_pada": null
   },
   {
     "id": "f6947e64-7491-4459-b024-4f2e9b0edc18",
@@ -559,7 +598,8 @@ export const members = [
     "pesan_fatir": "Halo Manggala Patra Raditya, terima kasih banyak atas kontribusimu sebagai Staff of Creative Content & Outreach di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Manggala Patra Raditya! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Creative Content & Outreach, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Manggala Patra Raditya, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Creative Content & Outreach. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Creative Content & Outreach"
+    "jabatan": "Staff of Creative Content & Outreach",
+    "buka_pesan_pada": null
   },
   {
     "id": "ca44e74c-678d-4b18-bcab-5567a2667593",
@@ -573,7 +613,8 @@ export const members = [
     "pesan_fatir": "Halo Pamela Sandra Amelia Br Ginting, terima kasih banyak atas kontribusimu sebagai Staff of Creative Content & Outreach di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Pamela Sandra Amelia Br Ginting! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Creative Content & Outreach, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Pamela Sandra Amelia Br Ginting, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Creative Content & Outreach. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Creative Content & Outreach"
+    "jabatan": "Staff of Creative Content & Outreach",
+    "buka_pesan_pada": null
   },
   {
     "id": "5d713dd1-4bc8-48be-a62b-6f5d747ed9fa",
@@ -587,7 +628,8 @@ export const members = [
     "pesan_fatir": "Halo Mahardhika Putra Azlian, terima kasih banyak atas kontribusimu sebagai Staff of Creative Content & Outreach di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Mahardhika Putra Azlian! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Creative Content & Outreach, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Mahardhika Putra Azlian, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Creative Content & Outreach. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Creative Content & Outreach"
+    "jabatan": "Staff of Creative Content & Outreach",
+    "buka_pesan_pada": null
   },
   {
     "id": "842e4b39-bb5a-452c-9b4f-6e05a5306b75",
@@ -601,7 +643,8 @@ export const members = [
     "pesan_fatir": "Halo Muhammad Zacky Permana, terima kasih banyak atas kontribusimu sebagai Staff of Creative Content & Outreach di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Muhammad Zacky Permana! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Creative Content & Outreach, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Muhammad Zacky Permana, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Creative Content & Outreach. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Creative Content & Outreach"
+    "jabatan": "Staff of Creative Content & Outreach",
+    "buka_pesan_pada": null
   },
   {
     "id": "45454663-a48f-47a7-9b1c-302556ba899f",
@@ -615,7 +658,8 @@ export const members = [
     "pesan_fatir": "Halo Laluna Afril Diasyifa, terima kasih banyak atas kontribusimu sebagai Staff of Creative Content & Outreach di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Laluna Afril Diasyifa! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Creative Content & Outreach, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Laluna Afril Diasyifa, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Creative Content & Outreach. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Creative Content & Outreach"
+    "jabatan": "Staff of Creative Content & Outreach",
+    "buka_pesan_pada": null
   },
   {
     "id": "99f2d8df-6e8b-4867-b335-13d7e5a4357f",
@@ -629,7 +673,8 @@ export const members = [
     "pesan_fatir": "Halo Aqilla Rachel Rabbani, terima kasih banyak atas kontribusimu sebagai Staff of Creative Content & Outreach di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Aqilla Rachel Rabbani! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Creative Content & Outreach, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Aqilla Rachel Rabbani, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Creative Content & Outreach. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Creative Content & Outreach"
+    "jabatan": "Staff of Creative Content & Outreach",
+    "buka_pesan_pada": null
   },
   {
     "id": "cb141eab-b14d-48c6-96aa-d5cbeb6e3598",
@@ -643,7 +688,8 @@ export const members = [
     "pesan_fatir": "Halo Moh. Chandra Wardana, terima kasih banyak atas kontribusimu sebagai Staff of Creative Content & Outreach di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Moh. Chandra Wardana! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of Creative Content & Outreach, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Moh. Chandra Wardana, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen Creative Content & Outreach. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of Creative Content & Outreach"
+    "jabatan": "Staff of Creative Content & Outreach",
+    "buka_pesan_pada": null
   },
   {
     "id": "712ecc60-c28a-4349-9130-da41eb39c4e2",
@@ -657,7 +703,8 @@ export const members = [
     "pesan_fatir": "Halo Damanik, Yohanes Geovan Ondova, terima kasih banyak atas kontribusimu sebagai Core of External Relations & Advocacy di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Damanik, Yohanes Geovan Ondova! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Core of External Relations & Advocacy, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Damanik, Yohanes Geovan Ondova, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen External Relations & Advocacy. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Core of External Relations & Advocacy"
+    "jabatan": "Core of External Relations & Advocacy",
+    "buka_pesan_pada": null
   },
   {
     "id": "cd8ac37d-7ef7-4609-bb4c-2d3ae26a0fff",
@@ -671,7 +718,8 @@ export const members = [
     "pesan_fatir": "Halo Elfan Endriyanto, terima kasih banyak atas kontribusimu sebagai Staff of External Relations & Advocacy di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Elfan Endriyanto! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of External Relations & Advocacy, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Elfan Endriyanto, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen External Relations & Advocacy. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of External Relations & Advocacy"
+    "jabatan": "Staff of External Relations & Advocacy",
+    "buka_pesan_pada": null
   },
   {
     "id": "bb0c4abb-30e2-45c0-aa09-68c0cb4bb84b",
@@ -685,7 +733,8 @@ export const members = [
     "pesan_fatir": "Halo Ais Nurhanifah, terima kasih banyak atas kontribusimu sebagai Staff of External Relations & Advocacy di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Ais Nurhanifah! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of External Relations & Advocacy, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Ais Nurhanifah, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen External Relations & Advocacy. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of External Relations & Advocacy"
+    "jabatan": "Staff of External Relations & Advocacy",
+    "buka_pesan_pada": null
   },
   {
     "id": "1f94be6f-2aa0-4ee5-ba4d-d9d40f4d3204",
@@ -699,7 +748,8 @@ export const members = [
     "pesan_fatir": "Halo Ilham Sulistyo Rizqi, terima kasih banyak atas kontribusimu sebagai Staff of External Relations & Advocacy di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Ilham Sulistyo Rizqi! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of External Relations & Advocacy, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Ilham Sulistyo Rizqi, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen External Relations & Advocacy. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of External Relations & Advocacy"
+    "jabatan": "Staff of External Relations & Advocacy",
+    "buka_pesan_pada": null
   },
   {
     "id": "b5a0ded1-3de5-4baa-bfbc-735d37de7598",
@@ -713,7 +763,8 @@ export const members = [
     "pesan_fatir": "Halo Angelina Loria Timba, terima kasih banyak atas kontribusimu sebagai Staff of External Relations & Advocacy di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Angelina Loria Timba! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of External Relations & Advocacy, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Angelina Loria Timba, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen External Relations & Advocacy. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of External Relations & Advocacy"
+    "jabatan": "Staff of External Relations & Advocacy",
+    "buka_pesan_pada": null
   },
   {
     "id": "943cd5e9-37fa-41a4-934d-a51661e44e1b",
@@ -727,7 +778,8 @@ export const members = [
     "pesan_fatir": "Halo Rayhan Ahza Widayamukti, terima kasih banyak atas kontribusimu sebagai Staff of External Relations & Advocacy di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Rayhan Ahza Widayamukti! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of External Relations & Advocacy, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Rayhan Ahza Widayamukti, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen External Relations & Advocacy. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of External Relations & Advocacy"
+    "jabatan": "Staff of External Relations & Advocacy",
+    "buka_pesan_pada": null
   },
   {
     "id": "46b885ed-702e-4304-8807-60318d018a08",
@@ -741,6 +793,7 @@ export const members = [
     "pesan_fatir": "Halo Rakhmat Pratama, terima kasih banyak atas kontribusimu sebagai Staff of External Relations & Advocacy di periode kepengurusan ini. Kerjamu sangat luar biasa dan sangat membantu kelancaran program kerja HMIF. Tetap semangat dan semoga sukses di langkah berikutnya!",
     "pesan_aedil": "Hai Rakhmat Pratama! Salut dengan dedikasi dan energi positif yang kamu bawa. Sebagai Staff of External Relations & Advocacy, kamu sudah memberikan yang terbaik. Semoga pengalaman di HMIF ini bermanfaat untuk masa depanmu ya!",
     "pesan_koor": "Halo Rakhmat Pratama, sebagai rekan satu tim, aku bangga sekali bisa bekerja bersamamu di departemen External Relations & Advocacy. Kerja kerasmu sangat menginspirasi. Terima kasih atas segala bantuan dan kebersamaan kita!",
-    "jabatan": "Staff of External Relations & Advocacy"
+    "jabatan": "Staff of External Relations & Advocacy",
+    "buka_pesan_pada": null
   }
 ];
