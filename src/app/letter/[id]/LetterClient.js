@@ -187,10 +187,12 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     e.preventDefault();
     if (!isiBalasan.trim()) return;
 
-    if (currentUserIsEBSecretaryOrTreasurer && tujuan === 'koor') {
-      alert("Sekretaris dan Bendahara Executive Board hanya dapat mengirim umpan balik ke Chairman dan Vice Chairman.");
+    // Block EB members from sending to koor (they have no department koor)
+    if (currentUser?.departemen === 'Executive Board' && tujuan === 'koor') {
+      alert("Anggota Executive Board hanya dapat mengirim umpan balik ke Chairman dan Vice Chairman.");
       return;
     }
+
 
     setFeedbackLoading(true);
     try {
@@ -448,10 +450,11 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   // Determine which tabs to show based on member role
   const isFatir = member.nama === 'Fatir Gibran' || member.jabatan === 'Chairman';
   const isAedil = member.nama === 'Aedil Riski Ansyah' || member.jabatan === 'Vice Chairman';
-  const isEBSecretaryOrTreasurer = member.departemen === 'Executive Board' && (member.jabatan?.includes('Secretary') || member.jabatan?.includes('Treasure'));
+  // All EB members (except Chairman/Vice Chairman) don't get a Koor tab — EB has no traditional department coordinator
+  const isMemberInEB = member.departemen === 'Executive Board';
   const showFatirTab = !isFatir; // Fatir doesn't see their own tab
   const showAedilTab = !isAedil; // Aedil doesn't see their own tab
-  const showKoorTab = !isFatir && !isAedil && !isEBSecretaryOrTreasurer && member.role !== 'koor'; // EB members and coordinators don't see Koor tab
+  const showKoorTab = !isFatir && !isAedil && !isMemberInEB && member.role !== 'koor'; // EB members and coordinators don't see Koor tab
 
   // Check if member is Chairman or Vice Chairman (hide feedback for them)
   const isMemberEB = isFatir || isAedil;
@@ -464,13 +467,12 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     currentUser.jabatan === 'Vice Chairman'
   );
 
-  // Check if current user is EB Secretary or Treasurer
-  const currentUserIsEBSecretaryOrTreasurer = currentUser && 
-    currentUser.departemen === 'Executive Board' && 
-    (currentUser.jabatan?.includes('Secretary') || currentUser.jabatan?.includes('Treasure'));
+  // All EB members can only send feedback to Chairman/Vice Chairman (no koor in EB)
+  const isCurrentUserInEB = !!(currentUser && currentUser.departemen === 'Executive Board');
 
   // Whether the current user is allowed to send feedback to their Koor
-  const canSendToKoor = !!(currentUser && currentUser.role !== 'koor' && !currentUserIsEBSecretaryOrTreasurer);
+  // Hidden for: coordinators themselves, and ALL Executive Board members
+  const canSendToKoor = !!(currentUser && currentUser.role !== 'koor' && !isCurrentUserInEB);
 
   // Frame background class resolver for the theme variants
   // Get CSS filter style string based on current selection
