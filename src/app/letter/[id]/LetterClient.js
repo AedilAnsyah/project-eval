@@ -93,6 +93,7 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   const [cameraFlash, setCameraFlash] = useState(false); // for capture visual effect
   const [cameraStream, setCameraStream] = useState(null);
   const [countdown, setCountdown] = useState(null);
+  const [capturedPreview, setCapturedPreview] = useState(null);
 
   const videoElRef = useRef(null);
   const streamRef = useRef(null);
@@ -290,12 +291,19 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     setCameraStream(null);
   };
 
+  const cancelCameraModal = () => {
+    stopCamera();
+    setCapturedPreview(null);
+    setCameraModalOpen(false);
+  };
+
   const switchCamera = async (deviceId) => {
     setActiveDeviceId(deviceId);
     await startCamera(deviceId);
   };
 
   const openCameraForSlot = (slotIdx) => {
+    setCapturedPreview(null);
     setActiveCameraSlot(slotIdx);
     setCameraModalOpen(true);
     setTimeout(() => {
@@ -324,16 +332,35 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     ctx.drawImage(video, sx, sy, minSize, minSize, 0, 0, 600, 600);
     const base64Image = canvas.toDataURL("image/webp", 0.85);
 
-    if (slotIdx === 1) {
-      setCustomSlot1Photo(base64Image);
-    } else if (slotIdx === 2) {
-      setCustomSlot2Photo(base64Image);
-    } else if (slotIdx === 3) {
-      setCustomSlot3Photo(base64Image);
+    // Save to captured preview instead of closing modal directly
+    setCapturedPreview(base64Image);
+
+    // Turn off camera light immediately
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setCameraStream(null);
+  };
+
+  const saveCapturedPhoto = () => {
+    if (!capturedPreview) return;
+
+    if (activeCameraSlot === 1) {
+      setCustomSlot1Photo(capturedPreview);
+    } else if (activeCameraSlot === 2) {
+      setCustomSlot2Photo(capturedPreview);
+    } else if (activeCameraSlot === 3) {
+      setCustomSlot3Photo(capturedPreview);
     }
 
-    stopCamera();
+    setCapturedPreview(null);
     setCameraModalOpen(false);
+  };
+
+  const retakePhoto = () => {
+    setCapturedPreview(null);
+    startCamera(activeDeviceId);
   };
 
   const startCaptureCountdown = () => {
@@ -2586,6 +2613,15 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
       {cameraModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 overlay-polka-dot">
           <div className="bg-[#FFFDF0] border-4 border-black p-6 rounded-2xl max-w-md w-full relative shadow-neo-xl">
+            {/* Close Button X */}
+            <button
+              type="button"
+              onClick={cancelCameraModal}
+              className="absolute top-4 right-4 text-gray-500 hover:text-black font-black text-sm w-6 h-6 border-2 border-black rounded-md flex items-center justify-center bg-white cursor-pointer hover:bg-gray-100 shadow-neo-sm active:translate-y-0.5 active:shadow-none"
+            >
+              ✕
+            </button>
+
             {/* Visual Flash Overlay */}
             {cameraFlash && (
               <div 
@@ -2633,19 +2669,28 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
                   </div>
                 )}
 
-                <video 
-                  ref={setVideoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full h-full object-cover transform scale-x-[-1]"
-                />
+                {capturedPreview ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img 
+                    src={capturedPreview}
+                    alt="captured preview"
+                    className="w-full h-full object-cover transform scale-x-[-1]"
+                  />
+                ) : (
+                  <video 
+                    ref={setVideoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover transform scale-x-[-1]"
+                  />
+                )}
                 <div className="absolute inset-4 border-2 border-dashed border-white/30 pointer-events-none rounded-md"></div>
               </div>
             </div>
 
             {/* Camera Select Device Option */}
-            {cameraDevices.length > 1 && (
+            {!capturedPreview && cameraDevices.length > 1 && (
               <div className="mb-4">
                 <label className="block font-lexend font-bold text-[9px] uppercase text-gray-500 mb-1">Pilih Kamera</label>
                 <select
@@ -2664,25 +2709,43 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
 
             {/* Action Control Buttons */}
             <div className="flex gap-2 pt-2 border-t-2 border-black/10">
-              <button
-                type="button"
-                onClick={() => {
-                  stopCamera();
-                  setCameraModalOpen(false);
-                }}
-                className="flex-1 bg-white hover:bg-gray-100 text-black font-lexend font-black py-2 border-3 border-black rounded-lg shadow-neo-sm text-xs cursor-pointer active:translate-y-0.5 active:shadow-none transition-all"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={startCaptureCountdown}
-                disabled={isCameraLoading || countdown !== null}
-                className="flex-1 bg-[#06D6A0] hover:bg-[#05ba8c] text-black font-lexend font-black py-2 border-3 border-black rounded-lg shadow-neo-sm text-xs cursor-pointer active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
-              >
-                <Camera className="w-4 h-4" />
-                {countdown !== null ? `Mulai (${countdown}s)` : "Ambil Foto"}
-              </button>
+              {capturedPreview ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={retakePhoto}
+                    className="flex-1 bg-white hover:bg-gray-100 text-black font-lexend font-black py-2 border-3 border-black rounded-lg shadow-neo-sm text-xs cursor-pointer active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-1.5"
+                  >
+                    🔄 Ambil Ulang
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveCapturedPhoto}
+                    className="flex-1 bg-[#06D6A0] hover:bg-[#05ba8c] text-black font-lexend font-black py-2 border-3 border-black rounded-lg shadow-neo-sm text-xs cursor-pointer active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-1.5"
+                  >
+                    💾 Simpan Foto
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={cancelCameraModal}
+                    className="flex-1 bg-white hover:bg-gray-100 text-black font-lexend font-black py-2 border-3 border-black rounded-lg shadow-neo-sm text-xs cursor-pointer active:translate-y-0.5 active:shadow-none transition-all"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={startCaptureCountdown}
+                    disabled={isCameraLoading || countdown !== null}
+                    className="flex-1 bg-[#06D6A0] hover:bg-[#05ba8c] text-black font-lexend font-black py-2 border-3 border-black rounded-lg shadow-neo-sm text-xs cursor-pointer active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  >
+                    <Camera className="w-4 h-4" />
+                    {countdown !== null ? `Mulai (${countdown}s)` : "Ambil Foto"}
+                  </button>
+                </>
+              )}
             </div>
 
           </div>
