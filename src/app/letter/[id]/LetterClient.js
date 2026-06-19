@@ -469,6 +469,9 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     currentUser.departemen === 'Executive Board' && 
     (currentUser.jabatan?.includes('Secretary') || currentUser.jabatan?.includes('Treasure'));
 
+  // Whether the current user is allowed to send feedback to their Koor
+  const canSendToKoor = !!(currentUser && currentUser.role !== 'koor' && !currentUserIsEBSecretaryOrTreasurer);
+
   // Frame background class resolver for the theme variants
   // Get CSS filter style string based on current selection
   const getFilterStyle = () => {
@@ -2039,8 +2042,9 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
               <h3 className="font-lilita uppercase text-2xl text-white tracking-tight mb-2 drop-shadow-[2px_2px_0px_#000] text-center">
                 Tinggalkan Umpan Balik (Feedback Loop)
               </h3>
+
               <p className="text-xs font-lexend text-white/90 font-bold mb-6 text-center max-w-lg mx-auto">
-                Kirim tanggapan balik atau pesan balasan Anda secara langsung kepada Chairman & Vice Chairman atau Koordinator Departemen Anda.
+                Kirim tanggapan balik atau pesan balasan Anda secara langsung kepada Chairman &amp; Vice Chairman atau Koordinator Departemen Anda.
               </p>
 
               <form onSubmit={handleFeedbackSubmit} className="space-y-4">
@@ -2048,7 +2052,7 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
                 {/* 1. Destination Radio Buttons */}
                 <div>
                   <label className="block font-lilita text-xs uppercase text-white mb-2 tracking-wide">Penerima Pesan</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className={`grid grid-cols-1 gap-2 ${canSendToKoor ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
                     <label className={`p-3 border-2.5 border-black rounded-lg font-lexend font-black text-xs uppercase flex items-center gap-2 cursor-pointer transition-all
                       ${tujuan === 'chairman' ? 'bg-[#FFFDF0] text-black shadow-neo-sm' : 'bg-[#FF006E] text-white border-white/40 hover:bg-[#e60063]'}
                     `}>
@@ -2077,8 +2081,8 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
                       <span>Aedil Riski (Vice Chairman)</span>
                     </label>
 
-                    {/* Show department Koor option only if they belong to a department and are not a coordinator themselves or EB Secretary/Treasurer */}
-                    {!(currentUser?.role === 'koor') && !currentUserIsEBSecretaryOrTreasurer && (
+                    {/* Show Koor option only if user is NOT a coordinator themselves and NOT an EB Secretary/Treasurer */}
+                    {canSendToKoor && (
                     <label className={`p-3 border-2.5 border-black rounded-lg font-lexend font-black text-xs uppercase flex items-center gap-2 cursor-pointer transition-all
                       ${tujuan === 'koor' ? 'bg-[#FFFDF0] text-black shadow-neo-sm' : 'bg-[#FF006E] text-white border-white/40 hover:bg-[#e60063]'}
                     `}>
