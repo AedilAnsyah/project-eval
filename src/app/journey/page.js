@@ -528,8 +528,8 @@ export default function JourneyPage() {
               <path 
                 d="M 50 0 C 65 30, 35 70, 50 100" 
                 stroke="#1A1D20" 
-                strokeWidth="3.5" 
-                strokeDasharray="6 6"
+                strokeWidth="3" 
+                strokeDasharray="4 4"
                 vectorEffect="non-scaling-stroke"
               />
             </svg>
@@ -537,14 +537,14 @@ export default function JourneyPage() {
         </div>
 
         {/* Milestones mapped */}
-        <div className="space-y-20 relative z-10">
+        <div className="flex flex-col gap-20 relative z-10">
           {timelineNodes.map((node, index) => {
             if (node.type === "month") {
               const monthColor = getMonthColor(node.month);
               return (
                 <div 
                   key={node.id}
-                  className="relative h-20 flex justify-center items-center z-10 my-4"
+                  className="relative h-20 flex justify-start md:justify-center items-center z-10 py-4 ml-12 md:ml-0"
                 >
                   {/* Line from Month Header to next node */}
                   {index < timelineNodes.length - 1 && (
@@ -556,8 +556,8 @@ export default function JourneyPage() {
                         <path 
                           d="M 50 0 C 45 30, 55 70, 50 100" 
                           stroke="#1A1D20" 
-                          strokeWidth="3.5" 
-                          strokeDasharray="6 6"
+                          strokeWidth="3" 
+                          strokeDasharray="4 4"
                           vectorEffect="non-scaling-stroke"
                         />
                       </svg>
@@ -600,8 +600,8 @@ export default function JourneyPage() {
                         <path 
                           d="M 50 0 C 55 30, 45 70, 50 100" 
                           stroke="#1A1D20" 
-                          strokeWidth="3.5" 
-                          strokeDasharray="6 6"
+                          strokeWidth="3" 
+                          strokeDasharray="4 4"
                           vectorEffect="non-scaling-stroke"
                         />
                       </svg>
@@ -616,8 +616,8 @@ export default function JourneyPage() {
                         <path 
                           d={getTimelinePathD(node.eventIndex)} 
                           stroke="#1A1D20" 
-                          strokeWidth="3.5" 
-                          strokeDasharray="6 6"
+                          strokeWidth="3" 
+                          strokeDasharray="4 4"
                           vectorEffect="non-scaling-stroke"
                         />
                       </svg>
@@ -626,15 +626,15 @@ export default function JourneyPage() {
                 ) : (
                   /* Line connecting last milestone to the Finish Pin */
                   <div 
-                    style={{ top: "44px", bottom: "-72px" }}
+                    style={{ top: "44px", bottom: "-98px" }}
                     className="absolute left-6 md:left-1/2 -translate-x-1/2 w-16 md:w-32 z-0 pointer-events-none"
                   >
                     <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
                       <path 
                         d="M 50 0 C 35 30, 65 70, 50 100" 
                         stroke="#1A1D20" 
-                        strokeWidth="3.5" 
-                        strokeDasharray="6 6"
+                        strokeWidth="3" 
+                        strokeDasharray="4 4"
                         vectorEffect="non-scaling-stroke"
                       />
                     </svg>
