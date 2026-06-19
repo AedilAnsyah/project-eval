@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -91,9 +91,17 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   const [activeDeviceId, setActiveDeviceId] = useState("");
   const [isCameraLoading, setIsCameraLoading] = useState(false);
   const [cameraFlash, setCameraFlash] = useState(false); // for capture visual effect
+  const [cameraStream, setCameraStream] = useState(null);
 
-  const videoRef = useRef(null);
+  const videoElRef = useRef(null);
   const streamRef = useRef(null);
+
+  const setVideoRef = useCallback((node) => {
+    videoElRef.current = node;
+    if (node) {
+      node.srcObject = cameraStream;
+    }
+  }, [cameraStream]);
 
   // Letter Souvenir Print State
   const letterPrintRef = useRef(null);
@@ -234,16 +242,15 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
 
     try {
       const constraints = {
-        video: deviceId ? { deviceId: { exact: deviceId }, width: 600, height: 600 } : { facingMode: "user", width: 600, height: 600 },
+        video: deviceId 
+          ? { deviceId: { exact: deviceId }, width: { ideal: 640 }, height: { ideal: 640 } } 
+          : { facingMode: "user", width: { ideal: 640 }, height: { ideal: 640 } },
         audio: false
       };
       
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
+      setCameraStream(stream);
 
       // Enumerate available video inputs for switching cameras
       const devices = await navigator.mediaDevices.enumerateDevices();
@@ -273,9 +280,7 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
+    setCameraStream(null);
   };
 
   const switchCamera = async (deviceId) => {
@@ -288,11 +293,12 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     setCameraModalOpen(true);
     setTimeout(() => {
       startCamera();
-    }, 100);
+    }, 150);
   };
 
   const handleCapture = () => {
-    if (!videoRef.current) return;
+    const video = videoElRef.current;
+    if (!video) return;
     
     setCameraFlash(true);
     setTimeout(() => setCameraFlash(false), 200);
@@ -302,9 +308,8 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     canvas.height = 600;
     const ctx = canvas.getContext("2d");
     
-    const video = videoRef.current;
-    const vWidth = video.videoWidth;
-    const vHeight = video.videoHeight;
+    const vWidth = video.videoWidth || 640;
+    const vHeight = video.videoHeight || 480;
     const minSize = Math.min(vWidth, vHeight);
     const sx = (vWidth - minSize) / 2;
     const sy = (vHeight - minSize) / 2;
@@ -2572,20 +2577,19 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
             {/* Video Preview Viewport */}
             <div className="flex justify-center my-4 relative">
               <div className="w-[300px] h-[300px] border-4 border-black relative overflow-hidden bg-gray-900 shadow-inner rounded-lg flex items-center justify-center">
-                {isCameraLoading ? (
-                  <div className="text-center text-white space-y-2">
+                {isCameraLoading && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gray-900 text-center text-white space-y-2">
                     <div className="w-8 h-8 border-4 border-t-[#06D6A0] border-white rounded-full animate-spin mx-auto"></div>
                     <p className="text-[10px] font-lexend font-bold">Mengaktifkan Kamera...</p>
                   </div>
-                ) : (
-                  <video 
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    className="w-full h-full object-cover transform scale-x-[-1]"
-                  />
                 )}
+                <video 
+                  ref={setVideoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover transform scale-x-[-1]"
+                />
                 <div className="absolute inset-4 border-2 border-dashed border-white/30 pointer-events-none rounded-md"></div>
               </div>
             </div>
