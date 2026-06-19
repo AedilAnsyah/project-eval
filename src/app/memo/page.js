@@ -120,13 +120,13 @@ export default function MemoPage() {
       <div className="sticky top-0 z-40 bg-[#1A1D20]/95 backdrop-blur-sm text-white border-b-4 border-black px-4 py-3 flex justify-between items-center shadow-lg">
         <Link 
           href="/"
-          className="bg-white hover:bg-gray-100 text-black font-lexend font-black px-3.5 py-1.5 border-2.5 border-black rounded-lg shadow-neo-sm text-xs flex items-center gap-1.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer select-none"
+          className="bg-white hover:bg-gray-100 text-black font-lexend font-black px-2.5 py-1 sm:px-3.5 sm:py-1.5 border-2.5 border-black rounded-lg shadow-neo-sm text-[10px] sm:text-xs flex items-center gap-1 sm:gap-1.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer select-none"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          <ArrowLeft className="w-3.5 h-3.5 flex-shrink-0" />
           Kembali ke Mading
         </Link>
-        <div className="flex items-center gap-2 font-lilita uppercase tracking-wider text-xs sm:text-sm select-none pr-1">
-          <Sparkles className="w-4 h-4 text-[#FFBE0B] animate-spin-slow" />
+        <div className="flex items-center gap-1.5 font-lilita uppercase tracking-wider text-[10px] xs:text-xs sm:text-sm select-none pr-1 text-right justify-end leading-tight flex-1 max-w-[60%] sm:max-w-none">
+          <Sparkles className="w-3.5 h-3.5 text-[#FFBE0B] animate-spin-slow flex-shrink-0" />
           <span>Papan Aspirasi Pengurus HMIF</span>
         </div>
       </div>
