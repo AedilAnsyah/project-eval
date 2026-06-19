@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { getMembers, signIn, getStickyNotes, addStickyNote, deleteStickyNote } from "@/lib/db";
+import { getMembers, signIn } from "@/lib/db";
 import { getSession, clearSession, setSession } from "@/lib/session";
 
 // Department configuration for colors and branding
@@ -257,13 +257,6 @@ export default function Home() {
   
   // Pagination State for Polaroid Gallery
   const [visibleCount, setVisibleCount] = useState(16);
-  
-  // Sticky Notes States
-  const [stickyNotes, setStickyNotes] = useState([]);
-  const [newNoteText, setNewNoteText] = useState("");
-  const [newNoteColor, setNewNoteColor] = useState("bg-[#FFFFB5]"); // Y2K neon yellow default
-  const [noteLoading, setNoteLoading] = useState(false);
-  const [previewNote, setPreviewNote] = useState(null);
 
   // Login Modal State
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -305,13 +298,6 @@ export default function Home() {
         console.error("Failed to load members", err);
       }
       
-      try {
-        const notes = await getStickyNotes();
-        setStickyNotes(notes);
-      } catch (err) {
-        console.error("Failed to load sticky notes", err);
-      }
-      
       const session = getSession();
       setCurrentUser(session);
     }
@@ -322,37 +308,6 @@ export default function Home() {
   useEffect(() => {
     setVisibleCount(16);
   }, [selectedDept, searchQuery]);
-
-  // Sticky Notes Handlers
-  const handleAddNote = async (e) => {
-    e.preventDefault();
-    if (!newNoteText.trim() || noteLoading) return;
-
-    setNoteLoading(true);
-    try {
-      const newNote = await addStickyNote({
-        content: newNoteText,
-        color: newNoteColor,
-        sender_name: currentUser ? currentUser.nama : "Anonim"
-      });
-      setStickyNotes(prev => [...prev, newNote]);
-      setNewNoteText("");
-    } catch (err) {
-      alert("Gagal menambahkan memo: " + err.message);
-    } finally {
-      setNoteLoading(false);
-    }
-  };
-
-  const handleDeleteNote = async (id) => {
-    if (!confirm("Hapus memo aspirasi ini?")) return;
-    try {
-      await deleteStickyNote(id);
-      setStickyNotes(prev => prev.filter(n => n.id !== id));
-    } catch (err) {
-      alert("Gagal menghapus memo: " + err.message);
-    }
-  };
 
   // Stamp Badge Overlay Renderer
   const renderStamps = (stampsStr) => {
@@ -650,7 +605,7 @@ export default function Home() {
         </div>
 
         {/* Timeline Journey Banner */}
-        <div className="max-w-5xl mx-auto mb-10 bg-[#FF006E] border-4 border-black p-5 sm:p-6 rounded-xl shadow-neo-md text-white flex flex-col sm:flex-row items-center justify-between gap-4 rotate-[0.5deg]">
+        <div className="max-w-5xl mx-auto mb-6 bg-[#FF006E] border-4 border-black p-5 sm:p-6 rounded-xl shadow-neo-md text-white flex flex-col sm:flex-row items-center justify-between gap-4 rotate-[0.5deg]">
           <div className="text-center sm:text-left space-y-1.5 select-none">
             <h3 className="font-lilita text-xl sm:text-2xl uppercase tracking-wider leading-none flex items-center justify-center sm:justify-start gap-2">
               🚀 Setengah Perjalanan Astravia
@@ -664,6 +619,24 @@ export default function Home() {
             className="w-full sm:w-auto bg-[#FFBE0B] hover:bg-[#e6ab0a] text-black font-lexend font-black px-6 py-3 border-3 border-black rounded-lg shadow-neo-sm text-xs sm:text-sm whitespace-nowrap cursor-pointer active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2 text-center"
           >
             🗺️ Lihat Perjalanan Kita Sejauh Ini
+          </Link>
+        </div>
+
+        {/* Memo Board Banner */}
+        <div className="max-w-5xl mx-auto mb-10 bg-[#3A86FF] border-4 border-black p-5 sm:p-6 rounded-xl shadow-neo-md text-white flex flex-col sm:flex-row items-center justify-between gap-4 rotate-[-0.5deg]">
+          <div className="text-center sm:text-left space-y-1.5 select-none">
+            <h3 className="font-lilita text-xl sm:text-2xl uppercase tracking-wider leading-none flex items-center justify-center sm:justify-start gap-2">
+              📌 Papan Aspirasi Pengurus
+            </h3>
+            <p className="font-lexend text-[10px] sm:text-xs text-blue-100 font-semibold max-w-xl">
+              Tinggalkan catatan semangat, saran, kritik, candaan, atau kesan pesan Anda selama kepengurusan secara langsung di papan mading digital kami!
+            </p>
+          </div>
+          <Link 
+            href="/memo"
+            className="w-full sm:w-auto bg-[#FFBE0B] hover:bg-[#e6ab0a] text-black font-lexend font-black px-6 py-3 border-3 border-black rounded-lg shadow-neo-sm text-xs sm:text-sm whitespace-nowrap cursor-pointer active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2 text-center"
+          >
+            ✏️ Tulis & Tempel Memo Aspirasi
           </Link>
         </div>
 
@@ -731,141 +704,11 @@ export default function Home() {
               <Smile className="w-12 h-12 mx-auto text-gray-400 mb-3" />
               <h3 className="font-lexend font-extrabold text-xl text-black">Anggota tidak ditemukan</h3>
               <p className="font-lexend text-gray-500 text-sm mt-1">Coba gunakan kata kunci pencarian yang lain.</p>
+              {/* Spacing bottom */}
+              <div className="h-12" />
             </div>
           )}
         </main>
-
-        {/* Sticky Notes Wall / Papan Aspirasi */}
-        <section className="max-w-[95%] mx-auto mt-16 mb-8 px-4">
-          <div className="bg-[#FAF7F0] border-4 border-black p-6 rounded-2xl shadow-neo-lg relative overflow-hidden">
-            {/* Decorative corkboard tape */}
-            <div className="absolute top-0 left-0 right-0 h-4 bg-amber-800/20 border-b-2 border-black/10"></div>
-            
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pt-4 select-none">
-              <div>
-                <h2 className="font-lilita text-3xl text-black uppercase tracking-tight flex items-center gap-2">
-                  <Pin className="w-6 h-6 text-[#FF006E] rotate-[-25deg]" />
-                  Papan Aspirasi Pengurus HMIF
-                </h2>
-                <p className="font-lexend text-xs text-gray-500 font-bold mt-1">
-                  📌 Tinggalkan catatan semangat, candaan, atau kesan pesan Anda selama kepengurusan Kabinet Astravia!
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              {/* Sticky Note Form */}
-              <div className="lg:col-span-1 bg-white border-3 border-black p-4 rounded-xl shadow-neo-sm h-fit">
-                <h3 className="font-lilita text-sm text-black uppercase mb-3">Tulis Aspirasi Baru</h3>
-                <form onSubmit={handleAddNote} className="space-y-4">
-                  <div>
-                    <textarea
-                      rows={4}
-                      value={newNoteText}
-                      onChange={(e) => setNewNoteText(e.target.value)}
-                      placeholder="Tulis pesan penyemangat atau kesan di sini..."
-                      required
-                      maxLength={150}
-                      className="w-full p-2.5 border-2.5 border-black rounded-lg font-lexend text-xs text-black focus:outline-none focus:ring-3 focus:ring-[#FFBE0B]/30 bg-white placeholder-gray-400"
-                    />
-                    <div className="text-[10px] text-gray-400 font-lexend text-right mt-1">
-                      {newNoteText.length}/150 karakter
-                    </div>
-                  </div>
-
-                  {/* Color Selector */}
-                  <div>
-                    <label className="block font-lilita text-[10px] uppercase text-gray-500 mb-2">Pilih Warna Memo</label>
-                    <div className="flex gap-2">
-                      {[
-                        { class: "bg-[#FFFFB5]", label: "Kuning" },
-                        { class: "bg-[#FFD1DC]", label: "Pink" },
-                        { class: "bg-[#C1F0F6]", label: "Biru" },
-                        { class: "bg-[#D0F8B3]", label: "Hijau" }
-                      ].map((c) => (
-                        <button
-                          type="button"
-                          key={c.class}
-                          onClick={() => setNewNoteColor(c.class)}
-                          className={`w-7 h-7 rounded-full border-2 border-black cursor-pointer transition-transform ${c.class} ${
-                            newNoteColor === c.class ? "scale-110 ring-2 ring-black/40" : "hover:scale-105"
-                          }`}
-                          title={c.label}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={noteLoading}
-                    className="w-full bg-[#FFBE0B] hover:bg-[#e6ab0a] text-black font-lexend font-black py-2 border-2.5 border-black rounded-lg shadow-neo-sm text-xs flex items-center justify-center gap-1 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    {noteLoading ? "Menempel..." : "Tempel Memo"}
-                  </button>
-                </form>
-              </div>
-
-              {/* Corkboard Display Area */}
-              <div className="lg:col-span-4 min-h-[450px] border-3 border-dashed border-black/30 bg-[#FFFDF8] rounded-xl p-3 sm:p-4 relative flex flex-wrap gap-3 sm:gap-4 items-start content-start overflow-y-auto max-h-[650px]">
-                {stickyNotes.length > 0 ? (
-                  stickyNotes.map((note) => (
-                    <div
-                      key={note.id}
-                      onClick={(e) => {
-                        if (e.target.closest('.delete-btn')) return;
-                        setPreviewNote(note);
-                      }}
-                      className={`p-3 sm:p-4 border-2.5 border-black w-[calc(50%-6px)] sm:w-[180px] h-[160px] sm:h-[180px] flex flex-col justify-between shadow-neo-sm transition-all duration-200 hover:scale-105 hover:-translate-y-1 hover:shadow-neo-md cursor-pointer select-none relative ${note.color}`}
-                      style={{ transform: `rotate(${note.rotation || 0}deg)` }}
-                    >
-                      {/* Tiny visual pin at the top center */}
-                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-red-500 rounded-full border border-black/50 shadow-sm flex items-center justify-center font-bold text-[7px] text-white">
-                        📍
-                      </div>
-                      
-                      {/* Admin delete button */}
-                      {currentUser && currentUser.role === "admin" && (
-                        <button
-                          onClick={() => handleDeleteNote(note.id)}
-                          className="delete-btn absolute top-1.5 right-1.5 text-gray-500 hover:text-red-500 transition-colors cursor-pointer z-10"
-                          title="Hapus Memo (Admin Only)"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-
-                      <div className="font-handwriting font-bold text-[11px] sm:text-[13px] leading-snug text-gray-800 line-clamp-5 sm:line-clamp-6 pt-1">
-                        {note.content}
-                      </div>
-
-                      <div className="border-t border-black/10 pt-1 mt-1 sm:pt-1.5 sm:mt-1.5 flex flex-col justify-end text-left select-none">
-                        <span className="font-lexend font-black text-[8px] sm:text-[9px] text-gray-600 truncate uppercase leading-none">
-                          ~ {note.sender_name}
-                        </span>
-                        <span className="font-lexend text-[6px] sm:text-[7px] text-gray-400 leading-none mt-0.5 sm:mt-1">
-                          {new Date(note.created_at).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "short",
-                            hour: "2-digit",
-                            minute: "2-digit"
-                          })}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="w-full flex flex-col items-center justify-center py-16 text-center select-none">
-                    <span className="text-4xl mb-2">📌</span>
-                    <h4 className="font-lexend font-black text-sm text-gray-400">Papan Aspirasi Masih Kosong</h4>
-                    <p className="font-lexend text-[11px] text-gray-400 mt-0.5">Jadilah yang pertama menempelkan memo penyemangat!</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
 
       </div>
 
@@ -970,72 +813,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* MEMO PREVIEW MODAL */}
-      {previewNote && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 overlay-polka-dot transition-all duration-300"
-          onClick={() => setPreviewNote(null)}
-        >
-          <div 
-            className={`p-6 sm:p-8 border-4 border-black w-[92vw] sm:w-[350px] min-h-[320px] sm:min-h-[350px] flex flex-col justify-between shadow-neo-xl relative animate-in zoom-in duration-200 cursor-default ${previewNote.color}`}
-            onClick={(e) => e.stopPropagation()}
-            style={{ transform: 'rotate(0.5deg)' }}
-          >
-            {/* Y2K Header Tag */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-28 h-8 bg-amber-100/90 border-2 border-black rotate-[-2deg] shadow-sm flex items-center justify-center font-handwriting text-xs font-bold text-amber-900 select-none uppercase">
-              📌 Aspirasi
-            </div>
-
-            {/* Y2K styled cross button */}
-            <button
-              onClick={() => setPreviewNote(null)}
-              className="absolute -top-3.5 -right-3.5 w-8 h-8 rounded-full bg-red-500 text-white font-lilita border-3 border-black shadow-[2px_2px_0px_#000] hover:bg-red-600 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer text-sm"
-              title="Tutup"
-            >
-              ✕
-            </button>
-
-            {/* Memo Content */}
-            <div className="font-handwriting font-bold text-lg leading-relaxed text-gray-800 pt-3 select-text overflow-y-auto max-h-[220px] pr-1 scrollbar-thin">
-              {previewNote.content}
-            </div>
-
-            {/* Footer */}
-            <div className="border-t-2 border-black/10 pt-4 mt-4 flex justify-between items-end select-none">
-              <div className="flex flex-col text-left">
-                <span className="text-[10px] font-lexend font-black uppercase text-gray-500 leading-none">Dikirim Oleh</span>
-                <span className="font-lexend font-black text-sm text-black mt-1 uppercase">
-                  {previewNote.sender_name}
-                </span>
-                <span className="font-lexend text-[9px] text-gray-400 leading-none mt-1">
-                  {new Date(previewNote.created_at).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit"
-                  })}
-                </span>
-              </div>
-
-              {/* Admin delete from modal */}
-              {currentUser && currentUser.role === "admin" && (
-                <button
-                  onClick={() => {
-                    handleDeleteNote(previewNote.id);
-                    setPreviewNote(null);
-                  }}
-                  className="px-3 py-1.5 rounded bg-red-100 hover:bg-red-200 border-2 border-red-600 text-red-700 font-lexend font-black text-[10px] uppercase cursor-pointer flex items-center gap-1 transition-all"
-                  title="Hapus Memo Selamanya (Admin)"
-                >
-                  <Trash2 className="w-3 h-3" />
-                  Hapus
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Memo Modal Removed */}
 
 
     </div>

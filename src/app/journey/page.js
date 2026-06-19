@@ -655,7 +655,7 @@ export default function JourneyPage() {
                   whileInView={{ opacity: 1, x: 0, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.5, type: "spring", stiffness: 80 }}
-                  className={`w-[calc(100%-48px)] ml-12 md:ml-0 md:w-[45%] bg-white border-3 border-black p-4 sm:p-5 rounded-2xl shadow-neo-md relative z-10 group hover:scale-[1.02] hover:shadow-neo-lg transition-all ${node.tilt}`}
+                  className={`w-[calc(100%-56px)] ml-12 mr-2 md:w-[45%] md:ml-0 md:mr-0 bg-white border-3 border-black p-4 sm:p-5 rounded-2xl shadow-neo-md relative z-10 group hover:scale-[1.02] hover:shadow-neo-lg transition-all ${node.tilt}`}
                 >
                   
                   {/* Decorative tape sticker on top of polaroid */}
