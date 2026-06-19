@@ -187,6 +187,11 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     e.preventDefault();
     if (!isiBalasan.trim()) return;
 
+    if (currentUserIsEBSecretaryOrTreasurer && tujuan === 'koor') {
+      alert("Sekretaris dan Bendahara Executive Board hanya dapat mengirim umpan balik ke Chairman dan Vice Chairman.");
+      return;
+    }
+
     setFeedbackLoading(true);
     try {
       await addFeedback({
@@ -458,6 +463,11 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     currentUser.jabatan === 'Chairman' || 
     currentUser.jabatan === 'Vice Chairman'
   );
+
+  // Check if current user is EB Secretary or Treasurer
+  const currentUserIsEBSecretaryOrTreasurer = currentUser && 
+    currentUser.departemen === 'Executive Board' && 
+    (currentUser.jabatan?.includes('Secretary') || currentUser.jabatan?.includes('Treasure'));
 
   // Frame background class resolver for the theme variants
   // Get CSS filter style string based on current selection
@@ -2067,8 +2077,8 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
                       <span>Aedil Riski (Vice Chairman)</span>
                     </label>
 
-                    {/* Show department Koor option only if they belong to a department and are not a coordinator themselves */}
-                    {!(currentUser?.role === 'koor') && (
+                    {/* Show department Koor option only if they belong to a department and are not a coordinator themselves or EB Secretary/Treasurer */}
+                    {!(currentUser?.role === 'koor') && !currentUserIsEBSecretaryOrTreasurer && (
                     <label className={`p-3 border-2.5 border-black rounded-lg font-lexend font-black text-xs uppercase flex items-center gap-2 cursor-pointer transition-all
                       ${tujuan === 'koor' ? 'bg-[#FFFDF0] text-black shadow-neo-sm' : 'bg-[#FF006E] text-white border-white/40 hover:bg-[#e60063]'}
                     `}>
