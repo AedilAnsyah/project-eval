@@ -314,15 +314,76 @@ export default function JourneyPage() {
     <div className="min-h-screen y2k-mesh-bg relative overflow-hidden pb-32 text-[#1A1D20] font-sans">
       
       {/* Absolute Decorative Grid Elements for Y2K Scrapbook Feeling */}
-      <div className="absolute top-20 left-10 w-16 h-16 border-2 border-black/5 rounded-full rotate-[12deg] flex items-center justify-center text-4xl select-none opacity-20 pointer-events-none">
+      <motion.div 
+        animate={{ y: [0, -12, 0], rotate: [0, 5, 0] }}
+        transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+        className="absolute top-24 left-[5%] w-16 h-16 bg-[#FFBE0B] border-3 border-black rounded-full shadow-neo-sm rotate-[12deg] flex items-center justify-center text-2xl select-none z-0 pointer-events-none"
+      >
         ⭐
-      </div>
-      <div className="absolute top-96 right-8 w-20 h-20 border-2 border-black/5 rounded-lg rotate-[-15deg] flex items-center justify-center text-5xl select-none opacity-25 pointer-events-none">
+      </motion.div>
+      <motion.div 
+        animate={{ rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
+        className="absolute top-[12%] right-[8%] w-16 h-16 bg-[#FAF7F0] border-3 border-black rounded-full shadow-neo-sm flex items-center justify-center text-3xl select-none z-0 pointer-events-none"
+      >
+        💿
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, 10, 0] }}
+        transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+        className="absolute top-[22%] left-[8%] w-14 h-14 bg-[#3A86FF] border-3 border-black rounded shadow-neo-sm rotate-[-8deg] flex items-center justify-center text-2xl select-none z-0 pointer-events-none"
+      >
+        📁
+      </motion.div>
+      <motion.div 
+        animate={{ scale: [1, 1.1, 1] }}
+        transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+        className="absolute top-[32%] right-[6%] text-4xl select-none z-0 pointer-events-none"
+      >
+        ✨
+      </motion.div>
+      <motion.div 
+        animate={{ rotate: [-10, 10, -10] }}
+        transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+        className="absolute top-[42%] left-[4%] w-14 h-14 bg-[#06D6A0] border-3 border-black rounded shadow-neo-sm flex items-center justify-center text-2xl select-none z-0 pointer-events-none"
+      >
+        💾
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, -15, 0] }}
+        transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+        className="absolute top-[52%] right-[7%] w-14 h-14 bg-[#FF006E] border-3 border-black rounded-full shadow-neo-sm rotate-[15deg] flex items-center justify-center text-2xl select-none z-0 pointer-events-none"
+      >
+        ⚡
+      </motion.div>
+      <motion.div 
+        animate={{ rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
+        className="absolute top-[62%] left-[6%] w-16 h-16 bg-[#FAF7F0] border-3 border-black rounded-full shadow-neo-sm flex items-center justify-center text-3xl select-none z-0 pointer-events-none"
+      >
+        🪐
+      </motion.div>
+      <motion.div 
+        animate={{ scale: [1, 0.9, 1], rotate: [0, -12, 0] }}
+        transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
+        className="absolute top-[72%] right-[5%] w-14 h-14 bg-[#FFBE0B] border-3 border-black rounded shadow-neo-sm flex items-center justify-center text-2xl select-none z-0 pointer-events-none"
+      >
+        📌
+      </motion.div>
+      <motion.div 
+        animate={{ y: [0, 8, 0] }}
+        transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+        className="absolute top-[82%] left-[5%] w-16 h-16 bg-[#3A86FF] border-3 border-black rounded-full shadow-neo-sm rotate-[-12deg] flex items-center justify-center text-3xl select-none z-0 pointer-events-none"
+      >
         🎨
-      </div>
-      <div className="absolute bottom-40 left-16 w-24 h-24 border-2 border-black/5 rounded-full rotate-[20deg] flex items-center justify-center text-6xl select-none opacity-20 pointer-events-none">
+      </motion.div>
+      <motion.div 
+        animate={{ x: [0, 10, 0], y: [0, -10, 0] }}
+        transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+        className="absolute top-[92%] right-[8%] w-16 h-16 bg-[#06D6A0] border-3 border-black rounded-full shadow-neo-sm rotate-[45deg] flex items-center justify-center text-3xl select-none z-0 pointer-events-none"
+      >
         🚀
-      </div>
+      </motion.div>
 
       {/* WIN95 STYLE BACK BUTTON BAR */}
       <div className="sticky top-0 z-40 bg-[#1A1D20]/95 backdrop-blur-sm text-white border-b-4 border-black px-4 py-3 flex justify-between items-center shadow-lg">
@@ -342,7 +403,7 @@ export default function JourneyPage() {
       <div className="max-w-4xl mx-auto px-4 py-16 relative">
         
         {/* Timeline Header Intro */}
-        <header className="text-center mb-20 relative select-none">
+        <header className="text-center mb-20 relative z-10 select-none">
           <span className="font-lilita text-xs bg-[#06D6A0] text-black px-3 py-1 border-3 border-black rounded uppercase shadow-neo-sm rotate-[-1.5deg] inline-block mb-3">
             Kabinet Astravia 2026
           </span>
@@ -355,8 +416,21 @@ export default function JourneyPage() {
           </p>
         </header>
 
-        {/* Vertical Path road line (dashed roadmap style with footprints background) */}
-        <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-48 bottom-48 w-2 bg-transparent border-l-4 border-dashed border-black/35 z-0"></div>
+        {/* Vertical Path road line (animated flowing roadmap line) */}
+        <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-[350px] bottom-[320px] w-2 z-0 pointer-events-none">
+          <svg className="w-full h-full overflow-visible" fill="none">
+            <line 
+              x1="4" 
+              y1="0" 
+              x2="4" 
+              y2="100%" 
+              stroke="black" 
+              strokeWidth="4" 
+              strokeOpacity="0.3"
+              className="animate-dash-flow" 
+            />
+          </svg>
+        </div>
 
         {/* Milestones mapped */}
         <div className="space-y-20 relative z-10">
@@ -387,20 +461,20 @@ export default function JourneyPage() {
                 >
                   
                   {/* Decorative tape sticker on top of polaroid */}
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-24 h-7 bg-[#FFFDF0]/90 border-2 border-black/30 rotate-[-2deg] shadow-sm flex items-center justify-center font-handwriting text-[9px] font-bold text-amber-900 pointer-events-none uppercase tracking-widest select-none z-10">
-                    ★ KABINET AST R AVIA ★
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-40 h-7 bg-[#FFFDF0]/90 border-2 border-black/30 rotate-[-2deg] shadow-sm flex items-center justify-center font-handwriting text-[9px] font-bold text-amber-900 pointer-events-none uppercase tracking-widest select-none z-10 whitespace-nowrap">
+                    ★ KABINET ASTRAVIA ★
                   </div>
 
                   {/* Event Photo with Polaroid styling */}
                   <div className="bg-[#FAF7F0] border-2.5 border-black p-2.5 rounded shadow-inner mb-4 relative overflow-hidden bg-dot-pattern">
                     {event.img ? (
-                      <div className="relative overflow-hidden border border-black/10 rounded bg-white aspect-[4/3] flex items-center justify-center">
+                      <div className="border border-black/10 rounded bg-white p-1.5 flex items-center justify-center overflow-hidden">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img 
                           src={event.img} 
                           alt={event.title}
                           loading="lazy"
-                          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-[1.03]"
+                          className="w-full h-auto max-h-[380px] object-contain transition-all duration-500 group-hover:scale-[1.02] rounded-sm select-none"
                         />
                       </div>
                     ) : (

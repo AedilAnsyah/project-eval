@@ -170,3 +170,15 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Animated dashed line for timeline */
+@keyframes dashflow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+.animate-dash-flow {
+  stroke-dasharray: 10 10;
+  animation: dashflow 0.8s linear infinite;
+}
+
