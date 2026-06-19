@@ -119,15 +119,6 @@ export default function DashboardPage() {
 
   // Open Edit Modal for a Member
   const handleOpenEdit = (member) => {
-    // Access guard: Fatir (Chairman) cannot edit Aedil (Vice Chairman)
-    const isFatir = currentUser?.nama === 'Fatir Gibran' || currentUser?.jabatan === 'Chairman' || currentUser?.nim === '103112430153';
-    const isTargetAedil = member?.nama === 'Aedil Riski Ansyah' || member?.jabatan === 'Vice Chairman' || member?.nim === '103112400101';
-    
-    if (isFatir && isTargetAedil) {
-      alert("Akses ditolak: Chairman tidak diperbolehkan mengedit data Vice Chairman.");
-      return;
-    }
-
     // Access guard: Koor cannot edit themselves
     if (currentUser?.role === "koor" && member?.id === currentUser?.id) {
       alert("Akses ditolak: Koordinator tidak diperbolehkan mengedit data diri sendiri.");
@@ -251,13 +242,8 @@ export default function DashboardPage() {
     setIsUpdating(true);
 
     try {
-      // Access guard: Fatir (Chairman) cannot edit Aedil (Vice Chairman)
       const isFatir = currentUser?.nama === 'Fatir Gibran' || currentUser?.jabatan === 'Chairman' || currentUser?.nim === '103112430153';
       const isTargetAedil = editingMember?.nama === 'Aedil Riski Ansyah' || editingMember?.jabatan === 'Vice Chairman' || editingMember?.nim === '103112400101';
-      
-      if (isFatir && isTargetAedil) {
-        throw new Error("Chairman tidak memiliki akses untuk mengedit data Vice Chairman.");
-      }
 
       // Access guard: Koor cannot edit themselves
       if (currentUser?.role === "koor" && editingMember?.id === currentUser?.id) {
@@ -266,7 +252,10 @@ export default function DashboardPage() {
 
       const updatedFields = {};
 
-      if (currentUser.role === "admin") {
+      if (isFatir && isTargetAedil) {
+        // Fatir can ONLY edit pesan_fatir for Aedil
+        updatedFields.pesan_fatir = editPesanFatir;
+      } else if (currentUser.role === "admin") {
         // Admin can edit everything
         updatedFields.nim = editNim;
         updatedFields.tanggal_lahir = editDob;
@@ -453,6 +442,10 @@ export default function DashboardPage() {
   };
 
   const visibleMembers = getVisibleMembers();
+
+  const isFatir = currentUser?.nama === 'Fatir Gibran' || currentUser?.jabatan === 'Chairman' || currentUser?.nim === '103112430153';
+  const isTargetAedil = editingMember?.nama === 'Aedil Riski Ansyah' || editingMember?.jabatan === 'Vice Chairman' || editingMember?.nim === '103112400101';
+  const isFatirEditingAedil = isFatir && isTargetAedil;
 
   return (
     <div className="min-h-screen y2k-mesh-bg pb-20">
@@ -757,10 +750,8 @@ export default function DashboardPage() {
                         </td>
                       )}
                       <td className="p-3 text-center border-l-2 border-black/5">
-                        {/* Access check: Fatir (Chairman) cannot edit Aedil (Vice Chairman) OR Koor cannot edit themselves */}
-                        {(((currentUser?.nama === 'Fatir Gibran' || currentUser?.jabatan === 'Chairman' || currentUser?.nim === '103112430153') && 
-                          (m.nama === 'Aedil Riski Ansyah' || m.jabatan === 'Vice Chairman' || m.nim === '103112400101')) ||
-                          (currentUser?.role === "koor" && m.id === currentUser?.id)) ? (
+                        {/* Access check: Koor cannot edit themselves */}
+                        {(currentUser?.role === "koor" && m.id === currentUser?.id) ? (
                           <div className="flex items-center gap-1 mx-auto justify-center text-gray-400 font-bold bg-gray-100 border-2 border-dashed border-gray-300 px-3 py-1.5 rounded-md w-max select-none">
                             <Lock className="w-3.5 h-3.5" />
                             <span>Terkunci</span>
@@ -814,7 +805,27 @@ export default function DashboardPage() {
             </div>
 
             <form onSubmit={handleEditSubmit} className="space-y-4">
-              {currentUser.role === "admin" ? (
+              {isFatirEditingAedil ? (
+                // Restricted Admin Interface for Fatir editing Aedil (Only Pesan Fatir)
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border-2 border-blue-400 p-3 rounded-lg text-xs text-blue-700 font-semibold leading-relaxed">
+                    💡 Sebagai Chairman, Anda hanya diperbolehkan mengedit <strong>Pesan Evaluasi Fatir</strong> untuk Vice Chairman. Anda tidak dapat mengubah kredensial, foto profil, atau stempel apresiasi.
+                  </div>
+                  <div>
+                    <label className="block font-lexend font-bold text-xs uppercase text-amber-700 mb-1 flex items-center gap-1">
+                      <Shield className="w-3.5 h-3.5 fill-amber-300" />
+                      Pesan Evaluasi Fatir (Chairman)
+                    </label>
+                    <textarea 
+                      rows={5}
+                      value={editPesanFatir}
+                      onChange={(e) => setEditPesanFatir(e.target.value)}
+                      placeholder="Tulis pesan evaluasi dari Fatir..."
+                      className="w-full p-3 border-2.5 border-black rounded-lg font-lexend text-xs text-black bg-white"
+                    />
+                  </div>
+                </div>
+              ) : currentUser.role === "admin" ? (
                 // ADMIN INTERFACE (Can edit credentials, departments, roles, messages)
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1060,7 +1071,8 @@ export default function DashboardPage() {
               )}
 
               {/* Apresiasi Stempel / Achievement Stamps (Shared) */}
-              <div className="border-t-2 border-black/5 pt-4">
+              {!isFatirEditingAedil && (
+                <div className="border-t-2 border-black/5 pt-4">
                 <label className="block font-lexend font-black text-xs uppercase text-[#FF006E] mb-2">
                   🏆 Apresiasi Stempel (Achievement Stamps)
                 </label>
@@ -1183,6 +1195,7 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex gap-2 pt-4 border-t-2 border-black/10">
