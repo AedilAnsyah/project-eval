@@ -477,8 +477,9 @@ export default function JourneyPage() {
               <path 
                 d="M 50 0 C 65 30, 35 70, 50 100" 
                 stroke="#1A1D20" 
-                strokeWidth="4" 
-                className="animate-dash-flow" 
+                strokeWidth="3.5" 
+                strokeDasharray="6 6"
+                vectorEffect="non-scaling-stroke"
               />
             </svg>
           </div>
@@ -502,8 +503,9 @@ export default function JourneyPage() {
                       <path 
                         d={getTimelinePathD(index)} 
                         stroke="#1A1D20" 
-                        strokeWidth="4" 
-                        className="animate-dash-flow" 
+                        strokeWidth="3.5" 
+                        strokeDasharray="6 6"
+                        vectorEffect="non-scaling-stroke"
                       />
                     </svg>
                   </div>
@@ -514,8 +516,9 @@ export default function JourneyPage() {
                       <path 
                         d="M 50 0 C 35 30, 65 70, 50 100" 
                         stroke="#1A1D20" 
-                        strokeWidth="4" 
-                        className="animate-dash-flow" 
+                        strokeWidth="3.5" 
+                        strokeDasharray="6 6"
+                        vectorEffect="non-scaling-stroke"
                       />
                     </svg>
                   </div>
