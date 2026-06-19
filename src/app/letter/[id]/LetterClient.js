@@ -92,9 +92,11 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   const [isCameraLoading, setIsCameraLoading] = useState(false);
   const [cameraFlash, setCameraFlash] = useState(false); // for capture visual effect
   const [cameraStream, setCameraStream] = useState(null);
+  const [countdown, setCountdown] = useState(null);
 
   const videoElRef = useRef(null);
   const streamRef = useRef(null);
+  const countdownIntervalRef = useRef(null);
 
   const setVideoRef = useCallback((node) => {
     videoElRef.current = node;
@@ -276,6 +278,11 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   };
 
   const stopCamera = () => {
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    setCountdown(null);
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -296,7 +303,7 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     }, 150);
   };
 
-  const handleCapture = () => {
+  const handleCapture = (slotIdx = activeCameraSlot) => {
     const video = videoElRef.current;
     if (!video) return;
     
@@ -317,16 +324,36 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     ctx.drawImage(video, sx, sy, minSize, minSize, 0, 0, 600, 600);
     const base64Image = canvas.toDataURL("image/webp", 0.85);
 
-    if (activeCameraSlot === 1) {
+    if (slotIdx === 1) {
       setCustomSlot1Photo(base64Image);
-    } else if (activeCameraSlot === 2) {
+    } else if (slotIdx === 2) {
       setCustomSlot2Photo(base64Image);
-    } else if (activeCameraSlot === 3) {
+    } else if (slotIdx === 3) {
       setCustomSlot3Photo(base64Image);
     }
 
     stopCamera();
     setCameraModalOpen(false);
+  };
+
+  const startCaptureCountdown = () => {
+    if (countdown !== null || isCameraLoading) return;
+
+    const targetSlot = activeCameraSlot;
+    let count = 5;
+    setCountdown(count);
+
+    countdownIntervalRef.current = setInterval(() => {
+      count -= 1;
+      if (count <= 0) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+        setCountdown(null);
+        handleCapture(targetSlot);
+      } else {
+        setCountdown(count);
+      }
+    }, 1000);
   };
 
   const removeCustomPhoto = (slotIdx) => {
@@ -338,6 +365,9 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   // Stop camera when component unmounts
   useEffect(() => {
     return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
@@ -2583,6 +2613,26 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
                     <p className="text-[10px] font-lexend font-bold">Mengaktifkan Kamera...</p>
                   </div>
                 )}
+
+                {countdown !== null && (
+                  <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-xs">
+                    <style>{`
+                      @keyframes popScale {
+                        0% { transform: scale(0.5); opacity: 0; }
+                        50% { transform: scale(1.1); }
+                        100% { transform: scale(1); opacity: 1; }
+                      }
+                    `}</style>
+                    <div 
+                      key={countdown}
+                      className="bg-[#FF006E] text-white border-4 border-black font-lilita text-7xl w-24 h-24 flex items-center justify-center rounded-2xl shadow-neo-lg"
+                      style={{ animation: "popScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards" }}
+                    >
+                      {countdown}
+                    </div>
+                  </div>
+                )}
+
                 <video 
                   ref={setVideoRef}
                   autoPlay
@@ -2626,12 +2676,12 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
               </button>
               <button
                 type="button"
-                onClick={handleCapture}
-                disabled={isCameraLoading}
+                onClick={startCaptureCountdown}
+                disabled={isCameraLoading || countdown !== null}
                 className="flex-1 bg-[#06D6A0] hover:bg-[#05ba8c] text-black font-lexend font-black py-2 border-3 border-black rounded-lg shadow-neo-sm text-xs cursor-pointer active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 <Camera className="w-4 h-4" />
-                Ambil Foto
+                {countdown !== null ? `Mulai (${countdown}s)` : "Ambil Foto"}
               </button>
             </div>
 
