@@ -66,7 +66,7 @@ const TIMELINE_EVENTS = [
     title: "NGAFIRMATICS 5.0",
     emoji: "🍿",
     date: "28 Februari 2026",
-    desc: "Keseruan acara Ngaprak Informatics edisi kelima. Ajang berkumpul, bermain, dan mempererat tali persaudaraan keluarga besar HMIF.",
+    desc: "Ngafirmatics adalah proker ngabuburit bareng mahasiswa prodi teknik informatika.",
     img: "/timeline/ngafirmatics5.jpg",
     tilt: "rotate-[-1.5deg]"
   },
@@ -93,7 +93,7 @@ const TIMELINE_EVENTS = [
     title: "Akrobat with HMTB",
     emoji: "🎭",
     date: "29 Maret 2026",
-    desc: "Kolaborasi seru acara Akrobat bersama HMTB. Sinergi antar himpunan yang dipenuhi keceriaan dan diskusi interaktif.",
+    desc: "Akrobat adalah proker akrab bareng sobat yaitu studi banding dengan himpunan internal kampus yakni hmtb",
     img: "/timeline/akrobatwithhmtb.jpg",
     tilt: "rotate-[1.5deg]"
   },
