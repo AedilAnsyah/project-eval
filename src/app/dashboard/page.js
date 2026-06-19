@@ -47,6 +47,7 @@ export default function DashboardPage() {
   const [customStampEmoji, setCustomStampEmoji] = useState("");
   const [customStampText, setCustomStampText] = useState("");
   const [editBukaPesanPada, setEditBukaPesanPada] = useState("");
+  const [bulkReleaseTime, setBulkReleaseTime] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Cropper Modal States
@@ -270,8 +271,13 @@ export default function DashboardPage() {
         updatedFields.nim = editNim;
         updatedFields.tanggal_lahir = editDob;
         updatedFields.pesan_fatir = editPesanFatir;
-        updatedFields.pesan_aedil = editPesanAedil;
-        updatedFields.pesan_koor = editPesanKoor;
+        
+        // Fatir cannot edit Aedil's or Coordinator's messages
+        if (currentUser?.nama !== 'Fatir Gibran') {
+          updatedFields.pesan_aedil = editPesanAedil;
+          updatedFields.pesan_koor = editPesanKoor;
+        }
+        
         updatedFields.foto_url = editFotoUrl;
         updatedFields.role = editRole;
         updatedFields.departemen = editDept;
@@ -309,6 +315,84 @@ export default function DashboardPage() {
       alert("Pesan feedback berhasil dihapus!");
     } catch (err) {
       alert("Gagal menghapus feedback: " + err.message);
+    }
+  };
+
+  // Handle bulk release time setup
+  const handleBulkApplyReleaseTime = async () => {
+    if (!bulkReleaseTime) {
+      alert("Pilih tanggal dan waktu rilis terlebih dahulu!");
+      return;
+    }
+
+    const formattedTime = `${bulkReleaseTime}:00+07:00`;
+    const targetMembers = getVisibleMembers();
+
+    if (targetMembers.length === 0) {
+      alert("Tidak ada anggota untuk diperbarui.");
+      return;
+    }
+
+    if (!window.confirm(`Apakah Anda yakin ingin menyetel waktu rilis ke ${getWIBDisplayTime(formattedTime)} untuk ${targetMembers.length} anggota?`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      for (const m of targetMembers) {
+        // Access checks: Fatir cannot edit Aedil, Koor cannot edit themselves
+        const isFatir = currentUser?.nama === 'Fatir Gibran' || currentUser?.jabatan === 'Chairman' || currentUser?.nim === '103112430153';
+        const isTargetAedil = m.nama === 'Aedil Riski Ansyah' || m.jabatan === 'Vice Chairman' || m.nim === '103112400101';
+        const isSelfKoor = currentUser?.role === "koor" && m.id === currentUser?.id;
+
+        if ((isFatir && isTargetAedil) || isSelfKoor) {
+          continue; // Skip restricted
+        }
+
+        await updateMember(m.id, { buka_pesan_pada: formattedTime });
+      }
+
+      await refreshData();
+      alert("Berhasil memperbarui jadwal rilis untuk semua anggota!");
+    } catch (err) {
+      alert("Gagal memperbarui: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBulkClearReleaseTime = async () => {
+    const targetMembers = getVisibleMembers();
+
+    if (targetMembers.length === 0) {
+      alert("Tidak ada anggota untuk diperbarui.");
+      return;
+    }
+
+    if (!window.confirm(`Apakah Anda yakin ingin mengosongkan/membuka langsung surat evaluasi untuk ${targetMembers.length} anggota?`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      for (const m of targetMembers) {
+        const isFatir = currentUser?.nama === 'Fatir Gibran' || currentUser?.jabatan === 'Chairman' || currentUser?.nim === '103112430153';
+        const isTargetAedil = m.nama === 'Aedil Riski Ansyah' || m.jabatan === 'Vice Chairman' || m.nim === '103112400101';
+        const isSelfKoor = currentUser?.role === "koor" && m.id === currentUser?.id;
+
+        if ((isFatir && isTargetAedil) || isSelfKoor) {
+          continue;
+        }
+
+        await updateMember(m.id, { buka_pesan_pada: null });
+      }
+
+      await refreshData();
+      alert("Berhasil mengosongkan jadwal rilis untuk semua anggota!");
+    } catch (err) {
+      alert("Gagal mengosongkan: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -547,6 +631,43 @@ export default function DashboardPage() {
                   className="w-full pl-9 pr-3 py-1.5 border-2.5 border-black rounded-lg font-lexend font-semibold text-xs text-black focus:outline-none focus:ring-3 focus:ring-[#06D6A0]/30"
                 />
                 <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-500" />
+              </div>
+            </div>
+
+            {/* Bulk Release Time Panel */}
+            <div className="bg-[#FFFDF0] border-4 border-black p-4 rounded-xl shadow-neo-sm space-y-3">
+              <h3 className="font-lilita text-sm uppercase text-black flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#3A86FF]" />
+                Setel Waktu Rilis Masal (Bulk Set Release Time)
+              </h3>
+              <p className="text-[10px] font-lexend font-semibold text-gray-500">
+                {currentUser.role === 'admin' ? "Atur jadwal buka surat untuk semua anggota sekaligus (WIB)." : `Atur jadwal buka surat untuk semua staf Divisi ${currentUser.departemen} sekaligus (WIB).`}
+              </p>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex-grow">
+                  <input 
+                    type="datetime-local" 
+                    value={bulkReleaseTime} 
+                    onChange={(e) => setBulkReleaseTime(e.target.value)} 
+                    className="w-full px-3 py-1.5 border-2.5 border-black rounded-lg font-lexend text-xs text-black bg-white" 
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    type="button" 
+                    onClick={handleBulkApplyReleaseTime} 
+                    className="bg-[#3A86FF] hover:bg-[#206be6] text-white font-lexend font-black px-4 py-2 border-2.5 border-black rounded-lg text-xs cursor-pointer shadow-neo-sm flex items-center gap-1.5 active:translate-y-0.5 active:shadow-none transition-all"
+                  >
+                    Terapkan Jadwal
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={handleBulkClearReleaseTime} 
+                    className="bg-[#FF6B6B] hover:bg-[#e05656] text-black font-lexend font-black px-4 py-2 border-2.5 border-black rounded-lg text-xs cursor-pointer shadow-neo-sm flex items-center gap-1.5 active:translate-y-0.5 active:shadow-none transition-all"
+                  >
+                    Kosongkan Semua
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -819,35 +940,39 @@ export default function DashboardPage() {
                         className="w-full p-3 border-2.5 border-black rounded-lg font-lexend text-xs text-black bg-white"
                       />
                     </div>
-                    <div>
-                      <label className="block font-lexend font-bold text-xs uppercase text-blue-700 mb-1 flex items-center gap-1">
-                        <Shield className="w-3.5 h-3.5 fill-blue-300" />
-                        Pesan Evaluasi Aedil (Vice Chairman)
-                      </label>
-                      <textarea 
-                        rows={3}
-                        value={editPesanAedil}
-                        onChange={(e) => setEditPesanAedil(e.target.value)}
-                        placeholder="Tulis pesan evaluasi dari Aedil..."
-                        className="w-full p-3 border-2.5 border-black rounded-lg font-lexend text-xs text-black bg-white"
-                      />
-                    </div>
-                    {editingMember?.departemen !== 'Executive Board' && (
-                      <div>
-                        <label className="block font-lexend font-bold text-xs uppercase text-pink-700 mb-1 flex items-center gap-1">
-                          <Shield className="w-3.5 h-3.5 fill-pink-300" />
-                          Pesan Evaluasi dari {
-                            members.find(m => m.departemen === editingMember.departemen && m.role === 'koor')?.nama || "Koordinator"
-                          }
-                        </label>
-                        <textarea 
-                          rows={3}
-                          value={editPesanKoor}
-                          onChange={(e) => setEditPesanKoor(e.target.value)}
-                          placeholder={`Tulis pesan evaluasi dari ${members.find(m => m.departemen === editingMember.departemen && m.role === 'koor')?.nama || "Koordinator"}...`}
-                          className="w-full p-3 border-2.5 border-black rounded-lg font-lexend text-xs text-black bg-white"
-                        />
-                      </div>
+                    {currentUser?.nama !== 'Fatir Gibran' && (
+                      <>
+                        <div>
+                          <label className="block font-lexend font-bold text-xs uppercase text-blue-700 mb-1 flex items-center gap-1">
+                            <Shield className="w-3.5 h-3.5 fill-blue-300" />
+                            Pesan Evaluasi Aedil (Vice Chairman)
+                          </label>
+                          <textarea 
+                            rows={3}
+                            value={editPesanAedil}
+                            onChange={(e) => setEditPesanAedil(e.target.value)}
+                            placeholder="Tulis pesan evaluasi dari Aedil..."
+                            className="w-full p-3 border-2.5 border-black rounded-lg font-lexend text-xs text-black bg-white"
+                          />
+                        </div>
+                        {editingMember?.departemen !== 'Executive Board' && (
+                          <div>
+                            <label className="block font-lexend font-bold text-xs uppercase text-pink-700 mb-1 flex items-center gap-1">
+                              <Shield className="w-3.5 h-3.5 fill-pink-300" />
+                              Pesan Evaluasi dari {
+                                members.find(m => m.departemen === editingMember.departemen && m.role === 'koor')?.nama || "Koordinator"
+                              }
+                            </label>
+                            <textarea 
+                              rows={3}
+                              value={editPesanKoor}
+                              onChange={(e) => setEditPesanKoor(e.target.value)}
+                              placeholder={`Tulis pesan evaluasi dari ${members.find(m => m.departemen === editingMember.departemen && m.role === 'koor')?.nama || "Koordinator"}...`}
+                              className="w-full p-3 border-2.5 border-black rounded-lg font-lexend text-xs text-black bg-white"
+                            />
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </>
@@ -1215,6 +1340,25 @@ function convertToWIBDatetimeLocal(isoString) {
     return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
   } catch (e) {
     console.error("Error converting timestamp to WIB: ", e);
+    return "";
+  }
+}
+
+// Convert ISO string/timestamp to local display format representing WIB (Asia/Jakarta)
+function getWIBDisplayTime(isoString) {
+  if (!isoString) return "";
+  try {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return "";
+    return date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Asia/Jakarta"
+    }) + " WIB";
+  } catch (e) {
+    console.error("Error formatting WIB time: ", e);
     return "";
   }
 }

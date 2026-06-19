@@ -104,9 +104,9 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
       }
 
       try {
-        let data = initialMember;
+        let data = await getMemberById(memberId);
         if (!data) {
-          data = await getMemberById(memberId);
+          data = initialMember;
         }
         
         if (data) {
