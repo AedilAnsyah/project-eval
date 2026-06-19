@@ -291,10 +291,58 @@ const getTimelinePathD = (index) => {
   return paths[index % paths.length];
 };
 
+// Helper to extract Indonesian month name
+const getMonthFromDate = (dateString) => {
+  if (dateString.includes("Januari")) return "JANUARI";
+  if (dateString.includes("Februari")) return "FEBRUARI";
+  if (dateString.includes("Maret")) return "MARET";
+  if (dateString.includes("April")) return "APRIL";
+  if (dateString.includes("Mei")) return "MEI";
+  if (dateString.includes("Juni")) return "JUNI";
+  return "";
+};
+
+// Colors for each month header matching the Y2K palette
+const getMonthColor = (month) => {
+  const colors = {
+    "JANUARI": "#FFBE0B",
+    "FEBRUARI": "#3A86FF",
+    "MARET": "#FF006E",
+    "APRIL": "#06D6A0",
+    "MEI": "#8338EC",
+    "JUNI": "#FF6B6B"
+  };
+  return colors[month] || "#FFBE0B";
+};
+
 export default function JourneyPage() {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+
+  // Group events by month
+  const timelineNodes = [];
+  let currentMonth = "";
+  let eventCount = 0;
+
+  TIMELINE_EVENTS.forEach((event) => {
+    const eventMonth = getMonthFromDate(event.date);
+    if (eventMonth && eventMonth !== currentMonth) {
+      currentMonth = eventMonth;
+      timelineNodes.push({
+        type: "month",
+        month: eventMonth,
+        id: `month-${eventMonth.toLowerCase()}`
+      });
+    }
+    timelineNodes.push({
+      type: "event",
+      eventIndex: eventCount,
+      isLeft: eventCount % 2 === 0,
+      ...event
+    });
+    eventCount++;
+  });
 
   // Simulate Windows 95/Y2K preloader boot progress
   useEffect(() => {
@@ -472,7 +520,10 @@ export default function JourneyPage() {
           </div>
           
           {/* Line from Start Pin to first milestone */}
-          <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-[24px] bottom-[-44px] w-16 md:w-32 z-0 pointer-events-none">
+          <div 
+            style={{ top: "24px", bottom: "-80px" }}
+            className="absolute left-6 md:left-1/2 -translate-x-1/2 w-16 md:w-32 z-0 pointer-events-none"
+          >
             <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
               <path 
                 d="M 50 0 C 65 30, 35 70, 50 100" 
@@ -487,31 +538,97 @@ export default function JourneyPage() {
 
         {/* Milestones mapped */}
         <div className="space-y-20 relative z-10">
-          {TIMELINE_EVENTS.map((event, index) => {
-            const isLeft = index % 2 === 0;
+          {timelineNodes.map((node, index) => {
+            if (node.type === "month") {
+              const monthColor = getMonthColor(node.month);
+              return (
+                <div 
+                  key={node.id}
+                  className="relative h-20 flex justify-center items-center z-10 my-4"
+                >
+                  {/* Line from Month Header to next node */}
+                  {index < timelineNodes.length - 1 && (
+                    <div 
+                      style={{ top: "40px", bottom: "-124px" }}
+                      className="absolute left-6 md:left-1/2 -translate-x-1/2 w-16 md:w-32 z-0 pointer-events-none"
+                    >
+                      <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
+                        <path 
+                          d="M 50 0 C 45 30, 55 70, 50 100" 
+                          stroke="#1A1D20" 
+                          strokeWidth="3.5" 
+                          strokeDasharray="6 6"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
+                    </div>
+                  )}
+
+                  <div 
+                    style={{ backgroundColor: monthColor }}
+                    className="border-3 border-black px-6 py-2 rounded-xl shadow-neo-sm font-lilita text-base uppercase tracking-wider text-black select-none z-20 flex items-center gap-2 rotate-[-1deg] hover:scale-105 transition-transform duration-200"
+                  >
+                    <span>📅</span>
+                    <span>{node.month}</span>
+                  </div>
+                </div>
+              );
+            }
+
+            // Otherwise, it is an event node
+            const isLeft = node.isLeft;
+            const nextNode = timelineNodes[index + 1];
+            const isNextMonth = nextNode && nextNode.type === "month";
+            const isLastNode = index === timelineNodes.length - 1;
+
             return (
               <div 
-                key={event.id}
+                key={node.id}
                 className={`flex flex-col md:flex-row items-start w-full relative ${
                   isLeft ? 'md:flex-row-reverse' : ''
                 }`}
               >
-                {/* Wavy snaking path line segment (Responsive SVG Bezier curve connecting nodes) */}
-                {index < TIMELINE_EVENTS.length - 1 ? (
-                  <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-[44px] bottom-[-124px] w-16 md:w-32 z-0 pointer-events-none">
-                    <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
-                      <path 
-                        d={getTimelinePathD(index)} 
-                        stroke="#1A1D20" 
-                        strokeWidth="3.5" 
-                        strokeDasharray="6 6"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    </svg>
-                  </div>
+                {/* Wavy snaking path line segment */}
+                {!isLastNode ? (
+                  isNextMonth ? (
+                    /* Line connecting Event to Month Node */
+                    <div 
+                      style={{ top: "44px", bottom: "-120px" }}
+                      className="absolute left-6 md:left-1/2 -translate-x-1/2 w-16 md:w-32 z-0 pointer-events-none"
+                    >
+                      <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
+                        <path 
+                          d="M 50 0 C 55 30, 45 70, 50 100" 
+                          stroke="#1A1D20" 
+                          strokeWidth="3.5" 
+                          strokeDasharray="6 6"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
+                    </div>
+                  ) : (
+                    /* Line connecting Event to Event */
+                    <div 
+                      style={{ top: "44px", bottom: "-124px" }}
+                      className="absolute left-6 md:left-1/2 -translate-x-1/2 w-16 md:w-32 z-0 pointer-events-none"
+                    >
+                      <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
+                        <path 
+                          d={getTimelinePathD(node.eventIndex)} 
+                          stroke="#1A1D20" 
+                          strokeWidth="3.5" 
+                          strokeDasharray="6 6"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
+                    </div>
+                  )
                 ) : (
                   /* Line connecting last milestone to the Finish Pin */
-                  <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-[44px] bottom-[-76px] w-16 md:w-32 z-0 pointer-events-none">
+                  <div 
+                    style={{ top: "44px", bottom: "-72px" }}
+                    className="absolute left-6 md:left-1/2 -translate-x-1/2 w-16 md:w-32 z-0 pointer-events-none"
+                  >
                     <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
                       <path 
                         d="M 50 0 C 35 30, 65 70, 50 100" 
@@ -523,12 +640,13 @@ export default function JourneyPage() {
                     </svg>
                   </div>
                 )}
+                
                 {/* Placeholder space on opposite side for desktop */}
                 <div className="hidden md:block w-1/2"></div>
 
                 {/* The timeline node dot with active emoji */}
                 <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-6 w-10 h-10 rounded-full bg-[#FFBE0B] border-3 border-black flex items-center justify-center shadow-neo-sm z-20 group hover:scale-110 hover:bg-[#FF006E] transition-all cursor-default">
-                  <span className="text-sm select-none group-hover:scale-125 transition-transform">{event.emoji}</span>
+                  <span className="text-sm select-none group-hover:scale-125 transition-transform">{node.emoji}</span>
                 </div>
 
                 {/* Content Card with Framer Motion scroll triggers */}
@@ -537,7 +655,7 @@ export default function JourneyPage() {
                   whileInView={{ opacity: 1, x: 0, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.5, type: "spring", stiffness: 80 }}
-                  className={`w-[calc(100%-48px)] ml-12 md:ml-0 md:w-[45%] bg-white border-3 border-black p-4 sm:p-5 rounded-2xl shadow-neo-md relative z-10 group hover:scale-[1.02] hover:shadow-neo-lg transition-all ${event.tilt}`}
+                  className={`w-[calc(100%-48px)] ml-12 md:ml-0 md:w-[45%] bg-white border-3 border-black p-4 sm:p-5 rounded-2xl shadow-neo-md relative z-10 group hover:scale-[1.02] hover:shadow-neo-lg transition-all ${node.tilt}`}
                 >
                   
                   {/* Decorative tape sticker on top of polaroid */}
@@ -547,15 +665,15 @@ export default function JourneyPage() {
 
                   {/* Event Photo with Polaroid styling */}
                   <div className="bg-[#FAF7F0] border-2.5 border-black p-2.5 rounded shadow-inner mb-4 relative overflow-hidden bg-dot-pattern">
-                    {event.img ? (
+                    {node.img ? (
                       <div 
-                        onClick={() => setSelectedPhoto(event)}
+                        onClick={() => setSelectedPhoto(node)}
                         className="border border-black/10 rounded bg-white p-1.5 flex items-center justify-center overflow-hidden cursor-zoom-in hover:border-black/30 transition-all relative group/img"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img 
-                          src={event.img} 
-                          alt={event.title}
+                          src={node.img} 
+                          alt={node.title}
                           loading="lazy"
                           className="w-full h-auto max-h-[380px] object-contain transition-all duration-500 group-hover/img:scale-[1.02] rounded-sm select-none"
                         />
@@ -581,11 +699,11 @@ export default function JourneyPage() {
                       <div className="flex items-center gap-1.5 text-gray-600">
                         <Calendar className="w-3.5 h-3.5 text-[#FF006E] flex-shrink-0" />
                         <span className="font-handwriting font-black text-xs">
-                          {event.date}
+                          {node.date}
                         </span>
                       </div>
                       <span className="font-lilita text-[10px] uppercase text-[#3A86FF] bg-[#3A86FF]/10 px-2 py-0.5 border border-[#3A86FF]/20 rounded-md">
-                        {event.id.toUpperCase()}
+                        {node.id.toUpperCase()}
                       </span>
                     </div>
                   </div>
@@ -593,11 +711,11 @@ export default function JourneyPage() {
                   {/* Title and description */}
                   <div className="text-left">
                     <h4 className="font-lilita text-lg sm:text-xl text-[#1A1D20] uppercase leading-tight mb-2 flex items-center gap-1.5">
-                      <span className="text-lg">{event.emoji}</span>
-                      {event.title}
+                      <span className="text-lg">{node.emoji}</span>
+                      {node.title}
                     </h4>
                     <p className="font-lexend text-xs text-gray-600 leading-relaxed font-semibold">
-                      {event.desc}
+                      {node.desc}
                     </p>
                   </div>
 
