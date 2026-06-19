@@ -18,6 +18,7 @@ import {
   X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { getMembers, signIn, getStickyNotes, addStickyNote, deleteStickyNote } from "@/lib/db";
 import { getSession, clearSession, setSession } from "@/lib/session";
 
@@ -256,7 +257,6 @@ export default function Home() {
   
   // Pagination State for Polaroid Gallery
   const [visibleCount, setVisibleCount] = useState(16);
-  const [timelineOpen, setTimelineOpen] = useState(false);
   
   // Sticky Notes States
   const [stickyNotes, setStickyNotes] = useState([]);
@@ -659,12 +659,12 @@ export default function Home() {
               Mari tengok kembali jejak langkah, tawa, rapat larut malam, dan kerja keras yang telah kita lalui bersama selama setengah tahun kepengurusan terakhir.
             </p>
           </div>
-          <button 
-            onClick={() => setTimelineOpen(true)}
-            className="w-full sm:w-auto bg-[#FFBE0B] hover:bg-[#e6ab0a] text-black font-lexend font-black px-6 py-3 border-3 border-black rounded-lg shadow-neo-sm text-xs sm:text-sm whitespace-nowrap cursor-pointer active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2"
+          <Link 
+            href="/journey"
+            className="w-full sm:w-auto bg-[#FFBE0B] hover:bg-[#e6ab0a] text-black font-lexend font-black px-6 py-3 border-3 border-black rounded-lg shadow-neo-sm text-xs sm:text-sm whitespace-nowrap cursor-pointer active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2 text-center"
           >
             🗺️ Lihat Perjalanan Kita Sejauh Ini
-          </button>
+          </Link>
         </div>
 
         {/* Polaroid Grid Layout */}
@@ -1037,161 +1037,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* TIMELINE JOURNEY MODAL OVERLAY */}
-      <AnimatePresence>
-        {timelineOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: "100%" }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 150 }}
-            className="fixed inset-0 z-50 bg-[#FAF7F0] overflow-y-auto y2k-mesh-bg scrollbar-none select-none"
-          >
-            {/* Top sticky Win95-styled navbar */}
-            <div className="sticky top-0 z-30 bg-[#1A1D20] text-white border-b-4 border-black px-4 py-3 flex justify-between items-center shadow-md">
-              <div className="flex items-center gap-2 select-none">
-                <span className="text-lg">🗺️</span>
-                <span className="font-lilita uppercase tracking-wider text-sm sm:text-base">Kilas Balik Setengah Perjalanan Astravia</span>
-              </div>
-              <button 
-                onClick={() => setTimelineOpen(false)}
-                className="w-8 h-8 rounded-full bg-[#FF6B6B] hover:bg-[#e05656] text-black font-black border-2.5 border-black shadow-[1.5px_1.5px_0px_#000] active:translate-y-0.5 active:shadow-none cursor-pointer flex items-center justify-center text-xs"
-                title="Tutup Linimasa"
-              >
-                ✕
-              </button>
-            </div>
 
-            <div className="max-w-4xl mx-auto px-4 py-12 relative min-h-screen pb-32">
-              
-              {/* Timeline Header Intro */}
-              <div className="text-center mb-16 relative">
-                <span className="font-lilita text-xs bg-[#06D6A0] text-black px-3 py-1 border-2 border-black rounded uppercase shadow-neo-sm rotate-[-1.5deg] inline-block mb-3">
-                  Kabinet Astravia 2026
-                </span>
-                <h2 className="text-3xl sm:text-5xl font-lilita uppercase text-black drop-shadow-[2.5px_2.5px_0px_#000] leading-none mb-4">
-                  Perjalanan Kita Sejauh Ini
-                </h2>
-                <p className="max-w-xl mx-auto text-xs sm:text-sm font-lexend font-medium text-gray-700 bg-white border-3 border-black p-3.5 rounded-lg shadow-neo-sm">
-                  Setiap langkah adalah cerita, setiap rapat adalah karya. Mari jelajahi kembali jejak dedikasi kita selama setengah tahun terakhir. 🌟
-                </p>
-              </div>
-
-              {/* Vertical Path road line (dashed roadmap style) */}
-              <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-48 bottom-48 w-2 bg-transparent border-l-4 border-dashed border-black/35 z-0"></div>
-
-              {/* Milestones mapped */}
-              <div className="space-y-16 relative z-10">
-                {TIMELINE_EVENTS.map((event, index) => {
-                  const isLeft = index % 2 === 0;
-                  return (
-                    <div 
-                      key={event.id}
-                      className={`flex flex-col md:flex-row items-start md:items-center w-full ${
-                        isLeft ? 'md:flex-row-reverse' : ''
-                      }`}
-                    >
-                      {/* Placeholder space on opposite side for desktop */}
-                      <div className="hidden md:block w-1/2"></div>
-
-                      {/* The timeline node dot */}
-                      <div className="absolute left-6 md:left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#FFBE0B] border-3 border-black flex items-center justify-center shadow-neo-sm z-20">
-                        <span className="text-xs">📍</span>
-                      </div>
-
-                      {/* Content Card with Framer Motion scroll triggers */}
-                      <motion.div 
-                        initial={{ opacity: 0, x: isLeft ? 40 : -40, y: 30 }}
-                        whileInView={{ opacity: 1, x: 0, y: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.5, type: "spring", stiffness: 80 }}
-                        className={`w-[calc(100%-48px)] ml-12 md:ml-0 md:w-[45%] bg-white border-3 border-black p-4 sm:p-5 rounded-xl shadow-neo-md relative group hover:scale-[1.01] transition-transform ${event.tilt}`}
-                      >
-                        {/* Event Photo with Polaroid styling */}
-                        <div className="bg-[#FAF7F0] border-2 border-black p-2 rounded shadow-inner mb-4 relative overflow-hidden group-hover:rotate-1 transition-transform">
-                          {event.img ? (
-                            <img 
-                              src={event.img} 
-                              alt={event.title} 
-                              className="w-full h-auto max-h-[300px] object-contain border border-black/10 rounded-sm bg-white"
-                            />
-                          ) : (
-                            <div className="w-full aspect-[4/3] border-2 border-dashed border-gray-400 rounded-sm bg-gray-50 flex flex-col items-center justify-center text-gray-500 gap-2 select-none">
-                              <span className="text-3xl">📸</span>
-                              <span className="font-lexend font-bold text-xs uppercase tracking-wide text-gray-400">
-                                Foto Menyusul
-                              </span>
-                            </div>
-                          )}
-                          {/* Calendar date tag inside photo frame */}
-                          <div className="mt-2.5 flex items-center gap-1.5 text-gray-600 bg-black/5 px-2 py-1 rounded-md w-fit">
-                            <Calendar className="w-3.5 h-3.5 text-[#FF006E] flex-shrink-0" />
-                            <span className="font-lexend font-black text-[10px] sm:text-xs uppercase tracking-wide">
-                              {event.date}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Title and description */}
-                        <div className="text-left">
-                          <h4 className="font-lilita text-base sm:text-lg text-black uppercase leading-tight mb-2">
-                            {event.title}
-                          </h4>
-                          <p className="font-lexend text-[11px] sm:text-xs text-gray-600 leading-relaxed font-semibold">
-                            {event.desc}
-                          </p>
-                        </div>
-                      </motion.div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Vacation & Outro Card */}
-              <div className="mt-24 relative z-10 flex justify-center">
-                <div className="absolute left-6 md:left-1/2 -translate-x-1/2 -top-12 w-8 h-8 rounded-full bg-[#06D6A0] border-3 border-black flex items-center justify-center shadow-neo-sm z-20">
-                  <span className="text-xs">🏁</span>
-                </div>
-
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  onViewportEnter={() => {
-                    // Trigger confetti when card scrolls into view
-                    import("canvas-confetti").then((confetti) => {
-                      confetti.default({ particleCount: 80, spread: 80, origin: { y: 0.8 } });
-                    });
-                  }}
-                  transition={{ duration: 0.5, type: "spring" }}
-                  className="w-[calc(100%-48px)] ml-12 md:ml-0 md:max-w-lg bg-[#FFBE0B] border-4 border-black p-6 sm:p-8 rounded-2xl shadow-neo-lg text-center relative rotate-[-1deg]"
-                >
-                  <div className="absolute -top-5 -left-5 w-12 h-12 bg-[#FF006E] border-3 border-black rounded-full flex items-center justify-center rotate-[-12deg] shadow-neo-sm text-lg select-none">
-                    💖
-                  </div>
-
-                  <h3 className="font-lilita text-2xl sm:text-4xl text-black uppercase leading-none mb-4 tracking-wider">
-                    Setengah Perjalanan Terlewati!
-                  </h3>
-                  
-                  <div className="space-y-3 font-lexend font-extrabold text-sm sm:text-base text-black bg-white/40 border-2.5 border-black/25 p-4 rounded-xl mb-6 select-text leading-relaxed">
-                    <p>“Tetap Semangat untuk setengah perjalanan Berikutnya!” 🚀</p>
-                    <p className="text-[#FF006E] text-base sm:text-lg">“Selamat Liburan Guys!! 🎉🏖️”</p>
-                  </div>
-
-                  <button
-                    onClick={() => setTimelineOpen(false)}
-                    className="px-6 py-2.5 bg-[#1A1D20] text-white hover:bg-black font-lexend font-black text-xs uppercase tracking-wider border-2.5 border-black rounded-lg shadow-neo-sm active:translate-y-0.5 active:shadow-none transition-all cursor-pointer inline-flex items-center gap-1.5"
-                  >
-                    Tutup Linimasa
-                  </button>
-                </motion.div>
-              </div>
-
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
