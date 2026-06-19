@@ -13,8 +13,11 @@ import {
   Smile,
   Pin,
   Plus,
-  Trash2
+  Trash2,
+  Calendar,
+  X
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { getMembers, signIn, getStickyNotes, addStickyNote, deleteStickyNote } from "@/lib/db";
 import { getSession, clearSession, setSession } from "@/lib/session";
 
@@ -30,6 +33,218 @@ const DEPARTMENTS = {
   "External Relations & Advocacy": { color: "#FB5607", text: "text-white", bg: "bg-[#FB5607]", badge: "bg-[#FB5607] text-white" }
 };
 
+// Timeline events representing Cabinet Astravia's half-year journey
+const TIMELINE_EVENTS = [
+  {
+    id: "firstmeet",
+    title: "First Meet",
+    date: "2 Januari 2026",
+    desc: "Pertemuan pertama pengurus Kabinet Astravia. Langkah awal untuk saling mengenal, menyatukan visi, dan merancang masa depan HMIF yang lebih baik.",
+    img: "/timeline/firstmeet.jpg",
+    tilt: "rotate-[-2deg]"
+  },
+  {
+    id: "sertijab",
+    title: "Sertijab Kabinet Astravia",
+    date: "11 Januari 2026",
+    desc: "Prosesi serah terima jabatan pengurus lama ke pengurus baru menandai awal perjuangan Kabinet Astravia HMIF 2026. Langkah awal kita dengan visi besar dan semangat baru!",
+    img: "/timeline/sertijabkabinetastravia.jpg",
+    tilt: "rotate-[1.5deg]"
+  },
+  {
+    id: "mlb",
+    title: "Musyawarah Luar Biasa",
+    date: "15 Januari 2026",
+    desc: "Musyawarah luar biasa untuk membahas hal-hal krusial demi kelancaran dan legalitas roda organisasi HMIF ke depan.",
+    img: "/timeline/musyawarahluarbiasa.jpg",
+    tilt: "rotate-[-1deg]"
+  },
+  {
+    id: "muswil",
+    title: "Muswil Permikomnas",
+    date: "6-8 Februari 2026",
+    desc: "Partisipasi HMIF dalam Musyawarah Wilayah Permikomnas. Menjalin relasi, bertukar ide, dan berkolaborasi dengan mahasiswa informatika se-wilayah.",
+    img: "/timeline/muswilpermikomnas.jpg",
+    tilt: "rotate-[2deg]"
+  },
+  {
+    id: "rabulfeb",
+    title: "Rabul Februari",
+    date: "21 Februari 2026",
+    desc: "Rapat Bulanan pertama di bulan Februari. Tempat koordinasi perkembangan program kerja antar divisi dan evaluasi awal kabinet.",
+    img: "/timeline/rabulfebruari.jpg",
+    tilt: "rotate-[-2.5deg]"
+  },
+  {
+    id: "ldk",
+    title: "LDK HMIF 2026",
+    date: "22 Februari 2026",
+    desc: "Latihan Dasar Kepemimpinan untuk membekali pengurus dengan jiwa kepemimpinan, tanggung jawab, dan soliditas organisasi yang kuat.",
+    img: "/timeline/ldkhmif2026.jpg",
+    tilt: "rotate-[1deg]"
+  },
+  {
+    id: "ngafirmatics",
+    title: "NGAFIRMATICS 5.0",
+    date: "28 Februari 2026",
+    desc: "Keseruan acara Ngaprak Informatics edisi kelima. Ajang berkumpul, bermain, dan mempererat tali persaudaraan keluarga besar HMIF.",
+    img: "/timeline/ngafirmatics5.jpg",
+    tilt: "rotate-[-1.5deg]"
+  },
+  {
+    id: "sosialberbagi",
+    title: "Sosial Berbagi",
+    date: "6 Maret 2026",
+    desc: "Aksi sosial nyata pengurus HMIF untuk berbagi keceriaan dan bantuan kepada sesama yang membutuhkan. Kepedulian yang menghangatkan.",
+    img: "/timeline/sosialberbagi.jpg",
+    tilt: "rotate-[2deg]"
+  },
+  {
+    id: "lcc",
+    title: "Lomba Cerdas Cermat HMIF",
+    date: "26 Maret 2026",
+    desc: "Kompetisi cerdas cermat yang mengasah wawasan akademik, sportivitas, dan kerja tim di bidang informatika.",
+    img: "/timeline/lombacerdascermat.jpg",
+    tilt: "rotate-[-2deg]"
+  },
+  {
+    id: "akrobat",
+    title: "Akrobat with HMTB",
+    date: "29 Maret 2026",
+    desc: "Kolaborasi seru acara Akrobat bersama HMTB. Sinergi antar himpunan yang dipenuhi keceriaan dan diskusi interaktif.",
+    img: "/timeline/akrobatwithhmtb.jpg",
+    tilt: "rotate-[1.5deg]"
+  },
+  {
+    id: "rabulmar",
+    title: "Rabul Maret & Evaluasi TW1",
+    date: "29 Maret 2026",
+    desc: "Rapat bulanan sekaligus evaluasi triwulan pertama. Menganalisis progress dan hambatan proker demi performa yang lebih baik.",
+    img: "/timeline/rabulmaret&evaluasitw1.jpg",
+    tilt: "rotate-[-1.5deg]"
+  },
+  {
+    id: "fotopengurus",
+    title: "Foto Pengurus",
+    date: "18 April 2026",
+    desc: "Sesi pemotretan pengurus Kabinet Astravia. Senyum terbaik dan seragam kebanggaan, bukti kesiapan kita mengabdi satu periode penuh.",
+    img: "/timeline/fotopengurus.jpg",
+    tilt: "rotate-[2deg]"
+  },
+  {
+    id: "uts",
+    title: "ResponsIF UTS Genap 2026",
+    date: "18-19 April 2026",
+    desc: "Program ResponsIF UTS untuk membantu mahasiswa mempersiapkan diri menghadapi ujian tengah semester genap melalui latihan soal dan tutorial.",
+    img: "/timeline/responsifutsgenap2026.jpg",
+    tilt: "rotate-[-1deg]"
+  },
+  {
+    id: "upgrading",
+    title: "UPGRADING HMIF 2026",
+    date: "25-26 April 2026",
+    desc: "Kegiatan peningkatan kapasitas diri pengurus dengan materi kepemimpinan, kerja sama tim, dan refreshing bersama untuk menyegarkan pikiran.",
+    img: "/timeline/upgradinghmif2026.jpg",
+    tilt: "rotate-[2.5deg]"
+  },
+  {
+    id: "shortmovie",
+    title: "Short Movie",
+    date: "9-10 Mei 2026",
+    desc: "Proses kreatif pembuatan film pendek HMIF. Kolaborasi seni dan teknologi, mengekspresikan ide kreatif lewat karya visual.",
+    img: "/timeline/shortmovie.jpg",
+    tilt: "rotate-[-2deg]"
+  },
+  {
+    id: "fitfun",
+    title: "Fit & Fun",
+    date: "15 Mei 2026",
+    desc: "Kegiatan olahraga bersama untuk menjaga kebugaran tubuh, melepas kepenatan rutinitas, dan menjalin kebersamaan santai.",
+    img: "/timeline/fit&fun.jpg",
+    tilt: "rotate-[1.5deg]"
+  },
+  {
+    id: "rakerwil",
+    title: "Rakerwil Cilacap",
+    date: "16-17 Mei 2026",
+    desc: "Kehadiran delegasi HMIF dalam Rapat Kerja Wilayah di Cilacap, menyelaraskan program kerja dan memperluas jejaring organisasi.",
+    img: "/timeline/rakerwilcilacap.jpg",
+    tilt: "rotate-[-1.5deg]"
+  },
+  {
+    id: "kuliahumum1",
+    title: "Kuliah Umum 1",
+    date: "20 Mei 2026",
+    desc: "Kuliah umum perdana dengan narasumber ahli, memperluas wawasan mahasiswa mengenai perkembangan teknologi terkini.",
+    img: "/timeline/kuliahumum1.jpg",
+    tilt: "rotate-[2deg]"
+  },
+  {
+    id: "talkshow",
+    title: "Talkshow Kewirausahaan",
+    date: "23 Mei 2026",
+    desc: "Talkshow inspiratif kewirausahaan, memotivasi mahasiswa untuk menggali potensi bisnis di era digital.",
+    img: "/timeline/talkshowkewirausahaan.jpg",
+    tilt: "rotate-[-2.5deg]"
+  },
+  {
+    id: "sosialmengajar",
+    title: "Sosial Mengajar",
+    date: "25 Mei 2026",
+    desc: "Kegiatan pengabdian masyarakat melalui program mengajar, membagikan ilmu komputer dasar kepada anak-anak sekolah.",
+    img: "/timeline/sosialmengajar.jpg",
+    tilt: "rotate-[1deg]"
+  },
+  {
+    id: "kuliahumum2",
+    title: "Kuliah Umum 2",
+    date: "25 Mei 2026",
+    desc: "Kuliah umum kedua yang mengupas tuntas implementasi teknologi industri dan peluang karir di masa depan.",
+    img: "/timeline/kuliahumum2.jpg",
+    tilt: "rotate-[-1.5deg]"
+  },
+  {
+    id: "workshopobs",
+    title: "Workshop OBS",
+    date: "30 Mei 2026",
+    desc: "Workshop praktis penggunaan OBS Studio untuk kebutuhan streaming, recording, dan produksi konten digital.",
+    img: "/timeline/workshopobs.jpg",
+    tilt: "rotate-[2deg]"
+  },
+  {
+    id: "podcast",
+    title: "Podcast Informatics",
+    date: "6 Juni 2026",
+    desc: "Rekaman podcast seru HMIF yang membahas kehidupan kampus, tips akademik, dan obrolan menarik seputar dunia IT.",
+    img: "/timeline/podcastinformatics.jpg",
+    tilt: "rotate-[-2deg]"
+  },
+  {
+    id: "uas",
+    title: "ResponsIF UAS",
+    date: "13-14 Juni 2026",
+    desc: "Program belajar bersama menyambut Ujian Akhir Semester genap, memberikan bimbingan materi kuliah intensif bagi mahasiswa.",
+    img: "/timeline/responsiuasganjil2026.jpg",
+    tilt: "rotate-[1.5deg]"
+  },
+  {
+    id: "kuliahumum3",
+    title: "Kuliah Umum 3",
+    date: "18 Juni 2026",
+    desc: "Kuliah umum edisi ketiga, menghadirkan topik mutakhir untuk mempersiapkan kompetensi lulusan di dunia kerja.",
+    img: "/timeline/kuliahumum3.jpg",
+    tilt: "rotate-[-1.5deg]"
+  },
+  {
+    id: "webinar",
+    title: "Webinar UPGRADE IF",
+    date: "20 Juni 2026",
+    desc: "Webinar peningkatan kapasitas akademik dan profesional mahasiswa informatika.",
+    img: null,
+    tilt: "rotate-[2deg]"
+  }
+];
+
 export default function Home() {
   const router = useRouter();
   
@@ -41,6 +256,7 @@ export default function Home() {
   
   // Pagination State for Polaroid Gallery
   const [visibleCount, setVisibleCount] = useState(16);
+  const [timelineOpen, setTimelineOpen] = useState(false);
   
   // Sticky Notes States
   const [stickyNotes, setStickyNotes] = useState([]);
@@ -433,6 +649,24 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Timeline Journey Banner */}
+        <div className="max-w-5xl mx-auto mb-10 bg-[#FF006E] border-4 border-black p-5 sm:p-6 rounded-xl shadow-neo-md text-white flex flex-col sm:flex-row items-center justify-between gap-4 rotate-[0.5deg]">
+          <div className="text-center sm:text-left space-y-1.5 select-none">
+            <h3 className="font-lilita text-xl sm:text-2xl uppercase tracking-wider leading-none flex items-center justify-center sm:justify-start gap-2">
+              🚀 Setengah Perjalanan Astravia
+            </h3>
+            <p className="font-lexend text-[10px] sm:text-xs text-pink-100 font-semibold max-w-xl">
+              Mari tengok kembali jejak langkah, tawa, rapat larut malam, dan kerja keras yang telah kita lalui bersama selama setengah tahun kepengurusan terakhir.
+            </p>
+          </div>
+          <button 
+            onClick={() => setTimelineOpen(true)}
+            className="w-full sm:w-auto bg-[#FFBE0B] hover:bg-[#e6ab0a] text-black font-lexend font-black px-6 py-3 border-3 border-black rounded-lg shadow-neo-sm text-xs sm:text-sm whitespace-nowrap cursor-pointer active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2"
+          >
+            🗺️ Lihat Perjalanan Kita Sejauh Ini
+          </button>
+        </div>
+
         {/* Polaroid Grid Layout */}
         <main className="max-w-6xl mx-auto">
           {filteredMembers.length > 0 ? (
@@ -802,6 +1036,162 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* TIMELINE JOURNEY MODAL OVERLAY */}
+      <AnimatePresence>
+        {timelineOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 150 }}
+            className="fixed inset-0 z-50 bg-[#FAF7F0] overflow-y-auto y2k-mesh-bg scrollbar-none select-none"
+          >
+            {/* Top sticky Win95-styled navbar */}
+            <div className="sticky top-0 z-30 bg-[#1A1D20] text-white border-b-4 border-black px-4 py-3 flex justify-between items-center shadow-md">
+              <div className="flex items-center gap-2 select-none">
+                <span className="text-lg">🗺️</span>
+                <span className="font-lilita uppercase tracking-wider text-sm sm:text-base">Kilas Balik Setengah Perjalanan Astravia</span>
+              </div>
+              <button 
+                onClick={() => setTimelineOpen(false)}
+                className="w-8 h-8 rounded-full bg-[#FF6B6B] hover:bg-[#e05656] text-black font-black border-2.5 border-black shadow-[1.5px_1.5px_0px_#000] active:translate-y-0.5 active:shadow-none cursor-pointer flex items-center justify-center text-xs"
+                title="Tutup Linimasa"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="max-w-4xl mx-auto px-4 py-12 relative min-h-screen pb-32">
+              
+              {/* Timeline Header Intro */}
+              <div className="text-center mb-16 relative">
+                <span className="font-lilita text-xs bg-[#06D6A0] text-black px-3 py-1 border-2 border-black rounded uppercase shadow-neo-sm rotate-[-1.5deg] inline-block mb-3">
+                  Kabinet Astravia 2026
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-lilita uppercase text-black drop-shadow-[2.5px_2.5px_0px_#000] leading-none mb-4">
+                  Perjalanan Kita Sejauh Ini
+                </h2>
+                <p className="max-w-xl mx-auto text-xs sm:text-sm font-lexend font-medium text-gray-700 bg-white border-3 border-black p-3.5 rounded-lg shadow-neo-sm">
+                  Setiap langkah adalah cerita, setiap rapat adalah karya. Mari jelajahi kembali jejak dedikasi kita selama setengah tahun terakhir. 🌟
+                </p>
+              </div>
+
+              {/* Vertical Path road line (dashed roadmap style) */}
+              <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-48 bottom-48 w-2 bg-transparent border-l-4 border-dashed border-black/35 z-0"></div>
+
+              {/* Milestones mapped */}
+              <div className="space-y-16 relative z-10">
+                {TIMELINE_EVENTS.map((event, index) => {
+                  const isLeft = index % 2 === 0;
+                  return (
+                    <div 
+                      key={event.id}
+                      className={`flex flex-col md:flex-row items-start md:items-center w-full ${
+                        isLeft ? 'md:flex-row-reverse' : ''
+                      }`}
+                    >
+                      {/* Placeholder space on opposite side for desktop */}
+                      <div className="hidden md:block w-1/2"></div>
+
+                      {/* The timeline node dot */}
+                      <div className="absolute left-6 md:left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#FFBE0B] border-3 border-black flex items-center justify-center shadow-neo-sm z-20">
+                        <span className="text-xs">📍</span>
+                      </div>
+
+                      {/* Content Card with Framer Motion scroll triggers */}
+                      <motion.div 
+                        initial={{ opacity: 0, x: isLeft ? 40 : -40, y: 30 }}
+                        whileInView={{ opacity: 1, x: 0, y: 0 }}
+                        viewport={{ once: true, margin: "-100px" }}
+                        transition={{ duration: 0.5, type: "spring", stiffness: 80 }}
+                        className={`w-[calc(100%-48px)] ml-12 md:ml-0 md:w-[45%] bg-white border-3 border-black p-4 sm:p-5 rounded-xl shadow-neo-md relative group hover:scale-[1.01] transition-transform ${event.tilt}`}
+                      >
+                        {/* Event Photo with Polaroid styling */}
+                        <div className="bg-[#FAF7F0] border-2 border-black p-2 rounded shadow-inner mb-4 relative overflow-hidden group-hover:rotate-1 transition-transform">
+                          {event.img ? (
+                            <img 
+                              src={event.img} 
+                              alt={event.title} 
+                              className="w-full h-auto max-h-[300px] object-contain border border-black/10 rounded-sm bg-white"
+                            />
+                          ) : (
+                            <div className="w-full aspect-[4/3] border-2 border-dashed border-gray-400 rounded-sm bg-gray-50 flex flex-col items-center justify-center text-gray-500 gap-2 select-none">
+                              <span className="text-3xl">📸</span>
+                              <span className="font-lexend font-bold text-xs uppercase tracking-wide text-gray-400">
+                                Foto Menyusul
+                              </span>
+                            </div>
+                          )}
+                          {/* Calendar date tag inside photo frame */}
+                          <div className="mt-2.5 flex items-center gap-1.5 text-gray-600 bg-black/5 px-2 py-1 rounded-md w-fit">
+                            <Calendar className="w-3.5 h-3.5 text-[#FF006E] flex-shrink-0" />
+                            <span className="font-lexend font-black text-[10px] sm:text-xs uppercase tracking-wide">
+                              {event.date}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Title and description */}
+                        <div className="text-left">
+                          <h4 className="font-lilita text-base sm:text-lg text-black uppercase leading-tight mb-2">
+                            {event.title}
+                          </h4>
+                          <p className="font-lexend text-[11px] sm:text-xs text-gray-600 leading-relaxed font-semibold">
+                            {event.desc}
+                          </p>
+                        </div>
+                      </motion.div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Vacation & Outro Card */}
+              <div className="mt-24 relative z-10 flex justify-center">
+                <div className="absolute left-6 md:left-1/2 -translate-x-1/2 -top-12 w-8 h-8 rounded-full bg-[#06D6A0] border-3 border-black flex items-center justify-center shadow-neo-sm z-20">
+                  <span className="text-xs">🏁</span>
+                </div>
+
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  onViewportEnter={() => {
+                    // Trigger confetti when card scrolls into view
+                    import("canvas-confetti").then((confetti) => {
+                      confetti.default({ particleCount: 80, spread: 80, origin: { y: 0.8 } });
+                    });
+                  }}
+                  transition={{ duration: 0.5, type: "spring" }}
+                  className="w-[calc(100%-48px)] ml-12 md:ml-0 md:max-w-lg bg-[#FFBE0B] border-4 border-black p-6 sm:p-8 rounded-2xl shadow-neo-lg text-center relative rotate-[-1deg]"
+                >
+                  <div className="absolute -top-5 -left-5 w-12 h-12 bg-[#FF006E] border-3 border-black rounded-full flex items-center justify-center rotate-[-12deg] shadow-neo-sm text-lg select-none">
+                    💖
+                  </div>
+
+                  <h3 className="font-lilita text-2xl sm:text-4xl text-black uppercase leading-none mb-4 tracking-wider">
+                    Setengah Perjalanan Terlewati!
+                  </h3>
+                  
+                  <div className="space-y-3 font-lexend font-extrabold text-sm sm:text-base text-black bg-white/40 border-2.5 border-black/25 p-4 rounded-xl mb-6 select-text leading-relaxed">
+                    <p>“Tetap Semangat untuk setengah perjalanan Berikutnya!” 🚀</p>
+                    <p className="text-[#FF006E] text-base sm:text-lg">“Selamat Liburan Guys!! 🎉🏖️”</p>
+                  </div>
+
+                  <button
+                    onClick={() => setTimelineOpen(false)}
+                    className="px-6 py-2.5 bg-[#1A1D20] text-white hover:bg-black font-lexend font-black text-xs uppercase tracking-wider border-2.5 border-black rounded-lg shadow-neo-sm active:translate-y-0.5 active:shadow-none transition-all cursor-pointer inline-flex items-center gap-1.5"
+                  >
+                    Tutup Linimasa
+                  </button>
+                </motion.div>
+              </div>
+
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
