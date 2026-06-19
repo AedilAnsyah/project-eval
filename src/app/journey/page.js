@@ -243,9 +243,58 @@ const TIMELINE_EVENTS = [
   }
 ];
 
+// Custom Map Pin components matching the reference image
+const GreenPin = () => (
+  <svg width="46" height="54" viewBox="0 0 24 28" fill="none" className="filter drop-shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] select-none">
+    <path 
+      d="M12 2C6.48 2 2 6.48 2 12C2 17.5 12 26 12 26C12 26 22 17.5 22 12C22 6.48 17.52 2 12 2Z" 
+      fill="#06D6A0" 
+      stroke="black" 
+      strokeWidth="2.5" 
+      strokeLinejoin="round" 
+    />
+    <circle cx="12" cy="11.5" r="5" fill="white" stroke="black" strokeWidth="2.5" />
+    <text x="12" y="14" fontSize="6.5" textAnchor="middle" fontFamily="sans-serif">🏠</text>
+  </svg>
+);
+
+const RedPin = () => (
+  <svg width="46" height="54" viewBox="0 0 24 28" fill="none" className="filter drop-shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] select-none">
+    <path 
+      d="M12 2C6.48 2 2 6.48 2 12C2 17.5 12 26 12 26C12 26 22 17.5 22 12C22 6.48 17.52 2 12 2Z" 
+      fill="#FF6B6B" 
+      stroke="black" 
+      strokeWidth="2.5" 
+      strokeLinejoin="round" 
+    />
+    <circle cx="12" cy="11.5" r="5" fill="white" stroke="black" strokeWidth="2.5" />
+    <text x="12" y="14" fontSize="6.5" textAnchor="middle" fontFamily="sans-serif">🏁</text>
+  </svg>
+);
+
+// Winding/curving path generator for varied timeline routes
+const getTimelinePathD = (index) => {
+  const paths = [
+    // S-curve winding left then right
+    "M 50 0 C 15 25, 85 75, 50 100",
+    // Deep right bulge
+    "M 50 0 C 100 30, 100 70, 50 100",
+    // Reverse S-curve winding right then left
+    "M 50 0 C 85 25, 15 75, 50 100",
+    // Deep left bulge
+    "M 50 0 C 0 30, 0 70, 50 100",
+    // Gentle right curve
+    "M 50 0 C 75 30, 75 70, 50 100",
+    // Gentle left curve
+    "M 50 0 C 25 30, 25 70, 50 100"
+  ];
+  return paths[index % paths.length];
+};
+
 export default function JourneyPage() {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   // Simulate Windows 95/Y2K preloader boot progress
   useEffect(() => {
@@ -416,20 +465,23 @@ export default function JourneyPage() {
           </p>
         </header>
 
-        {/* Vertical Path road line (animated flowing roadmap line) */}
-        <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-[350px] bottom-[320px] w-2 z-0 pointer-events-none">
-          <svg className="w-full h-full overflow-visible" fill="none">
-            <line 
-              x1="4" 
-              y1="0" 
-              x2="4" 
-              y2="100%" 
-              stroke="black" 
-              strokeWidth="4" 
-              strokeOpacity="0.3"
-              className="animate-dash-flow" 
-            />
-          </svg>
+        {/* Start Pin (Green map pin with house) */}
+        <div className="relative h-20 mb-10 flex justify-start md:justify-center z-10">
+          <div className="absolute left-6 md:left-1/2 -translate-x-1/2 -top-2 flex flex-col items-center select-none z-20">
+            <GreenPin />
+          </div>
+          
+          {/* Line from Start Pin to first milestone */}
+          <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-[24px] bottom-[-44px] w-16 md:w-32 z-0 pointer-events-none">
+            <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
+              <path 
+                d="M 50 0 C 65 30, 35 70, 50 100" 
+                stroke="#1A1D20" 
+                strokeWidth="4" 
+                className="animate-dash-flow" 
+              />
+            </svg>
+          </div>
         </div>
 
         {/* Milestones mapped */}
@@ -439,15 +491,40 @@ export default function JourneyPage() {
             return (
               <div 
                 key={event.id}
-                className={`flex flex-col md:flex-row items-start md:items-center w-full ${
+                className={`flex flex-col md:flex-row items-start w-full relative ${
                   isLeft ? 'md:flex-row-reverse' : ''
                 }`}
               >
+                {/* Wavy snaking path line segment (Responsive SVG Bezier curve connecting nodes) */}
+                {index < TIMELINE_EVENTS.length - 1 ? (
+                  <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-[44px] bottom-[-124px] w-16 md:w-32 z-0 pointer-events-none">
+                    <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
+                      <path 
+                        d={getTimelinePathD(index)} 
+                        stroke="#1A1D20" 
+                        strokeWidth="4" 
+                        className="animate-dash-flow" 
+                      />
+                    </svg>
+                  </div>
+                ) : (
+                  /* Line connecting last milestone to the Finish Pin */
+                  <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-[44px] bottom-[-76px] w-16 md:w-32 z-0 pointer-events-none">
+                    <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" fill="none">
+                      <path 
+                        d="M 50 0 C 35 30, 65 70, 50 100" 
+                        stroke="#1A1D20" 
+                        strokeWidth="4" 
+                        className="animate-dash-flow" 
+                      />
+                    </svg>
+                  </div>
+                )}
                 {/* Placeholder space on opposite side for desktop */}
                 <div className="hidden md:block w-1/2"></div>
 
                 {/* The timeline node dot with active emoji */}
-                <div className="absolute left-6 md:left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-[#FFBE0B] border-3 border-black flex items-center justify-center shadow-neo-sm z-20 group hover:scale-110 hover:bg-[#FF006E] transition-all cursor-default">
+                <div className="absolute left-6 md:left-1/2 -translate-x-1/2 top-6 w-10 h-10 rounded-full bg-[#FFBE0B] border-3 border-black flex items-center justify-center shadow-neo-sm z-20 group hover:scale-110 hover:bg-[#FF006E] transition-all cursor-default">
                   <span className="text-sm select-none group-hover:scale-125 transition-transform">{event.emoji}</span>
                 </div>
 
@@ -457,7 +534,7 @@ export default function JourneyPage() {
                   whileInView={{ opacity: 1, x: 0, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.5, type: "spring", stiffness: 80 }}
-                  className={`w-[calc(100%-48px)] ml-12 md:ml-0 md:w-[45%] bg-white border-3 border-black p-4 sm:p-5 rounded-2xl shadow-neo-md relative group hover:scale-[1.02] hover:shadow-neo-lg transition-all ${event.tilt}`}
+                  className={`w-[calc(100%-48px)] ml-12 md:ml-0 md:w-[45%] bg-white border-3 border-black p-4 sm:p-5 rounded-2xl shadow-neo-md relative z-10 group hover:scale-[1.02] hover:shadow-neo-lg transition-all ${event.tilt}`}
                 >
                   
                   {/* Decorative tape sticker on top of polaroid */}
@@ -468,14 +545,24 @@ export default function JourneyPage() {
                   {/* Event Photo with Polaroid styling */}
                   <div className="bg-[#FAF7F0] border-2.5 border-black p-2.5 rounded shadow-inner mb-4 relative overflow-hidden bg-dot-pattern">
                     {event.img ? (
-                      <div className="border border-black/10 rounded bg-white p-1.5 flex items-center justify-center overflow-hidden">
+                      <div 
+                        onClick={() => setSelectedPhoto(event)}
+                        className="border border-black/10 rounded bg-white p-1.5 flex items-center justify-center overflow-hidden cursor-zoom-in hover:border-black/30 transition-all relative group/img"
+                      >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img 
                           src={event.img} 
                           alt={event.title}
                           loading="lazy"
-                          className="w-full h-auto max-h-[380px] object-contain transition-all duration-500 group-hover:scale-[1.02] rounded-sm select-none"
+                          className="w-full h-auto max-h-[380px] object-contain transition-all duration-500 group-hover/img:scale-[1.02] rounded-sm select-none"
                         />
+                        {/* Interactive Magnifying Glass/Zoom Overlay */}
+                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center pointer-events-none z-10">
+                          <div className="bg-[#FFFDF0] border-2.5 border-black px-3.5 py-2 rounded-xl shadow-neo-sm font-lilita text-[10px] sm:text-xs text-black uppercase tracking-wider scale-90 group-hover/img:scale-100 transition-all duration-300 flex items-center gap-1.5">
+                            <span>🔎</span>
+                            <span>Perbesar Foto</span>
+                          </div>
+                        </div>
                       </div>
                     ) : (
                       <div className="w-full aspect-[4/3] border-3 border-dashed border-gray-400 rounded bg-gray-50 flex flex-col items-center justify-center text-gray-500 gap-2 select-none">
@@ -524,8 +611,9 @@ export default function JourneyPage() {
 
         {/* Outro Card at the bottom */}
         <div className="mt-28 relative z-10 flex justify-center">
-          <div className="absolute left-6 md:left-1/2 -translate-x-1/2 -top-12 w-10 h-10 rounded-full bg-[#06D6A0] border-3 border-black flex items-center justify-center shadow-neo-sm z-20">
-            <span className="text-sm select-none">🏁</span>
+          {/* Finish Pin (Red map pin with checkered flag) */}
+          <div className="absolute left-6 md:left-1/2 -translate-x-1/2 -top-16 flex flex-col items-center select-none z-20">
+            <RedPin />
           </div>
 
           <motion.div 
@@ -589,6 +677,65 @@ export default function JourneyPage() {
         </div>
 
       </div>
+
+      {/* PHOTO ZOOM MODAL OVERLAY */}
+      <AnimatePresence>
+        {selectedPhoto && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md cursor-zoom-out"
+            onClick={() => setSelectedPhoto(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, rotate: -2 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0.9, rotate: 2 }}
+              transition={{ type: "spring", damping: 20 }}
+              className="bg-[#FFFDF0] border-4 border-black p-4 sm:p-6 rounded-sm max-w-2xl w-full relative shadow-neo-xl cursor-default"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Win95 Close button */}
+              <button 
+                onClick={() => setSelectedPhoto(null)}
+                className="absolute -top-3.5 -right-3.5 w-8 h-8 rounded-full bg-[#FF6B6B] hover:bg-[#e05656] text-black border-3 border-black shadow-[2px_2px_0px_#000] active:translate-y-0.5 active:shadow-none cursor-pointer flex items-center justify-center font-lilita text-sm z-50"
+                title="Tutup"
+              >
+                ✕
+              </button>
+
+              {/* Photo Frame */}
+              <div className="bg-white border-3 border-black p-2.5 rounded shadow-inner mb-4 flex items-center justify-center">
+                <img 
+                  src={selectedPhoto.img} 
+                  alt={selectedPhoto.title} 
+                  className="w-full h-auto max-h-[55vh] sm:max-h-[60vh] object-contain rounded-sm select-none"
+                />
+              </div>
+
+              {/* Details */}
+              <div className="bg-[#FAF7F0] border-2 border-black p-3.5 rounded text-left">
+                <div className="flex items-center justify-between border-b border-black/5 pb-2 mb-2 select-none">
+                  <div className="flex items-center gap-1.5 text-gray-600">
+                    <Calendar className="w-4 h-4 text-[#FF006E]" />
+                    <span className="font-handwriting font-black text-sm">{selectedPhoto.date}</span>
+                  </div>
+                  <span className="font-lilita text-xs uppercase text-[#3A86FF] bg-[#3A86FF]/10 px-2 py-0.5 border border-[#3A86FF]/20 rounded-md">
+                    {selectedPhoto.emoji} {selectedPhoto.id.toUpperCase()}
+                  </span>
+                </div>
+                <h4 className="font-lilita text-xl sm:text-2xl text-black uppercase leading-tight mb-2">
+                  {selectedPhoto.title}
+                </h4>
+                <p className="font-lexend text-xs sm:text-sm text-gray-700 leading-relaxed font-semibold">
+                  {selectedPhoto.desc}
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
