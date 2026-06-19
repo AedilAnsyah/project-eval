@@ -15,7 +15,9 @@ import {
   Image as ImageIcon,
   CheckCircle,
   EyeOff,
-  UserCheck
+  UserCheck,
+  Camera,
+  Video
 } from "lucide-react";
 import { getMemberById, addFeedback, updateMember, getMembers } from "@/lib/db";
 import { getSession, isAdmin } from "@/lib/session";
@@ -78,6 +80,20 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   const [slot3EmojiInput, setSlot3EmojiInput] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [photoSource, setPhotoSource] = useState("profile"); // 'profile', 'kabinet', 'departemen'
+
+  // Camera & Custom Slot Photo States
+  const [customSlot1Photo, setCustomSlot1Photo] = useState(null);
+  const [customSlot2Photo, setCustomSlot2Photo] = useState(null);
+  const [customSlot3Photo, setCustomSlot3Photo] = useState(null);
+  const [cameraModalOpen, setCameraModalOpen] = useState(false);
+  const [activeCameraSlot, setActiveCameraSlot] = useState(1);
+  const [cameraDevices, setCameraDevices] = useState([]);
+  const [activeDeviceId, setActiveDeviceId] = useState("");
+  const [isCameraLoading, setIsCameraLoading] = useState(false);
+  const [cameraFlash, setCameraFlash] = useState(false); // for capture visual effect
+
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
 
   // Letter Souvenir Print State
   const letterPrintRef = useRef(null);
@@ -207,6 +223,121 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
       });
     }, 1200);
   };
+
+  // Camera Helper Functions
+  const startCamera = async (deviceId = "") => {
+    setIsCameraLoading(true);
+    // Cleanup any existing stream first
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+    }
+
+    try {
+      const constraints = {
+        video: deviceId ? { deviceId: { exact: deviceId }, width: 600, height: 600 } : { facingMode: "user", width: 600, height: 600 },
+        audio: false
+      };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      streamRef.current = stream;
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+
+      // Enumerate available video inputs for switching cameras
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === "videoinput");
+      setCameraDevices(videoDevices);
+      
+      // If we used default camera, set its device ID as active
+      if (!deviceId && videoDevices.length > 0) {
+        const activeTrack = stream.getVideoTracks()[0];
+        const activeLabel = activeTrack?.label;
+        const matchingDevice = videoDevices.find(d => d.label === activeLabel);
+        setActiveDeviceId(matchingDevice?.deviceId || videoDevices[0].deviceId);
+      } else if (deviceId) {
+        setActiveDeviceId(deviceId);
+      }
+    } catch (err) {
+      console.error("Failed to access camera:", err);
+      alert("Gagal mengakses kamera. Pastikan Anda memberikan izin akses kamera.");
+      setCameraModalOpen(false);
+    } finally {
+      setIsCameraLoading(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  const switchCamera = async (deviceId) => {
+    setActiveDeviceId(deviceId);
+    await startCamera(deviceId);
+  };
+
+  const openCameraForSlot = (slotIdx) => {
+    setActiveCameraSlot(slotIdx);
+    setCameraModalOpen(true);
+    setTimeout(() => {
+      startCamera();
+    }, 100);
+  };
+
+  const handleCapture = () => {
+    if (!videoRef.current) return;
+    
+    setCameraFlash(true);
+    setTimeout(() => setCameraFlash(false), 200);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 600;
+    canvas.height = 600;
+    const ctx = canvas.getContext("2d");
+    
+    const video = videoRef.current;
+    const vWidth = video.videoWidth;
+    const vHeight = video.videoHeight;
+    const minSize = Math.min(vWidth, vHeight);
+    const sx = (vWidth - minSize) / 2;
+    const sy = (vHeight - minSize) / 2;
+
+    ctx.drawImage(video, sx, sy, minSize, minSize, 0, 0, 600, 600);
+    const base64Image = canvas.toDataURL("image/webp", 0.85);
+
+    if (activeCameraSlot === 1) {
+      setCustomSlot1Photo(base64Image);
+    } else if (activeCameraSlot === 2) {
+      setCustomSlot2Photo(base64Image);
+    } else if (activeCameraSlot === 3) {
+      setCustomSlot3Photo(base64Image);
+    }
+
+    stopCamera();
+    setCameraModalOpen(false);
+  };
+
+  const removeCustomPhoto = (slotIdx) => {
+    if (slotIdx === 1) setCustomSlot1Photo(null);
+    if (slotIdx === 2) setCustomSlot2Photo(null);
+    if (slotIdx === 3) setCustomSlot3Photo(null);
+  };
+
+  // Stop camera when component unmounts
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
 
   // Handle feedback form submit
   const handleFeedbackSubmit = async (e) => {
@@ -867,6 +998,7 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
 
   // Get photobox photo URL based on active source selection
   const getPhotoboxPhotoUrl = () => {
+    if (customSlot1Photo) return customSlot1Photo;
     if (photoSource === "kabinet") return "/Foto Kabinet.webp";
     if (photoSource === "departemen") return getDeptPhotoUrl(member?.departemen);
     return member?.foto_url;
@@ -875,14 +1007,15 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   // Render photo slot
   const renderPhotoSlot = (extraClass = "") => {
     const finalSlot1Emoji = slot1Emoji === "custom" ? slot1EmojiInput : slot1Emoji;
-    const isGroupPhoto = photoSource === "kabinet" || photoSource === "departemen";
+    const isGroupPhoto = !customSlot1Photo && (photoSource === "kabinet" || photoSource === "departemen");
+    const photoUrl = customSlot1Photo || getPhotoboxPhotoUrl();
     
     return (
       <div className={`w-[190px] aspect-square border-3 p-1.5 flex flex-col justify-between shadow-md relative ${getSlotBgClass()} ${extraClass}`}>
         <div className={`w-full aspect-square border border-black overflow-hidden relative ${isGroupPhoto ? 'bg-white' : 'bg-gray-100'}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
-            src={getPhotoboxPhotoUrl()} 
+            src={photoUrl} 
             alt="photobox-avatar" 
             className={`w-full h-full animate-fade-in ${isGroupPhoto ? 'object-contain' : 'object-cover'}`} 
             style={{ filter: getFilterStyle() }}
@@ -909,15 +1042,17 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
     const finalSlot2Emoji = slot2Emoji === "custom" ? slot2EmojiInput : slot2Emoji;
     const deptPhotoUrl = getDeptPhotoUrl(member?.departemen);
     const labelText = member?.departemen === "Executive Board" ? "Executive Board" : member?.departemen;
+    const photoUrl = customSlot2Photo || deptPhotoUrl;
+    const isCustom = !!customSlot2Photo;
 
     return (
       <div className={`w-[190px] aspect-square border-3 p-1.5 flex flex-col justify-between shadow-md relative ${getSlotBgClass()} ${extraClass}`}>
-        <div className="w-full aspect-square border border-black overflow-hidden bg-white relative">
+        <div className={`w-full aspect-square border border-black overflow-hidden relative ${isCustom ? 'bg-gray-100' : 'bg-white'}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
-            src={deptPhotoUrl} 
+            src={photoUrl} 
             alt="department-photo" 
-            className="w-full h-full object-contain animate-fade-in" 
+            className={`w-full h-full animate-fade-in ${isCustom ? 'object-cover' : 'object-contain'}`} 
             style={{ filter: getFilterStyle() }}
           />
           
@@ -938,15 +1073,17 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
   // Render cabinet photo slot
   const renderCabinetPhotoSlot = (extraClass = "") => {
     const finalSlot3Emoji = slot3Emoji === "custom" ? slot3EmojiInput : slot3Emoji;
+    const photoUrl = customSlot3Photo || "/Foto Kabinet.webp";
+    const isCustom = !!customSlot3Photo;
     
     return (
       <div className={`w-[190px] aspect-square border-3 p-1.5 flex flex-col justify-between shadow-md relative ${getSlotBgClass()} ${extraClass}`}>
-        <div className="w-full aspect-square border border-black overflow-hidden bg-white relative">
+        <div className={`w-full aspect-square border border-black overflow-hidden relative ${isCustom ? 'bg-gray-100' : 'bg-white'}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
-            src="/Foto Kabinet.webp" 
+            src={photoUrl} 
             alt="cabinet-photo" 
-            className="w-full h-full object-contain animate-fade-in" 
+            className={`w-full h-full animate-fade-in ${isCustom ? 'object-cover' : 'object-contain'}`} 
             style={{ filter: getFilterStyle() }}
           />
           
@@ -1661,6 +1798,91 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
                   </div>
                 </div>
 
+                {/* 8. Ambil Foto Kamera (Kustomisasi) */}
+                <div className="space-y-2.5 p-3 bg-white border-2 border-black rounded-lg shadow-neo-sm">
+                  <span className="block font-black text-xs uppercase text-black border-b pb-1 flex items-center gap-1.5">
+                    <Camera className="w-4 h-4 text-[#FF006E]" />
+                    📸 Ambil Foto via Kamera
+                  </span>
+                  <p className="text-[10px] text-gray-500 font-semibold leading-relaxed">
+                    Ambil foto langsung melalui kamera laptop/HP Anda untuk mengisi slot foto di photobox.
+                  </p>
+                  <div className="space-y-2">
+                    {/* Slot 1 Button */}
+                    <div className="flex items-center justify-between gap-2 border-b border-black/5 pb-2">
+                      <span className="text-[10px] font-bold text-gray-700">Slot 1 (Utama):</span>
+                      <div className="flex gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => openCameraForSlot(1)}
+                          className="bg-[#3A86FF] hover:bg-[#206be6] text-white font-lexend font-black px-2.5 py-1.5 border-2 border-black rounded-md text-[10px] cursor-pointer shadow-neo-sm active:translate-y-0.5 active:shadow-none"
+                        >
+                          {customSlot1Photo ? "Ambil Ulang 📸" : "Ambil Foto 📸"}
+                        </button>
+                        {customSlot1Photo && (
+                          <button
+                            type="button"
+                            onClick={() => removeCustomPhoto(1)}
+                            className="bg-[#FF6B6B] hover:bg-[#e05656] text-black font-lexend font-black px-2.5 py-1.5 border-2 border-black rounded-md text-[10px] cursor-pointer shadow-neo-sm active:translate-y-0.5 active:shadow-none"
+                          >
+                            Hapus
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Slot 2 Button - only show if layout uses slot 2 */}
+                    {photoboxLayout !== "trio_strip" && photoboxLayout !== "classic_polaroid" && (
+                      <div className="flex items-center justify-between gap-2 border-b border-black/5 pb-2">
+                        <span className="text-[10px] font-bold text-gray-700">Slot 2 (Tengah):</span>
+                        <div className="flex gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => openCameraForSlot(2)}
+                            className="bg-[#3A86FF] hover:bg-[#206be6] text-white font-lexend font-black px-2.5 py-1.5 border-2 border-black rounded-md text-[10px] cursor-pointer shadow-neo-sm active:translate-y-0.5 active:shadow-none"
+                          >
+                            {customSlot2Photo ? "Ambil Ulang 📸" : "Ambil Foto 📸"}
+                          </button>
+                          {customSlot2Photo && (
+                            <button
+                              type="button"
+                              onClick={() => removeCustomPhoto(2)}
+                              className="bg-[#FF6B6B] hover:bg-[#e05656] text-black font-lexend font-black px-2.5 py-1.5 border-2 border-black rounded-md text-[10px] cursor-pointer shadow-neo-sm active:translate-y-0.5 active:shadow-none"
+                            >
+                              Hapus
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Slot 3 Button - only show if layout uses slot 3 */}
+                    {(photoboxLayout === "vertical_strip" || photoboxLayout === "trio_strip") && (
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-bold text-gray-700">Slot 3 (Bawah):</span>
+                        <div className="flex gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => openCameraForSlot(3)}
+                            className="bg-[#3A86FF] hover:bg-[#206be6] text-white font-lexend font-black px-2.5 py-1.5 border-2 border-black rounded-md text-[10px] cursor-pointer shadow-neo-sm active:translate-y-0.5 active:shadow-none"
+                          >
+                            {customSlot3Photo ? "Ambil Ulang 📸" : "Ambil Foto 📸"}
+                          </button>
+                          {customSlot3Photo && (
+                            <button
+                              type="button"
+                              onClick={() => removeCustomPhoto(3)}
+                              className="bg-[#FF6B6B] hover:bg-[#e05656] text-black font-lexend font-black px-2.5 py-1.5 border-2 border-black rounded-md text-[10px] cursor-pointer shadow-neo-sm active:translate-y-0.5 active:shadow-none"
+                            >
+                              Hapus
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* Download PDF Button */}
                 <div className="pt-2">
                   <button
@@ -1730,12 +1952,12 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
                     {photoboxLayout === "classic_polaroid" && (
                       <div className={`w-[210px] p-3 border-3 flex flex-col justify-between items-center shadow-lg rounded-sm relative z-10 ${getSlotBgClass()}`}>
                         {/* Top Photo */}
-                        <div className={`w-full aspect-square border border-black overflow-hidden relative ${photoSource !== 'profile' ? 'bg-white' : 'bg-gray-100'}`}>
+                        <div className={`w-full aspect-square border border-black overflow-hidden relative ${(!customSlot1Photo && photoSource !== 'profile') ? 'bg-white' : 'bg-gray-100'}`}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img 
                             src={getPhotoboxPhotoUrl()} 
                             alt="photobox-avatar" 
-                            className={`w-full h-full ${photoSource !== 'profile' ? 'object-contain' : 'object-cover'}`} 
+                            className={`w-full h-full ${(!customSlot1Photo && photoSource !== 'profile') ? 'object-contain' : 'object-cover'}`} 
                             style={{ filter: getFilterStyle() }}
                           />
                           {slot1Emoji && slot1Emoji !== "none" && (
@@ -2320,6 +2542,96 @@ export default function LetterClient({ memberId, initialMember, initialKoorName 
           </div>
           )}
 
+        </div>
+      )}
+
+      {/* ----------------------------------------------------
+          CAMERA CAPTURE MODAL
+          ---------------------------------------------------- */}
+      {cameraModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 overlay-polka-dot">
+          <div className="bg-[#FFFDF0] border-4 border-black p-6 rounded-2xl max-w-md w-full relative shadow-neo-xl">
+            {/* Visual Flash Overlay */}
+            {cameraFlash && (
+              <div 
+                className="absolute inset-0 bg-white z-50 pointer-events-none rounded-2xl"
+                style={{ transition: "opacity 0.2s ease-out" }}
+              ></div>
+            )}
+
+            <div className="border-b-2.5 border-black/10 pb-3 mb-4 text-center">
+              <h3 className="font-lilita text-lg text-black uppercase flex items-center justify-center gap-1.5">
+                <Camera className="w-5 h-5 text-[#FF006E]" />
+                Ambil Foto Kamera (Slot {activeCameraSlot})
+              </h3>
+              <p className="text-[10px] font-lexend font-semibold text-gray-500">
+                Posisikan wajah Anda di dalam area kotak preview di bawah.
+              </p>
+            </div>
+
+            {/* Video Preview Viewport */}
+            <div className="flex justify-center my-4 relative">
+              <div className="w-[300px] h-[300px] border-4 border-black relative overflow-hidden bg-gray-900 shadow-inner rounded-lg flex items-center justify-center">
+                {isCameraLoading ? (
+                  <div className="text-center text-white space-y-2">
+                    <div className="w-8 h-8 border-4 border-t-[#06D6A0] border-white rounded-full animate-spin mx-auto"></div>
+                    <p className="text-[10px] font-lexend font-bold">Mengaktifkan Kamera...</p>
+                  </div>
+                ) : (
+                  <video 
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover transform scale-x-[-1]"
+                  />
+                )}
+                <div className="absolute inset-4 border-2 border-dashed border-white/30 pointer-events-none rounded-md"></div>
+              </div>
+            </div>
+
+            {/* Camera Select Device Option */}
+            {cameraDevices.length > 1 && (
+              <div className="mb-4">
+                <label className="block font-lexend font-bold text-[9px] uppercase text-gray-500 mb-1">Pilih Kamera</label>
+                <select
+                  value={activeDeviceId}
+                  onChange={(e) => switchCamera(e.target.value)}
+                  className="w-full px-2 py-1 border-2 border-black rounded text-xs text-black bg-white cursor-pointer focus:outline-none"
+                >
+                  {cameraDevices.map(device => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label || `Kamera ${device.deviceId.slice(0, 5)}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Action Control Buttons */}
+            <div className="flex gap-2 pt-2 border-t-2 border-black/10">
+              <button
+                type="button"
+                onClick={() => {
+                  stopCamera();
+                  setCameraModalOpen(false);
+                }}
+                className="flex-1 bg-white hover:bg-gray-100 text-black font-lexend font-black py-2 border-3 border-black rounded-lg shadow-neo-sm text-xs cursor-pointer active:translate-y-0.5 active:shadow-none transition-all"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleCapture}
+                disabled={isCameraLoading}
+                className="flex-1 bg-[#06D6A0] hover:bg-[#05ba8c] text-black font-lexend font-black py-2 border-3 border-black rounded-lg shadow-neo-sm text-xs cursor-pointer active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                <Camera className="w-4 h-4" />
+                Ambil Foto
+              </button>
+            </div>
+
+          </div>
         </div>
       )}
     </div>
