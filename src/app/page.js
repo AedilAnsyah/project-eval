@@ -304,10 +304,6 @@ export default function Home() {
     loadData();
   }, []);
 
-  // Reset pagination count on search or filter change
-  useEffect(() => {
-    setVisibleCount(16);
-  }, [selectedDept, searchQuery]);
 
   // Stamp Badge Overlay Renderer
   const renderStamps = (stampsStr) => {
@@ -350,7 +346,7 @@ export default function Home() {
     };
     
     return (
-      <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
+      <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-row flex-wrap sm:flex-col gap-1 z-10 pointer-events-none max-w-[95%] sm:max-w-max">
         {list.map((stampStr, idx) => {
           const parsed = parseStamp(stampStr);
           const style = STAMP_STYLES[parsed.text] || { 
@@ -361,10 +357,10 @@ export default function Home() {
           return (
             <div 
               key={idx} 
-              className={`px-1.5 py-0.5 border-2 ${style.border || 'border-black'} ${style.bg} ${style.text} font-lilita text-[8px] uppercase tracking-wider shadow-neo-sm rotate-[-4deg] rounded-sm flex items-center gap-0.5`}
+              className={`px-1 py-0.5 sm:px-1.5 sm:py-0.5 border-[1.5px] sm:border-2 ${style.border || 'border-black'} ${style.bg} ${style.text} font-lilita text-[7px] sm:text-[8px] uppercase tracking-wider shadow-[1px_1px_0px_rgba(0,0,0,1)] sm:shadow-neo-sm rotate-[-3deg] sm:rotate-[-4deg] rounded-sm flex items-center gap-0.5`}
             >
               <span>{parsed.emoji}</span>
-              <span>{parsed.text}</span>
+              <span className={idx > 0 ? "hidden sm:inline" : ""}>{parsed.text}</span>
             </div>
           );
         })}
@@ -551,7 +547,10 @@ export default function Home() {
               type="text" 
               placeholder="Cari nama anggota atau jabatan..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setVisibleCount(16);
+              }}
               className="w-full pl-10 pr-4 py-3 border-3 border-black rounded-lg font-lexend font-semibold text-black placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#3A86FF]/30 focus:border-[#3A86FF] transition-all bg-[#F9F6F0]"
             />
             <Search className="absolute left-3.5 top-3.5 w-5 h-5 text-gray-500" />
@@ -566,7 +565,10 @@ export default function Home() {
               return (
                 <button
                   key={deptName}
-                  onClick={() => setSelectedDept(deptName)}
+                  onClick={() => {
+                    setSelectedDept(deptName);
+                    setVisibleCount(16);
+                  }}
                   style={{ backgroundColor: active ? deptInfo.color : '#FFFFFF' }}
                   className={`flex-shrink-0 px-3 py-2 border-2.5 border-black rounded-lg font-lexend font-bold text-xs uppercase cursor-pointer transition-all duration-150
                     ${active ? `${deptInfo.text} scale-105 shadow-neo-sm -translate-y-0.5` : 'bg-white hover:bg-gray-100 text-[#1A1D20] shadow-none'}
