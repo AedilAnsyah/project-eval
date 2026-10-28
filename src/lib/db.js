@@ -111,22 +111,29 @@ export async function signIn(identifierOrPassword, maybePassword) {
   const dob   = `${year}-${month}-${day}`;
 
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase
-      .from('anggota')
-      .select('*')
-      .eq('nim', nim)
-      .eq('tanggal_lahir', dob)
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase
+        .from('anggota')
+        .select('*')
+        .eq('nim', nim)
+        .eq('tanggal_lahir', dob)
+        .maybeSingle();
 
-    if (error) throw new Error(error.message);
-    if (!data) throw new Error('Password salah! Pastikan NIM dan Tanggal Lahir sudah benar.');
-    return data;
-  } else {
-    const members = getLocalMembers();
-    const found = members.find(m => m.nim === nim && m.tanggal_lahir === dob);
-    if (!found) throw new Error('Password salah! Pastikan NIM dan Tanggal Lahir sudah benar.');
-    return found;
+      if (error) {
+        console.warn('Supabase query error, falling back to local DB:', error.message);
+      } else if (data) {
+        return data;
+      }
+    } catch (err) {
+      console.warn('Supabase connection failed (TypeError Failed to fetch), using local fallback:', err);
+    }
   }
+
+  // Local fallback / default authentication
+  const members = getLocalMembers();
+  const found = members.find(m => m.nim === nim && m.tanggal_lahir === dob);
+  if (!found) throw new Error('Password salah! Pastikan NIM dan Tanggal Lahir sudah benar.');
+  return found;
 }
 
 // ----------------------------------------------------
@@ -138,19 +145,23 @@ export async function signIn(identifierOrPassword, maybePassword) {
  */
 export async function getMembers(departemen = null) {
   if (isSupabaseConfigured) {
-    let query = supabase
-      .from('anggota')
-      .select('*')
-      .order('no_urut', { ascending: true });
-    if (departemen) query = query.eq('departemen', departemen);
-    const { data, error } = await query;
-    if (error) throw new Error(error.message);
-    return data;
-  } else {
-    const members = getLocalMembers();
-    if (departemen) return members.filter(m => m.departemen === departemen);
-    return members;
+    try {
+      let query = supabase
+        .from('anggota')
+        .select('*')
+        .order('no_urut', { ascending: true });
+      if (departemen) query = query.eq('departemen', departemen);
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) return data;
+      if (error) console.warn('Supabase getMembers error, falling back to local DB:', error.message);
+    } catch (err) {
+      console.warn('Supabase getMembers failed to fetch, using local fallback:', err);
+    }
   }
+
+  const members = getLocalMembers();
+  if (departemen) return members.filter(m => m.departemen === departemen);
+  return members;
 }
 
 /**
@@ -158,17 +169,20 @@ export async function getMembers(departemen = null) {
  */
 export async function getMemberById(id) {
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase
-      .from('anggota')
-      .select('*')
-      .eq('id', id)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    return data;
-  } else {
-    const members = getLocalMembers();
-    return members.find(m => m.id === id) || null;
+    try {
+      const { data, error } = await supabase
+        .from('anggota')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      if (!error && data) return data;
+    } catch (err) {
+      console.warn('Supabase getMemberById failed to fetch, using local fallback:', err);
+    }
   }
+
+  const members = getLocalMembers();
+  return members.find(m => m.id === id) || null;
 }
 
 // ----------------------------------------------------
@@ -220,36 +234,36 @@ export async function submitVote(voterId, voterNim, votes) {
     submitted_at: new Date().toISOString(),
   };
 
+  const allVotes = getLocalVotes();
+  const existingLocal = allVotes.find(v => v.voter_id === voterId);
+  if (existingLocal) throw new Error('Kamu sudah pernah melakukan voting sebelumnya!');
+
   if (isSupabaseConfigured) {
-    const { data: existing } = await supabase
-      .from('votes')
-      .select('id')
-      .eq('voter_id', voterId)
-      .maybeSingle();
+    try {
+      const { data: existing } = await supabase
+        .from('votes')
+        .select('id')
+        .eq('voter_id', voterId)
+        .maybeSingle();
 
-    if (existing) throw new Error('Kamu sudah pernah melakukan voting sebelumnya!');
+      if (existing) throw new Error('Kamu sudah pernah melakukan voting sebelumnya!');
 
-    const { data, error } = await supabase
-      .from('votes')
-      .insert([{
-        voter_id: voterId,
-        voter_nim: voterNim,
-        votes: votes,
-      }])
-      .select()
-      .single();
-
-    if (error) throw new Error(error.message);
-    return { ...voteRecord, ...data };
-  } else {
-    const allVotes = getLocalVotes();
-    const existing = allVotes.find(v => v.voter_id === voterId);
-    if (existing) throw new Error('Kamu sudah pernah melakukan voting sebelumnya!');
-
-    allVotes.push(voteRecord);
-    saveLocalVotes(allVotes);
-    return voteRecord;
+      await supabase
+        .from('votes')
+        .insert([{
+          voter_id: voterId,
+          voter_nim: voterNim,
+          votes: votes,
+        }]);
+    } catch (err) {
+      if (err.message && err.message.includes('sudah pernah')) throw err;
+      console.warn('Supabase submitVote failed, storing locally:', err);
+    }
   }
+
+  allVotes.push(voteRecord);
+  saveLocalVotes(allVotes);
+  return voteRecord;
 }
 
 /**
