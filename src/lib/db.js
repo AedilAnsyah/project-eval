@@ -312,9 +312,40 @@ export function getVotingResults(allMembers) {
 }
 
 /**
+ * Reset vote for a single voter (useful for testing or re-voting).
+ */
+export async function resetMyVote(voterId) {
+  if (isSupabaseConfigured) {
+    try {
+      await supabase
+        .from('votes')
+        .delete()
+        .eq('voter_id', voterId);
+    } catch (e) {
+      console.error("Error resetting vote in Supabase:", e);
+    }
+  }
+  if (typeof window !== 'undefined') {
+    const allVotes = getLocalVotes();
+    const filtered = allVotes.filter(v => v.voter_id !== voterId);
+    saveLocalVotes(filtered);
+  }
+}
+
+/**
  * Reset all vote data. Admin-only action.
  */
-export function resetVotes() {
+export async function resetVotes() {
+  if (isSupabaseConfigured) {
+    try {
+      await supabase
+        .from('votes')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+    } catch (e) {
+      console.error("Error resetting all votes in Supabase:", e);
+    }
+  }
   if (typeof window !== 'undefined') {
     localStorage.removeItem(VOTING_DB_KEY);
   }

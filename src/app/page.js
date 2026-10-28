@@ -4,9 +4,9 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LogOut, Trophy, Search, ArrowUp, ArrowDown, X,
-  CheckCircle, BarChart2, Vote, Users, Lock, Info
+  CheckCircle, BarChart2, Vote, Users, Lock, Info, RotateCcw, Trash2
 } from "lucide-react";
-import { getMembers, signIn, submitVote, getMyVote } from "@/lib/db";
+import { getMembers, signIn, submitVote, getMyVote, resetMyVote, resetVotes } from "@/lib/db";
 import { getSession, setSession, clearSession } from "@/lib/session";
 import { useRouter } from "next/navigation";
 
@@ -142,6 +142,27 @@ export default function VotingPage() {
       alert(err.message);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleResetMyVote = async () => {
+    if (!currentUser) return;
+    if (confirm("Reset vote Anda? Anda akan dapat mengulang pemilihan kandidat dari awal untuk uji coba/testing.")) {
+      await resetMyVote(currentUser.id);
+      setExistingVote(null);
+      setSelectedVotes([]);
+      setActiveTab("candidates");
+    }
+  };
+
+  const handleResetAllVotes = async () => {
+    if (!currentUser || currentUser.nim !== SUPER_ADMIN_NIM) return;
+    if (confirm("⚠️ HAPUS SEMUA DATA VOTE SELURUH ANGGOTA? Tindakan ini akan mengosongkan seluruh data voting.")) {
+      await resetVotes();
+      setExistingVote(null);
+      setSelectedVotes([]);
+      setActiveTab("candidates");
+      alert("Semua data voting berhasil direset!");
     }
   };
 
@@ -350,7 +371,7 @@ export default function VotingPage() {
               })}
             </div>
 
-            <div className="bg-blue-50 border-2 border-[#3A86FF] rounded-xl p-3 text-xs font-lexend text-[#3A86FF] font-semibold text-center">
+            <div className="bg-blue-50 border-2 border-[#3A86FF] rounded-xl p-3 text-xs font-lexend text-[#3A86FF] font-semibold text-center mb-4">
               📅 Divote pada:{" "}
               {new Date(existingVote.submitted_at).toLocaleString("id-ID", {
                 timeZone: "Asia/Jakarta",
@@ -361,6 +382,26 @@ export default function VotingPage() {
                 hour: "2-digit",
                 minute: "2-digit",
               })} WIB
+            </div>
+
+            {/* Reset Vote for Testing Mode */}
+            <div className="pt-3 border-t-2 border-dashed border-black/20 flex flex-col gap-2">
+              <button
+                onClick={handleResetMyVote}
+                className="w-full bg-[#FFBE0B] hover:bg-[#ffd000] text-black font-lexend font-black py-2.5 px-4 border-3 border-black rounded-xl shadow-neo-sm text-xs sm:text-sm flex items-center justify-center gap-2 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Reset Vote Saya (Ulangi Vote untuk Testing)
+              </button>
+              {currentUser.nim === SUPER_ADMIN_NIM && (
+                <button
+                  onClick={handleResetAllVotes}
+                  className="w-full bg-[#FF6B6B] hover:bg-[#ff5252] text-black font-lexend font-black py-2 px-3 border-2 border-black rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Reset Semua Vote Seluruh Anggota (Super Admin)
+                </button>
+              )}
             </div>
           </motion.div>
         </div>
@@ -532,14 +573,24 @@ export default function VotingPage() {
             ${activeTab === "candidates" ? "hidden sm:flex" : "flex"}`}
         >
           {/* Panel Header */}
-          <div className="border-b-3 border-black p-3 sm:p-4">
-            <h2 className="font-lilita text-xl uppercase text-black flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-[#FFBE0B]" />
-              Ranking Pilihan
-            </h2>
-            <p className="font-lexend text-[10px] text-gray-500 mt-0.5">
-              Klik kandidat untuk menambah/hapus. Gunakan ↑↓ untuk atur urutan.
-            </p>
+          <div className="border-b-3 border-black p-3 sm:p-4 flex items-start justify-between">
+            <div>
+              <h2 className="font-lilita text-xl uppercase text-black flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-[#FFBE0B]" />
+                Ranking Pilihan
+              </h2>
+              <p className="font-lexend text-[10px] text-gray-500 mt-0.5">
+                Klik kandidat untuk menambah/hapus. Gunakan ↑↓ untuk atur urutan.
+              </p>
+            </div>
+            {selectedVotes.length > 0 && (
+              <button
+                onClick={() => setSelectedVotes([])}
+                className="text-[10px] font-lexend font-bold text-gray-500 hover:text-red-600 underline cursor-pointer ml-2 flex-shrink-0"
+              >
+                Kosongkan
+              </button>
+            )}
           </div>
 
           {/* Rankings List */}
