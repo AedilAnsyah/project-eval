@@ -1,823 +1,716 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { 
-  Search, 
-  Lock, 
-  LogOut, 
-  User, 
-  Sparkles, 
-  Heart, 
-  ArrowRight,
-  Smile,
-  Pin,
-  Plus,
-  Trash2,
-  Calendar,
-  X
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
-import { getMembers, signIn } from "@/lib/db";
-import { getSession, clearSession, setSession } from "@/lib/session";
+import {
+  LogOut, Trophy, Search, ArrowUp, ArrowDown, X,
+  CheckCircle, BarChart2, Vote, Users, Lock, Info
+} from "lucide-react";
+import { getMembers, signIn, submitVote, getMyVote } from "@/lib/db";
+import { getSession, setSession, clearSession } from "@/lib/session";
+import { useRouter } from "next/navigation";
 
-// Department configuration for colors and branding
-const DEPARTMENTS = {
-  "Semua": { color: "#1A1D20", text: "text-white", bg: "bg-[#1A1D20]" },
-  "Executive Board": { color: "#FF6B6B", text: "text-black", bg: "bg-[#FF6B6B]", badge: "bg-[#FF6B6B] text-black" },
-  "Human Capital & Character Building": { color: "#FFBE0B", text: "text-black", bg: "bg-[#FFBE0B]", badge: "bg-[#FFBE0B] text-black" },
-  "Talent Development & Innovation": { color: "#3A86FF", text: "text-white", bg: "bg-[#3A86FF]", badge: "bg-[#3A86FF] text-white" },
-  "Humanity Impact & Development": { color: "#06D6A0", text: "text-black", bg: "bg-[#06D6A0]", badge: "bg-[#06D6A0] text-black" },
-  "Finance & Enterprise Development": { color: "#8338EC", text: "text-white", bg: "bg-[#8338EC]", badge: "bg-[#8338EC] text-white" },
-  "Creative Content & Outreach": { color: "#FF006E", text: "text-white", bg: "bg-[#FF006E]", badge: "bg-[#FF006E] text-white" },
-  "External Relations & Advocacy": { color: "#FB5607", text: "text-white", bg: "bg-[#FB5607]", badge: "bg-[#FB5607] text-white" }
-};
+// Bobot ranking: index 0 → rank 1 = 5 poin, dst.
+const RANK_WEIGHTS = [5, 4, 3, 2, 1];
 
-// Timeline events representing Cabinet Astravia's half-year journey
-const TIMELINE_EVENTS = [
-  {
-    id: "firstmeet",
-    title: "First Meet",
-    date: "2 Januari 2026",
-    desc: "Pertemuan pertama pengurus Kabinet Astravia. Langkah awal untuk saling mengenal, menyatukan visi, dan merancang masa depan HMIF yang lebih baik.",
-    img: "/timeline/firstmeet.jpg",
-    tilt: "rotate-[-2deg]"
-  },
-  {
-    id: "sertijab",
-    title: "Sertijab Kabinet Astravia",
-    date: "11 Januari 2026",
-    desc: "Prosesi serah terima jabatan pengurus lama ke pengurus baru menandai awal perjuangan Kabinet Astravia HMIF 2026. Langkah awal kita dengan visi besar dan semangat baru!",
-    img: "/timeline/sertijabkabinetastravia.jpg",
-    tilt: "rotate-[1.5deg]"
-  },
-  {
-    id: "mlb",
-    title: "Musyawarah Luar Biasa",
-    date: "15 Januari 2026",
-    desc: "Musyawarah luar biasa untuk membahas hal-hal krusial demi kelancaran dan legalitas roda organisasi HMIF ke depan.",
-    img: "/timeline/musyawarahluarbiasa.jpg",
-    tilt: "rotate-[-1deg]"
-  },
-  {
-    id: "muswil",
-    title: "Muswil Permikomnas",
-    date: "6-8 Februari 2026",
-    desc: "Partisipasi HMIF dalam Musyawarah Wilayah Permikomnas. Menjalin relasi, bertukar ide, dan berkolaborasi dengan mahasiswa informatika se-wilayah.",
-    img: "/timeline/muswilpermikomnas.jpg",
-    tilt: "rotate-[2deg]"
-  },
-  {
-    id: "rabulfeb",
-    title: "Rabul Februari",
-    date: "21 Februari 2026",
-    desc: "Rapat Bulanan pertama di bulan Februari. Tempat koordinasi perkembangan program kerja antar divisi dan evaluasi awal kabinet.",
-    img: "/timeline/rabulfebruari.jpg",
-    tilt: "rotate-[-2.5deg]"
-  },
-  {
-    id: "ldk",
-    title: "LDK HMIF 2026",
-    date: "22 Februari 2026",
-    desc: "Latihan Dasar Kepemimpinan untuk membekali pengurus dengan jiwa kepemimpinan, tanggung jawab, dan soliditas organisasi yang kuat.",
-    img: "/timeline/ldkhmif2026.jpg",
-    tilt: "rotate-[1deg]"
-  },
-  {
-    id: "ngafirmatics",
-    title: "NGAFIRMATICS 5.0",
-    date: "28 Februari 2026",
-    desc: "Keseruan acara Ngaprak Informatics edisi kelima. Ajang berkumpul, bermain, dan mempererat tali persaudaraan keluarga besar HMIF.",
-    img: "/timeline/ngafirmatics5.jpg",
-    tilt: "rotate-[-1.5deg]"
-  },
-  {
-    id: "sosialberbagi",
-    title: "Sosial Berbagi",
-    date: "6 Maret 2026",
-    desc: "Aksi sosial nyata pengurus HMIF untuk berbagi keceriaan dan bantuan kepada sesama yang membutuhkan. Kepedulian yang menghangatkan.",
-    img: "/timeline/sosialberbagi.jpg",
-    tilt: "rotate-[2deg]"
-  },
-  {
-    id: "lcc",
-    title: "Lomba Cerdas Cermat HMIF",
-    date: "26 Maret 2026",
-    desc: "Kompetisi cerdas cermat yang mengasah wawasan akademik, sportivitas, dan kerja tim di bidang informatika.",
-    img: "/timeline/lombacerdascermat.jpg",
-    tilt: "rotate-[-2deg]"
-  },
-  {
-    id: "akrobat",
-    title: "Akrobat with HMTB",
-    date: "29 Maret 2026",
-    desc: "Kolaborasi seru acara Akrobat bersama HMTB. Sinergi antar himpunan yang dipenuhi keceriaan dan diskusi interaktif.",
-    img: "/timeline/akrobatwithhmtb.jpg",
-    tilt: "rotate-[1.5deg]"
-  },
-  {
-    id: "rabulmar",
-    title: "Rabul Maret & Evaluasi TW1",
-    date: "29 Maret 2026",
-    desc: "Rapat bulanan sekaligus evaluasi triwulan pertama. Menganalisis progress dan hambatan proker demi performa yang lebih baik.",
-    img: "/timeline/rabulmaret&evaluasitw1.jpg",
-    tilt: "rotate-[-1.5deg]"
-  },
-  {
-    id: "fotopengurus",
-    title: "Foto Pengurus",
-    date: "18 April 2026",
-    desc: "Sesi pemotretan pengurus Kabinet Astravia. Senyum terbaik dan seragam kebanggaan, bukti kesiapan kita mengabdi satu periode penuh.",
-    img: "/timeline/fotopengurus.jpg",
-    tilt: "rotate-[2deg]"
-  },
-  {
-    id: "uts",
-    title: "ResponsIF UTS Genap 2026",
-    date: "18-19 April 2026",
-    desc: "Program ResponsIF UTS untuk membantu mahasiswa mempersiapkan diri menghadapi ujian tengah semester genap melalui latihan soal dan tutorial.",
-    img: "/timeline/responsifutsgenap2026.jpg",
-    tilt: "rotate-[-1deg]"
-  },
-  {
-    id: "upgrading",
-    title: "UPGRADING HMIF 2026",
-    date: "25-26 April 2026",
-    desc: "Kegiatan peningkatan kapasitas diri pengurus dengan materi kepemimpinan, kerja sama tim, dan refreshing bersama untuk menyegarkan pikiran.",
-    img: "/timeline/upgradinghmif2026.jpg",
-    tilt: "rotate-[2.5deg]"
-  },
-  {
-    id: "shortmovie",
-    title: "Short Movie",
-    date: "9-10 Mei 2026",
-    desc: "Proses kreatif pembuatan film pendek HMIF. Kolaborasi seni dan teknologi, mengekspresikan ide kreatif lewat karya visual.",
-    img: "/timeline/shortmovie.jpg",
-    tilt: "rotate-[-2deg]"
-  },
-  {
-    id: "fitfun",
-    title: "Fit & Fun",
-    date: "15 Mei 2026",
-    desc: "Kegiatan olahraga bersama untuk menjaga kebugaran tubuh, melepas kepenatan rutinitas, dan menjalin kebersamaan santai.",
-    img: "/timeline/fit&fun.jpg",
-    tilt: "rotate-[1.5deg]"
-  },
-  {
-    id: "rakerwil",
-    title: "Rakerwil Cilacap",
-    date: "16-17 Mei 2026",
-    desc: "Kehadiran delegasi HMIF dalam Rapat Kerja Wilayah di Cilacap, menyelaraskan program kerja dan memperluas jejaring organisasi.",
-    img: "/timeline/rakerwilcilacap.jpg",
-    tilt: "rotate-[-1.5deg]"
-  },
-  {
-    id: "kuliahumum1",
-    title: "Kuliah Umum 1",
-    date: "20 Mei 2026",
-    desc: "Kuliah umum perdana dengan narasumber ahli, memperluas wawasan mahasiswa mengenai perkembangan teknologi terkini.",
-    img: "/timeline/kuliahumum1.jpg",
-    tilt: "rotate-[2deg]"
-  },
-  {
-    id: "talkshow",
-    title: "Talkshow Kewirausahaan",
-    date: "23 Mei 2026",
-    desc: "Talkshow inspiratif kewirausahaan, memotivasi mahasiswa untuk menggali potensi bisnis di era digital.",
-    img: "/timeline/talkshowkewirausahaan.jpg",
-    tilt: "rotate-[-2.5deg]"
-  },
-  {
-    id: "sosialmengajar",
-    title: "Sosial Mengajar",
-    date: "25 Mei 2026",
-    desc: "Kegiatan pengabdian masyarakat melalui program mengajar, membagikan ilmu komputer dasar kepada anak-anak sekolah.",
-    img: "/timeline/sosialmengajar.jpg",
-    tilt: "rotate-[1deg]"
-  },
-  {
-    id: "kuliahumum2",
-    title: "Kuliah Umum 2",
-    date: "25 Mei 2026",
-    desc: "Kuliah umum kedua yang mengupas tuntas implementasi teknologi industri dan peluang karir di masa depan.",
-    img: "/timeline/kuliahumum2.jpg",
-    tilt: "rotate-[-1.5deg]"
-  },
-  {
-    id: "workshopobs",
-    title: "Workshop OBS",
-    date: "30 Mei 2026",
-    desc: "Workshop praktis penggunaan OBS Studio untuk kebutuhan streaming, recording, dan produksi konten digital.",
-    img: "/timeline/workshopobs.jpg",
-    tilt: "rotate-[2deg]"
-  },
-  {
-    id: "podcast",
-    title: "Podcast Informatics",
-    date: "6 Juni 2026",
-    desc: "Rekaman podcast seru HMIF yang membahas kehidupan kampus, tips akademik, dan obrolan menarik seputar dunia IT.",
-    img: "/timeline/podcastinformatics.jpg",
-    tilt: "rotate-[-2deg]"
-  },
-  {
-    id: "uas",
-    title: "ResponsIF UAS",
-    date: "13-14 Juni 2026",
-    desc: "Program belajar bersama menyambut Ujian Akhir Semester genap, memberikan bimbingan materi kuliah intensif bagi mahasiswa.",
-    img: "/timeline/responsiuasganjil2026.jpg",
-    tilt: "rotate-[1.5deg]"
-  },
-  {
-    id: "kuliahumum3",
-    title: "Kuliah Umum 3",
-    date: "18 Juni 2026",
-    desc: "Kuliah umum edisi ketiga, menghadirkan topik mutakhir untuk mempersiapkan kompetensi lulusan di dunia kerja.",
-    img: "/timeline/kuliahumum3.jpg",
-    tilt: "rotate-[-1.5deg]"
-  },
-  {
-    id: "webinar",
-    title: "Webinar UPGRADE IF",
-    date: "20 Juni 2026",
-    desc: "Webinar peningkatan kapasitas akademik dan profesional mahasiswa informatika.",
-    img: null,
-    tilt: "rotate-[2deg]"
-  }
-];
+// NIM super admin (Aedil)
+const SUPER_ADMIN_NIM = "103112400101";
 
-export default function Home() {
+export default function VotingPage() {
   const router = useRouter();
-  
-  // States
-  const [allMembers, setAllMembers] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDept, setSelectedDept] = useState("Semua");
-  const [currentUser, setCurrentUser] = useState(null);
-  
-  // Pagination State for Polaroid Gallery
-  const [visibleCount, setVisibleCount] = useState(16);
 
-  // Login Modal State
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [targetMember, setTargetMember] = useState(null);
-  const [loginNim, setLoginNim] = useState("");
-  const [loginDob, setLoginDob] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentUser, setCurrentUser]       = useState(null);
+  const [allMembers, setAllMembers]         = useState([]);
+  const [candidates, setCandidates]         = useState([]);
+  const [selectedVotes, setSelectedVotes]   = useState([]); // [{id, nama, nim, foto_url, jabatan, departemen}]
+  const [existingVote, setExistingVote]     = useState(null);
+  const [loading, setLoading]               = useState(true);
+  const [username, setUsername]             = useState("");
+  const [password, setPassword]             = useState("");
+  const [loginError, setLoginError]         = useState("");
+  const [isSubmitting, setIsSubmitting]     = useState(false);
+  const [searchQuery, setSearchQuery]       = useState("");
+  const [confirmModal, setConfirmModal]     = useState(false);
+  const [activeTab, setActiveTab]           = useState("candidates"); // mobile: "candidates" | "ranking"
+  const [showHelp, setShowHelp]             = useState(false);
 
-  // Helper for department photo URLs
-  const getDeptPhotoUrl = (dept) => {
-    switch (dept) {
-      case "Human Capital & Character Building":
-        return "/HCCB.webp";
-      case "Talent Development & Innovation":
-        return "/TDI.webp";
-      case "Humanity Impact & Development":
-        return "/HID.webp";
-      case "Finance & Enterprise Development":
-        return "/FED.webp";
-      case "Creative Content & Outreach":
-        return "/CCO.webp";
-      case "External Relations & Advocacy":
-        return "/ERA.webp";
-      case "Executive Board":
-      default:
-        return "/Foto Kabinet.webp";
-    }
-  };
-
-  // Load members, session, and sticky notes on mount
+  // ─── Init ───────────────────────────────────────────────────
   useEffect(() => {
-    async function loadData() {
+    async function init() {
       try {
-        const data = await getMembers();
-        setAllMembers(data);
+        const session = getSession();
+        const members = await getMembers();
+        setAllMembers(members);
+
+        if (session) {
+          setCurrentUser(session);
+          setCandidates(buildCandidates(session, members));
+          const vote = getMyVote(session.id);
+          setExistingVote(vote);
+        }
       } catch (err) {
-        console.error("Failed to load members", err);
+        console.error("Init error", err);
+      } finally {
+        setLoading(false);
       }
-      
-      const session = getSession();
-      setCurrentUser(session);
     }
-    loadData();
+    init();
   }, []);
 
+  // ─── Helpers ────────────────────────────────────────────────
+  /**
+   * Build the list of candidates the given user can choose.
+   * - All voters: can only pick angkatan 25 (NIM starts with "109")
+   * - Cannot pick themselves
+   */
+  function buildCandidates(user, members) {
+    return members.filter(m => {
+      if (!m.nim.startsWith("109")) return false; // Only ang25 as candidates
+      if (m.id === user.id) return false;          // Not self
+      return true;
+    });
+  }
 
-  // Stamp Badge Overlay Renderer
-  const renderStamps = (stampsStr) => {
-    if (!stampsStr) return null;
-    const list = stampsStr.split(",").map(s => s.trim()).filter(Boolean);
-    
-    const STAMP_STYLES = {
-      "Bintang Utama": { bg: "bg-[#FFBE0B]", text: "text-black", border: "border-black", emoji: "⭐" },
-      "Sangat Aktif": { bg: "bg-[#FF006E]", text: "text-white", border: "border-black", emoji: "🔥" },
-      "Inovatif": { bg: "bg-[#3A86FF]", text: "text-white", border: "border-black", emoji: "💡" },
-      "Team Player": { bg: "bg-[#06D6A0]", text: "text-black", border: "border-black", emoji: "🤝" }
-    };
-
-    const COLORS = [
-      { bg: "bg-[#FFBE0B]", text: "text-black" },
-      { bg: "bg-[#FF006E]", text: "text-white" },
-      { bg: "bg-[#3A86FF]", text: "text-white" },
-      { bg: "bg-[#06D6A0]", text: "text-black" }
-    ];
-
-    const parseStamp = (stampStr) => {
-      const trimmed = stampStr.trim();
-      const spaceIdx = trimmed.indexOf(" ");
-      if (spaceIdx === -1) {
-        if (STAMP_STYLES[trimmed]) {
-          return { emoji: STAMP_STYLES[trimmed].emoji, text: trimmed };
-        }
-        return { emoji: "📌", text: trimmed };
-      }
-      const firstToken = trimmed.slice(0, spaceIdx);
-      const remaining = trimmed.slice(spaceIdx + 1).trim();
-      const isWord = /^[A-Za-z0-9]+$/.test(firstToken);
-      if (isWord) {
-        if (STAMP_STYLES[trimmed]) {
-          return { emoji: STAMP_STYLES[trimmed].emoji, text: trimmed };
-        }
-        return { emoji: "📌", text: trimmed };
-      }
-      return { emoji: firstToken, text: remaining };
-    };
-    
-    return (
-      <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-row flex-wrap sm:flex-col gap-1 z-10 pointer-events-none max-w-[95%] sm:max-w-max">
-        {list.map((stampStr, idx) => {
-          const parsed = parseStamp(stampStr);
-          const style = STAMP_STYLES[parsed.text] || { 
-            ...COLORS[idx % COLORS.length], 
-            border: "border-black", 
-            emoji: parsed.emoji 
-          };
-          return (
-            <div 
-              key={idx} 
-              className={`px-1 py-0.5 sm:px-1.5 sm:py-0.5 border-[1.5px] sm:border-2 ${style.border || 'border-black'} ${style.bg} ${style.text} font-lilita text-[7px] sm:text-[8px] uppercase tracking-wider shadow-[1px_1px_0px_rgba(0,0,0,1)] sm:shadow-neo-sm rotate-[-3deg] sm:rotate-[-4deg] rounded-sm flex items-center gap-0.5`}
-            >
-              <span>{parsed.emoji}</span>
-              <span className={idx > 0 ? "hidden sm:inline" : ""}>{parsed.text}</span>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  // Get filtered members directly during render to prevent double-renders and lint errors
-  const filteredMembers = allMembers.filter((m) => {
-    // Filter by department
-    if (selectedDept !== "Semua" && m.departemen !== selectedDept) {
-      return false;
-    }
-    // Filter by name query
-    if (searchQuery.trim() !== "") {
-      const query = searchQuery.toLowerCase();
-      return (
-        (m.nama || "").toLowerCase().includes(query) || 
-        (m.jabatan || "").toLowerCase().includes(query)
-      );
-    }
-    return true;
-  });
-
-  const visibleMembers = filteredMembers.slice(0, visibleCount);
-
-  const handleLogout = () => {
-    clearSession();
-    setCurrentUser(null);
-    router.refresh();
-  };
-
-  const handleCardClick = (member) => {
-    // If not logged in, open the login modal pre-filled for this member
-    if (!currentUser) {
-      setTargetMember(member);
-      setLoginNim(member.nim);
-      setLoginDob(""); // Let them type the date of birth
-      setLoginPassword("");
-      setLoginError("");
-      setLoginModalOpen(true);
-    } else {
-      // If logged in, check permission
-      // Admin can view any letter. Regular members/coords can only view their own.
-      if (currentUser.role === 'admin' || currentUser.id === member.id) {
-        router.push(`/letter/${member.id}`);
-      } else {
-        alert(`Kerahasiaan Terjamin! Anda hanya dapat membaca surat evaluasi Anda sendiri.`);
-      }
-    }
-  };
-
-  const handleLoginSubmit = async (e) => {
+  // ─── Auth ───────────────────────────────────────────────────
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoginError("");
     setIsSubmitting(true);
-
     try {
-      const user = await signIn(loginNim, loginDob, loginPassword);
-      // Save session
+      const user = await signIn(username, password);
       setSession(user);
       setCurrentUser(user);
-      setLoginModalOpen(false);
-      
-      // Load confetti effect (directly in browser)
-      import("canvas-confetti").then((confetti) => {
-        confetti.default({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-      });
-
-      // Redirect to their letter
-      router.push(`/letter/${user.id}`);
+      setCandidates(buildCandidates(user, allMembers));
+      const vote = getMyVote(user.id);
+      setExistingVote(vote);
     } catch (err) {
-      setLoginError(err.message || "Gagal masuk. Periksa kembali NIM & Tanggal Lahir.");
+      setLoginError(err.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const currentMemberInModal = allMembers.find(m => m.nim === loginNim) || targetMember;
-  const requiresPassword = !!(currentMemberInModal && (currentMemberInModal.role === 'admin' || currentMemberInModal.role === 'koor'));
+  const handleLogout = () => {
+    clearSession();
+    setCurrentUser(null);
+    setSelectedVotes([]);
+    setExistingVote(null);
+    setUsername("");
+    setPassword("");
+    setLoginError("");
+  };
 
-  return (
-    <div className="min-h-screen y2k-mesh-bg flex flex-col relative overflow-hidden pb-16">
-      
-      {/* Decorative Stickers (Neon Brutalism Elements) */}
-      <div className="absolute top-8 left-6 w-24 h-24 bg-white rounded-full border-4 border-black rotate-[-12deg] shadow-neo-md flex items-center justify-center select-none hidden md:flex sticker-shake z-10">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/hmif_logo.png" alt="HMIF Logo" className="w-full h-full p-1 object-contain rounded-full" />
+  // ─── Voting actions ─────────────────────────────────────────
+  const addToRanking = (candidate) => {
+    if (selectedVotes.length >= 5) return;
+    if (selectedVotes.some(v => v.id === candidate.id)) return;
+    setSelectedVotes(prev => [...prev, candidate]);
+  };
+
+  const removeFromRanking = (id) => {
+    setSelectedVotes(prev => prev.filter(v => v.id !== id));
+  };
+
+  const moveUp = (index) => {
+    if (index === 0) return;
+    const arr = [...selectedVotes];
+    [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+    setSelectedVotes(arr);
+  };
+
+  const moveDown = (index) => {
+    if (index === selectedVotes.length - 1) return;
+    const arr = [...selectedVotes];
+    [arr[index + 1], arr[index]] = [arr[index], arr[index + 1]];
+    setSelectedVotes(arr);
+  };
+
+  const handleSubmit = async () => {
+    if (selectedVotes.length < 3) return;
+    setIsSubmitting(true);
+    try {
+      const votes = selectedVotes.map((v, i) => ({
+        candidate_id:   v.id,
+        candidate_nim:  v.nim,
+        candidate_nama: v.nama,
+        rank:           i + 1,
+      }));
+      const result = await submitVote(currentUser.id, currentUser.nim, votes);
+      setExistingVote(result);
+      setConfirmModal(false);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const filteredCandidates = candidates.filter(c =>
+    c.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (c.departemen || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const isSelected = (id) => selectedVotes.some(v => v.id === id);
+
+  // ─── Loading ─────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="min-h-screen y2k-mesh-bg flex items-center justify-center">
+        <div className="bg-white border-4 border-black p-6 rounded-xl shadow-neo-md text-center">
+          <div className="w-12 h-12 border-4 border-t-[#FFBE0B] border-black rounded-full animate-spin mx-auto mb-4" />
+          <p className="font-lexend font-black">Memuat sistem voting...</p>
+        </div>
       </div>
-      <div className="absolute top-12 right-12 w-24 h-24 bg-white rounded-lg border-4 border-black rotate-[15deg] shadow-neo-md flex items-center justify-center select-none hidden lg:flex sticker-shake z-10">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/kabinet_logo.png" alt="Cabinet Logo" className="w-full h-full p-2.5 object-contain" />
+    );
+  }
+
+  // ─── LOGIN SCREEN ────────────────────────────────────────────
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen y2k-mesh-bg flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          className="bg-[#FFFDF0] border-4 border-black rounded-2xl shadow-neo-xl p-8 w-full max-w-md relative"
+        >
+          {/* Top Badge */}
+          <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-[#FF006E] text-white font-lilita text-xs uppercase px-4 py-1.5 border-3 border-black shadow-neo-sm rotate-[-1deg] rounded-md whitespace-nowrap select-none">
+            🗳️ VOTING KAHIM / WAKAHIM 2026
+          </div>
+
+          <div className="text-center mb-6 mt-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/hmif_logo.png" alt="HMIF" className="w-16 h-16 mx-auto mb-3 object-contain" />
+            <h1 className="font-lilita text-3xl uppercase text-black leading-none">VOTING</h1>
+            <p className="font-lilita text-xl text-[#3A86FF] uppercase leading-tight">Kahim &amp; Wakahim</p>
+            <p className="font-lexend text-xs text-gray-500 mt-1 font-semibold">Kabinet Astravia HMIF 2026</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block font-lexend font-bold text-xs uppercase text-gray-600 mb-1.5">
+                Username (NIM Anggota)
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Contoh: 103112400101"
+                autoComplete="username"
+                className="w-full px-3 py-2.5 border-3 border-black rounded-lg font-lexend font-bold text-black focus:outline-none focus:ring-4 focus:ring-[#FFBE0B]/30 focus:border-[#FFBE0B] bg-white text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block font-lexend font-bold text-xs uppercase text-gray-600 mb-1.5">
+                Password (NIM + Tanggal Lahir DDMMYYYY)
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Contoh: 10311240010124062006"
+                required
+                autoComplete="current-password"
+                className="w-full px-3 py-2.5 border-3 border-black rounded-lg font-lexend font-bold text-black focus:outline-none focus:ring-4 focus:ring-[#FFBE0B]/30 focus:border-[#FFBE0B] bg-white text-sm tracking-wider"
+              />
+            </div>
+
+            {/* Help Box */}
+            <div className="bg-amber-50 border-2 border-amber-400 p-3 rounded-lg">
+              <button
+                type="button"
+                onClick={() => setShowHelp(h => !h)}
+                className="flex items-center gap-1.5 font-lexend font-bold text-xs text-amber-700 w-full cursor-pointer"
+              >
+                <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                Cara membuat password voting
+                <span className="ml-auto">{showHelp ? "▲" : "▼"}</span>
+              </button>
+              {showHelp && (
+                <div className="mt-2 text-[11px] font-lexend text-amber-800 space-y-1 leading-relaxed">
+                  <p>Password = <strong>NIM</strong> + <strong>Tanggal Lahir (DDMMYYYY)</strong></p>
+                  <p className="bg-white border border-amber-300 px-2 py-1 rounded font-mono text-xs">
+                    NIM: 103112400101<br />
+                    Lahir: 24 Juni 2006 → 24062006<br />
+                    <strong>Password: 10311240010124062006</strong>
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {loginError && (
+              <div className="bg-[#FF6B6B] border-3 border-black p-3 rounded-lg text-xs font-lexend font-black text-black shadow-neo-sm">
+                ⚠️ {loginError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting || !password}
+              className="w-full bg-[#FFBE0B] hover:bg-[#FFD000] text-black font-lexend font-black py-3 border-3 border-black rounded-xl shadow-neo-md text-base flex items-center justify-center gap-2 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-t-black border-black/30 rounded-full animate-spin" />
+                  Memuat...
+                </>
+              ) : (
+                <>
+                  <Vote className="w-5 h-5" />
+                  Masuk &amp; Vote
+                </>
+              )}
+            </button>
+          </form>
+        </motion.div>
       </div>
+    );
+  }
 
- 
-      {/* Main Container */}
-      <div className="max-w-7xl w-full mx-auto px-4 md:px-8 pt-8 flex-grow">
-        
-        {/* Header Section */}
-        <header className="flex flex-col items-center text-center my-8 relative gap-4 w-full overflow-hidden px-2">
-
-          <div className="relative w-full max-w-full">
-            <h1 className="text-[8.2vw] sm:text-4xl md:text-6xl font-lilita uppercase tracking-tight text-[#1A1D20] drop-shadow-[2px_2px_0px_#000] md:drop-shadow-[4px_4px_0px_#000] leading-none mb-2 whitespace-nowrap">
-              Evaluasi & Apresiasi
-            </h1>
-            <div className="flex justify-center items-center gap-2">
-              <span className="text-[4.8vw] sm:text-2xl md:text-4xl font-lilita bg-[#3A86FF] text-white px-3 sm:px-4 py-1 border-3 sm:border-4 border-black rotate-[-2deg] shadow-neo-sm uppercase">
-                Anggota HMIF 2026
-              </span>
+  // ─── ALREADY VOTED SCREEN ─────────────────────────────────────
+  if (existingVote) {
+    return (
+      <div className="min-h-screen y2k-mesh-bg flex flex-col">
+        {/* Header */}
+        <header className="bg-white border-b-4 border-black p-3 sm:p-4 flex items-center justify-between sticky top-0 z-10 shadow-neo-sm">
+          <div className="flex items-center gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/hmif_logo.png" alt="HMIF" className="w-8 h-8 object-contain" />
+            <div>
+              <p className="font-lilita text-sm uppercase text-black leading-none">🗳️ Voting Kahim/Wakahim</p>
+              <p className="font-lexend text-[9px] text-gray-500 font-semibold">{currentUser.nama} · {currentUser.nim}</p>
             </div>
           </div>
-          
-          <p className="max-w-xl mt-4 text-sm md:text-base font-lexend font-medium text-gray-700 bg-white border-3 border-black p-3 rounded-lg shadow-neo-sm rotate-[1deg]">
-            🎁 Papan mading digital apresiasi triwulan dua. Cari polaroid foto Anda, masukkan NIM & tanggal lahir, lalu buka surat apresiasi Anda!
-          </p>
+          <div className="flex items-center gap-2">
+            {currentUser.nim === SUPER_ADMIN_NIM && (
+              <button
+                onClick={() => router.push("/voting-dashboard")}
+                className="bg-[#3A86FF] text-white font-lexend font-black px-3 py-1.5 border-3 border-black rounded-lg shadow-neo-sm text-xs flex items-center gap-1.5 cursor-pointer hover:bg-[#206be6] transition-colors"
+              >
+                <BarChart2 className="w-3.5 h-3.5" />
+                Dashboard
+              </button>
+            )}
+            <button
+              onClick={handleLogout}
+              className="bg-[#FF6B6B] text-black font-lexend font-black px-3 py-1.5 border-3 border-black rounded-lg shadow-neo-sm text-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              Keluar
+            </button>
+          </div>
         </header>
 
-        {/* User Session Bar */}
-        <div className="mb-8 max-w-4xl mx-auto">
-          {currentUser ? (
-            <div className="bg-[#FFFDF0] border-4 border-black p-4 rounded-xl shadow-neo-md flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full border-3 border-black bg-white flex items-center justify-center overflow-hidden shadow-neo-sm">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={currentUser.foto_url || `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${currentUser.nama}`} alt="avatar" className="w-full h-full object-cover" />
-                </div>
-                <div>
-                  <h3 className="font-lexend font-extrabold text-lg text-black leading-tight flex items-center gap-2">
-                    {currentUser.nama}
-                    <span className="text-xs uppercase px-2 py-0.5 border-2 border-black rounded-md bg-[#FFBE0B] font-bold">
-                      {currentUser.role}
-                    </span>
-                  </h3>
-                  <p className="text-xs font-lexend font-semibold text-gray-500 uppercase">{currentUser.jabatan} • {currentUser.departemen}</p>
-                </div>
+        <div className="flex-1 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#FFFDF0] border-4 border-black rounded-2xl shadow-neo-xl p-6 w-full max-w-lg"
+          >
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-[#06D6A0] border-4 border-black rounded-full flex items-center justify-center mx-auto mb-3 shadow-neo-sm">
+                <CheckCircle className="w-8 h-8 text-white" />
               </div>
-              
-              <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
-                <button 
-                  onClick={() => router.push(`/letter/${currentUser.id}`)}
-                  className="bg-[#06D6A0] hover:bg-[#05b889] text-black font-lexend font-black px-4 py-2 border-3 border-black rounded-lg shadow-neo-sm text-sm flex items-center gap-1.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
-                >
-                  <Heart className="w-4 h-4 fill-red-500 text-red-500" />
-                  Buka Surat Saya
-                </button>
-                
-                {(currentUser.role === 'admin' || currentUser.role === 'koor') && (
-                  <button 
-                    onClick={() => router.push('/dashboard')}
-                    className="bg-[#3A86FF] hover:bg-[#206be6] text-white font-lexend font-black px-4 py-2 border-3 border-black rounded-lg shadow-neo-sm text-sm flex items-center gap-1.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
-                  >
-                    Dashboard Pengurus
-                  </button>
-                )}
-                
-                <button 
-                  onClick={handleLogout}
-                  className="bg-[#FF6B6B] hover:bg-[#e05656] text-black font-lexend font-black px-3 py-2 border-3 border-black rounded-lg shadow-neo-sm text-sm flex items-center gap-1.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Keluar
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-[#FFFDF0] border-4 border-black p-3 rounded-xl shadow-neo-md text-center">
-              <p className="font-lexend font-extrabold text-sm text-black flex items-center justify-center gap-2">
-                <Lock className="w-4 h-4 text-[#FF006E]" />
-                Halaman Terkunci. Silakan klik kartu polaroid Anda di bawah untuk masuk.
+              <h2 className="font-lilita text-2xl uppercase text-black">Vote Terkunci!</h2>
+              <p className="font-lexend text-sm text-gray-600 mt-1">
+                Halo <strong>{currentUser.nama}</strong>, pilihan kamu sudah diterima dan dikunci.
               </p>
             </div>
-          )}
-        </div>
 
-        {/* Search & Filter Bar */}
-        <div className="max-w-5xl mx-auto mb-10 bg-white border-4 border-black p-4 rounded-xl shadow-neo-md">
-          {/* Search Box */}
-          <div className="relative mb-4">
-            <input 
-              type="text" 
-              placeholder="Cari nama anggota atau jabatan..."
+            <p className="font-lexend font-black text-xs uppercase text-gray-500 text-center mb-3">
+              Pilihan kamu (tidak dapat diubah)
+            </p>
+
+            <div className="space-y-2 mb-5">
+              {existingVote.votes.map((v, idx) => {
+                const cand = allMembers.find(m => m.id === v.candidate_id);
+                const rankColors = ["bg-[#FFBE0B]", "bg-[#C0C0C0]", "bg-[#CD7F32]", "bg-gray-100", "bg-gray-100"];
+                return (
+                  <div key={v.candidate_id} className="flex items-center gap-3 bg-white border-2 border-black p-2.5 rounded-xl shadow-neo-sm">
+                    <div className={`w-9 h-9 rounded-full border-3 border-black flex items-center justify-center font-lilita text-sm font-bold flex-shrink-0 ${rankColors[idx]}`}>
+                      {idx + 1}
+                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={cand?.foto_url || `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${v.candidate_nama}`}
+                      alt={v.candidate_nama}
+                      className="w-10 h-10 rounded-full border-2 border-black object-cover flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-lexend font-black text-sm text-black leading-none truncate">{v.candidate_nama}</p>
+                      <p className="font-lexend text-[10px] text-gray-500 uppercase mt-0.5">
+                        {cand?.jabatan || "Anggota"}
+                      </p>
+                    </div>
+                    <div className="bg-[#FFBE0B] border-2 border-black rounded-lg px-2 py-0.5 text-xs font-lexend font-black flex-shrink-0 shadow-neo-sm">
+                      +{RANK_WEIGHTS[idx]} poin
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="bg-blue-50 border-2 border-[#3A86FF] rounded-xl p-3 text-xs font-lexend text-[#3A86FF] font-semibold text-center">
+              📅 Divote pada:{" "}
+              {new Date(existingVote.submitted_at).toLocaleString("id-ID", {
+                timeZone: "Asia/Jakarta",
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })} WIB
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── VOTING SCREEN ────────────────────────────────────────────
+  return (
+    <div className="min-h-screen y2k-mesh-bg flex flex-col">
+      {/* Header */}
+      <header className="bg-white border-b-4 border-black p-3 sm:p-4 flex items-center justify-between sticky top-0 z-10 shadow-neo-sm">
+        <div className="flex items-center gap-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/hmif_logo.png" alt="HMIF" className="w-7 h-7 sm:w-8 sm:h-8 object-contain flex-shrink-0" />
+          <div>
+            <p className="font-lilita text-xs sm:text-sm uppercase text-black leading-none">🗳️ Voting Kahim/Wakahim</p>
+            <p className="font-lexend text-[9px] text-gray-500 font-semibold truncate max-w-[120px] sm:max-w-none">
+              {currentUser.nama}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {currentUser.nim === SUPER_ADMIN_NIM && (
+            <button
+              onClick={() => router.push("/voting-dashboard")}
+              className="bg-[#3A86FF] text-white font-lexend font-black px-2 sm:px-3 py-1.5 border-3 border-black rounded-lg shadow-neo-sm text-[10px] sm:text-xs flex items-center gap-1 cursor-pointer hover:bg-[#206be6] transition-colors"
+            >
+              <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <span className="hidden sm:inline">Dashboard</span>
+            </button>
+          )}
+          <div className="bg-[#FFBE0B] border-2 border-black rounded-lg px-2 py-1 text-[9px] sm:text-[10px] font-lexend font-black whitespace-nowrap">
+            {selectedVotes.length}/5
+          </div>
+          <button
+            onClick={handleLogout}
+            className="bg-[#FF6B6B] text-black font-lexend font-black px-2 sm:px-3 py-1.5 border-3 border-black rounded-lg shadow-neo-sm text-[10px] sm:text-xs flex items-center gap-1 cursor-pointer"
+          >
+            <LogOut className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span className="hidden sm:inline">Keluar</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Instructions Banner */}
+      <div className="bg-[#3A86FF] border-b-4 border-black px-4 py-2.5 text-center">
+        <p className="font-lexend font-black text-white text-xs sm:text-sm">
+          Pilih <strong>3–5 calon</strong> Kahim/Wakahim. Urutan pilihan menentukan bobot nilai!
+        </p>
+        <p className="font-lexend text-blue-100 text-[9px] sm:text-[10px] mt-0.5">
+          Pilihan ke-1 = 5 poin · ke-2 = 4 poin · ke-3 = 3 poin · ke-4 = 2 poin · ke-5 = 1 poin
+        </p>
+      </div>
+
+      {/* Mobile Tabs */}
+      <div className="flex sm:hidden border-b-4 border-black bg-white flex-shrink-0">
+        <button
+          onClick={() => setActiveTab("candidates")}
+          className={`flex-1 py-2.5 font-lexend font-black text-[11px] uppercase flex items-center justify-center gap-1.5 transition-all border-r-2 border-black
+            ${activeTab === "candidates" ? "bg-[#FFBE0B]" : "bg-white"}`}
+        >
+          <Users className="w-3.5 h-3.5" />
+          Kandidat ({filteredCandidates.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("ranking")}
+          className={`flex-1 py-2.5 font-lexend font-black text-[11px] uppercase flex items-center justify-center gap-1.5 transition-all
+            ${activeTab === "ranking" ? "bg-[#FFBE0B]" : "bg-white"} ${selectedVotes.length >= 3 ? "relative" : ""}`}
+        >
+          <Trophy className="w-3.5 h-3.5" />
+          Ranking ({selectedVotes.length}/5)
+          {selectedVotes.length >= 3 && (
+            <span className="absolute top-1 right-2 w-2 h-2 bg-[#FF006E] rounded-full" />
+          )}
+        </button>
+      </div>
+
+      {/* Main Content Layout */}
+      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
+
+        {/* ── Candidates Panel ── */}
+        <div className={`flex-1 overflow-y-auto p-3 sm:p-4 ${activeTab === "ranking" ? "hidden sm:block" : "block"}`}>
+          {/* Search */}
+          <div className="relative mb-3">
+            <input
+              type="text"
+              placeholder="Cari kandidat..."
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setVisibleCount(16);
-              }}
-              className="w-full pl-10 pr-4 py-3 border-3 border-black rounded-lg font-lexend font-semibold text-black placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-[#3A86FF]/30 focus:border-[#3A86FF] transition-all bg-[#F9F6F0]"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-8 pr-3 py-2 border-3 border-black rounded-lg font-lexend font-semibold text-sm focus:outline-none focus:ring-4 focus:ring-[#3A86FF]/30 focus:border-[#3A86FF] bg-white"
             />
-            <Search className="absolute left-3.5 top-3.5 w-5 h-5 text-gray-500" />
+            <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-gray-400" />
           </div>
 
-          {/* Department Filters */}
-          <div className="flex overflow-x-auto md:flex-wrap gap-2 pb-2 md:pb-0 scrollbar-none -mx-4 px-4 md:mx-0 md:px-0 pt-2 border-t-2 border-black/10">
-            {Object.keys(DEPARTMENTS).map((deptName) => {
-              const active = selectedDept === deptName;
-              const deptInfo = DEPARTMENTS[deptName];
-              
+          {/* Candidate Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
+            {filteredCandidates.map((cand) => {
+              const selected = isSelected(cand.id);
+              const rank     = selectedVotes.findIndex(v => v.id === cand.id);
+              const isFull   = selectedVotes.length >= 5;
               return (
-                <button
-                  key={deptName}
+                <motion.div
+                  key={cand.id}
+                  layout
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => {
-                    setSelectedDept(deptName);
-                    setVisibleCount(16);
+                    if (selected) {
+                      removeFromRanking(cand.id);
+                    } else if (!isFull) {
+                      addToRanking(cand);
+                      if (typeof window !== "undefined" && window.innerWidth < 640) {
+                        setActiveTab("ranking");
+                      }
+                    }
                   }}
-                  style={{ backgroundColor: active ? deptInfo.color : '#FFFFFF' }}
-                  className={`flex-shrink-0 px-3 py-2 border-2.5 border-black rounded-lg font-lexend font-bold text-xs uppercase cursor-pointer transition-all duration-150
-                    ${active ? `${deptInfo.text} scale-105 shadow-neo-sm -translate-y-0.5` : 'bg-white hover:bg-gray-100 text-[#1A1D20] shadow-none'}
-                  `}
+                  className={`relative p-2 border-3 rounded-xl cursor-pointer transition-all duration-150 select-none
+                    ${selected
+                      ? "border-[#06D6A0] bg-[#06D6A0]/10 shadow-[0_0_0_2px_#06D6A0] scale-[1.02]"
+                      : isFull
+                        ? "border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed"
+                        : "border-black bg-white hover:shadow-neo-sm hover:-translate-y-0.5 hover:scale-[1.01]"
+                    }`}
                 >
-                  {deptName === "Semua" ? "Semua Departemen" : deptName === "Executive Board" ? "Executive Board" : deptName}
-                </button>
+                  {/* Rank Badge */}
+                  {selected && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-2.5 -right-2.5 w-7 h-7 bg-[#06D6A0] border-2 border-black rounded-full flex items-center justify-center font-lilita text-sm text-black z-10 shadow-neo-sm"
+                    >
+                      {rank + 1}
+                    </motion.div>
+                  )}
+
+                  {/* Photo */}
+                  <div className="w-full aspect-square bg-gray-100 border-2 border-black rounded-lg overflow-hidden mb-1.5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={cand.foto_url}
+                      alt={cand.nama}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <p className="font-handwriting font-bold text-[#1A1D20] text-[10px] sm:text-xs leading-tight line-clamp-2 text-center">
+                    {cand.nama}
+                  </p>
+                  <p className="font-lexend font-black text-[7px] sm:text-[8px] text-gray-400 uppercase text-center leading-none mt-0.5 line-clamp-1">
+                    {(cand.departemen || "").split(" & ")[0]}
+                  </p>
+                </motion.div>
               );
             })}
           </div>
 
-          {/* Department Photo Preview Panel */}
-          <div className="mt-4 border-4 border-black p-4 rounded-xl bg-[#FFFDF0] flex flex-col md:flex-row items-center gap-6 shadow-neo-sm transition-all duration-200">
-            <div className="w-full md:w-[240px] aspect-[4/3] bg-white border-3 border-black p-1.5 rounded shadow-neo-sm overflow-hidden relative group flex-shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src={getDeptPhotoUrl(selectedDept)} 
-                alt={selectedDept} 
-                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.03] select-none"
-              />
-            </div>
-            <div className="flex-grow space-y-2 text-left">
-              <span className="text-[10px] uppercase font-black px-2 py-0.5 border-2 border-black rounded bg-white text-black select-none">
-                {selectedDept === 'Semua' ? 'Foto Bersama' : 'Foto Departemen'}
-              </span>
-              <h3 className="font-lilita text-xl text-black uppercase leading-none mt-1">
-                {selectedDept === 'Semua' ? 'Kabinet Astravia 2026' : selectedDept}
-              </h3>
-              <p className="font-lexend text-xs text-gray-600 font-semibold leading-relaxed">
-                {selectedDept === 'Semua' 
-                  ? 'Foto bersama seluruh jajaran pengurus Kabinet Astravia HMIF. Solid, bersinergi, dan berdedikasi tinggi demi memajukan organisasi.'
-                  : `Dokumentasi kebersamaan dan kerja keras seluruh anggota di bawah naungan Departemen ${selectedDept}.`}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Timeline Journey Banner */}
-        <div className="max-w-5xl mx-auto mb-6 bg-[#FF006E] border-4 border-black p-5 sm:p-6 rounded-xl shadow-neo-md text-white flex flex-col sm:flex-row items-center justify-between gap-4 rotate-[0.5deg]">
-          <div className="text-center sm:text-left space-y-1.5 select-none">
-            <h3 className="font-lilita text-xl sm:text-2xl uppercase tracking-wider leading-none flex items-center justify-center sm:justify-start gap-2">
-              🚀 Setengah Perjalanan Astravia
-            </h3>
-            <p className="font-lexend text-[10px] sm:text-xs text-pink-100 font-semibold max-w-xl">
-              Mari tengok kembali jejak langkah, tawa, rapat larut malam, dan kerja keras yang telah kita lalui bersama selama setengah tahun kepengurusan terakhir.
-            </p>
-          </div>
-          <Link 
-            href="/journey"
-            className="w-full sm:w-auto bg-[#FFBE0B] hover:bg-[#e6ab0a] text-black font-lexend font-black px-6 py-3 border-3 border-black rounded-lg shadow-neo-sm text-xs sm:text-sm whitespace-nowrap cursor-pointer active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2 text-center"
-          >
-            🗺️ Lihat Perjalanan Kita Sejauh Ini
-          </Link>
-        </div>
-
-        {/* Memo Board Banner */}
-        <div className="max-w-5xl mx-auto mb-10 bg-[#3A86FF] border-4 border-black p-5 sm:p-6 rounded-xl shadow-neo-md text-white flex flex-col sm:flex-row items-center justify-between gap-4 rotate-[-0.5deg]">
-          <div className="text-center sm:text-left space-y-1.5 select-none">
-            <h3 className="font-lilita text-xl sm:text-2xl uppercase tracking-wider leading-none flex items-center justify-center sm:justify-start gap-2">
-              📌 Papan Aspirasi Pengurus
-            </h3>
-            <p className="font-lexend text-[10px] sm:text-xs text-blue-100 font-semibold max-w-xl">
-              Tinggalkan catatan semangat, saran, kritik, candaan, atau kesan pesan Anda selama kepengurusan secara langsung di papan mading digital kami!
-            </p>
-          </div>
-          <Link 
-            href="/memo"
-            className="w-full sm:w-auto bg-[#FFBE0B] hover:bg-[#e6ab0a] text-black font-lexend font-black px-6 py-3 border-3 border-black rounded-lg shadow-neo-sm text-xs sm:text-sm whitespace-nowrap cursor-pointer active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2 text-center"
-          >
-            ✏️ Tulis & Tempel Memo Aspirasi
-          </Link>
-        </div>
-
-        {/* Polaroid Grid Layout */}
-        <main className="max-w-6xl mx-auto">
-          {filteredMembers.length > 0 ? (
-            <div className="space-y-10">
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6">
-                {visibleMembers.map((member, index) => {
-                  const deptColor = DEPARTMENTS[member.departemen]?.color || "#FFFFFF";
-                  // Alternate rotation angles for polaroids to look organic on a mading board
-                  const rotation = index % 4 === 0 ? "hover:rotate-[4deg]" : index % 4 === 1 ? "hover:rotate-[-4deg]" : index % 4 === 2 ? "hover:rotate-[2deg]" : "hover:rotate-[-2deg]";
-                  
-                  return (
-                    <div
-                      key={member.id}
-                      onClick={() => handleCardClick(member)}
-                      style={{ backgroundColor: deptColor }}
-                      className={`relative p-2.5 sm:p-3 border-3 sm:border-4 border-black rounded-sm shadow-neo-sm sm:shadow-neo-md transition-all duration-300 transform hover:scale-[1.03] cursor-pointer flex flex-col justify-between select-none ${rotation}`}
-                    >
-                      {/* Tape sticker on top of polaroid */}
-                      <div className="absolute -top-2.5 sm:-top-3.5 left-1/2 -translate-x-1/2 w-16 sm:w-20 h-5.5 sm:h-7 bg-amber-200/80 border-2 border-black/20 rotate-[-3deg] shadow-sm flex items-center justify-center font-handwriting text-[7px] sm:text-[9px] font-bold text-amber-900 pointer-events-none uppercase">
-                        ★ HMIF ★
-                      </div>
-                      
-                      {/* Photo container */}
-                      <div className="bg-white border-2 sm:border-3 border-black w-full aspect-square relative overflow-hidden mt-1 mb-2 sm:mb-3 shadow-inner">
-                        {renderStamps(member.stamps)}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img 
-                          src={member.foto_url} 
-                          alt={member.nama} 
-                          loading="lazy"
-                          className="w-full h-full object-cover select-none"
-                        />
-                      </div>
-                      
-                      {/* Polaroid Text Area */}
-                      <div className="bg-[#FFFDF0] border-2 border-black p-1.5 sm:p-2 rounded-sm text-center flex-grow flex flex-col justify-center">
-                        <h4 className="font-handwriting font-bold text-[#1A1D20] text-xs sm:text-sm leading-tight line-clamp-2 mb-1">
-                          {member.nama}
-                        </h4>
-                        <p className="font-lexend font-black uppercase text-[8px] sm:text-[9px] tracking-wide text-gray-500 leading-none">
-                          {member.jabatan}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              {filteredMembers.length > visibleCount && (
-                <div className="flex justify-center mt-12 mb-6">
-                  <button
-                    onClick={() => setVisibleCount((prev) => prev + 12)}
-                    className="px-6 py-3 border-4 border-black rounded-xl bg-[#FFBE0B] text-black font-lilita text-lg uppercase cursor-pointer hover:bg-[#FFD000] hover:scale-105 active:scale-95 transition-all duration-150 shadow-neo-md"
-                  >
-                    📂 Tampilkan Lebih Banyak ({filteredMembers.length - visibleCount} Anggota Tersisa)
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-white border-4 border-black rounded-2xl shadow-neo-md max-w-lg mx-auto">
-              <Smile className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-              <h3 className="font-lexend font-extrabold text-xl text-black">Anggota tidak ditemukan</h3>
-              <p className="font-lexend text-gray-500 text-sm mt-1">Coba gunakan kata kunci pencarian yang lain.</p>
-              {/* Spacing bottom */}
-              <div className="h-12" />
+          {filteredCandidates.length === 0 && (
+            <div className="text-center py-16 text-gray-400">
+              <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p className="font-lexend font-semibold">Tidak ada kandidat ditemukan</p>
             </div>
           )}
-        </main>
+        </div>
 
+        {/* ── Ranking Panel ── */}
+        <div
+          className={`w-full sm:w-80 lg:w-96 sm:border-l-4 border-black bg-[#FFFDF0] flex flex-col flex-shrink-0
+            ${activeTab === "candidates" ? "hidden sm:flex" : "flex"}`}
+        >
+          {/* Panel Header */}
+          <div className="border-b-3 border-black p-3 sm:p-4">
+            <h2 className="font-lilita text-xl uppercase text-black flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-[#FFBE0B]" />
+              Ranking Pilihan
+            </h2>
+            <p className="font-lexend text-[10px] text-gray-500 mt-0.5">
+              Klik kandidat untuk menambah/hapus. Gunakan ↑↓ untuk atur urutan.
+            </p>
+          </div>
+
+          {/* Rankings List */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            {selectedVotes.length === 0 && (
+              <div className="text-center py-10 text-gray-400 border-2 border-dashed border-gray-300 rounded-xl">
+                <Trophy className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <p className="font-lexend text-xs font-semibold">Belum ada pilihan</p>
+                <p className="font-lexend text-[10px] mt-0.5 opacity-70">Pilih kandidat dari panel kiri</p>
+              </div>
+            )}
+
+            <AnimatePresence>
+              {selectedVotes.map((v, idx) => {
+                const rankColors = ["bg-[#FFBE0B] text-black", "bg-[#C0C0C0] text-black", "bg-[#CD7F32] text-white", "bg-gray-100 text-gray-700", "bg-gray-100 text-gray-700"];
+                return (
+                  <motion.div
+                    key={v.id}
+                    layout
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -30, scale: 0.9 }}
+                    transition={{ duration: 0.15 }}
+                    className="flex items-center gap-2 bg-white border-2 border-black p-2 rounded-xl shadow-neo-sm"
+                  >
+                    {/* Rank number */}
+                    <div className={`w-7 h-7 rounded-full border-2 border-black flex items-center justify-center font-lilita text-sm flex-shrink-0 ${rankColors[idx]}`}>
+                      {idx + 1}
+                    </div>
+                    {/* Photo */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={v.foto_url} alt={v.nama} className="w-8 h-8 rounded-full border-2 border-black object-cover flex-shrink-0" />
+                    {/* Name + points */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-lexend font-black text-[10px] sm:text-xs text-black leading-none truncate">{v.nama}</p>
+                      <p className="font-lexend text-[8px] text-[#FF006E] font-bold">+{RANK_WEIGHTS[idx]} poin</p>
+                    </div>
+                    {/* Reorder buttons */}
+                    <div className="flex flex-col gap-0.5">
+                      <button
+                        onClick={() => moveUp(idx)}
+                        disabled={idx === 0}
+                        className="w-5 h-5 border border-black rounded flex items-center justify-center disabled:opacity-25 hover:bg-gray-100 cursor-pointer transition-colors"
+                      >
+                        <ArrowUp className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => moveDown(idx)}
+                        disabled={idx === selectedVotes.length - 1}
+                        className="w-5 h-5 border border-black rounded flex items-center justify-center disabled:opacity-25 hover:bg-gray-100 cursor-pointer transition-colors"
+                      >
+                        <ArrowDown className="w-3 h-3" />
+                      </button>
+                    </div>
+                    {/* Remove */}
+                    <button
+                      onClick={() => removeFromRanking(v.id)}
+                      className="w-6 h-6 border-2 border-black rounded-md flex items-center justify-center hover:bg-red-100 cursor-pointer flex-shrink-0 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+
+            {/* Empty slot indicators */}
+            {selectedVotes.length < 3 && Array.from({ length: 3 - selectedVotes.length }).map((_, i) => (
+              <div
+                key={`empty-${i}`}
+                className="flex items-center gap-2 bg-gray-50 border-2 border-dashed border-gray-300 p-2 rounded-xl"
+              >
+                <div className="w-7 h-7 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center font-lilita text-sm text-gray-300 flex-shrink-0">
+                  {selectedVotes.length + i + 1}
+                </div>
+                <p className="font-lexend text-[10px] text-gray-300 italic">Wajib dipilih...</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Submit Section */}
+          <div className="border-t-3 border-black p-3 sm:p-4">
+            {selectedVotes.length < 3 && (
+              <p className="font-lexend text-[10px] text-amber-600 font-bold text-center mb-2 bg-amber-50 border border-amber-300 rounded-lg py-1.5 px-2">
+                ⚠️ Minimal pilih {3 - selectedVotes.length} kandidat lagi
+              </p>
+            )}
+            <button
+              onClick={() => setConfirmModal(true)}
+              disabled={selectedVotes.length < 3}
+              className="w-full bg-[#FF006E] hover:bg-[#d4005e] text-white font-lexend font-black py-3 border-3 border-black rounded-xl shadow-neo-md text-base flex items-center justify-center gap-2 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Vote className="w-5 h-5" />
+              Submit Vote ({selectedVotes.length}/5)
+            </button>
+            <p className="font-lexend text-[9px] text-gray-400 text-center mt-1.5">
+              ⚠️ Vote <strong>tidak dapat diubah</strong> setelah dikirim
+            </p>
+          </div>
+        </div>
       </div>
 
-
-
-
-      {/* LOGIN MODAL */}
-      {loginModalOpen && targetMember && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/50 overlay-polka-dot transition-all duration-300">
-          <div className="bg-[#FFFDF0] border-4 border-black p-6 rounded-2xl max-w-md w-full relative shadow-neo-xl animate-in scale-in duration-200">
-            {/* Modal Sticker Decorator */}
-            <div className="absolute -top-4 -right-2 sm:-top-6 sm:-right-6 w-12 sm:w-16 h-12 sm:h-16 bg-[#FFBE0B] border-3 sm:border-4 border-black rounded-full shadow-neo-sm rotate-[12deg] flex items-center justify-center font-lilita text-black text-[9px] sm:text-xs p-1 text-center select-none z-10">
-              SECURE LOGIN
-            </div>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-14 h-14 rounded-full border-3 border-black bg-white overflow-hidden shadow-neo-sm">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={targetMember.foto_url} alt="avatar" className="w-full h-full object-cover" />
-              </div>
-              <div>
-                <h3 className="font-lexend font-black text-xl text-black leading-tight">Verifikasi Akses</h3>
-                <p className="text-xs font-lexend font-bold text-gray-500 uppercase">{targetMember.nama}</p>
-              </div>
-            </div>
-
-            <p className="text-xs font-lexend font-semibold text-gray-700 mb-4 bg-yellow-100 border-2 border-yellow-400 p-2 rounded-lg leading-relaxed">
-              🔑 Sistem ini bersifat internal terdaftar. Masukkan NIM dan Tanggal Lahir Anda yang terdaftar pada organisasi untuk membuktikan identitas.
-            </p>
-
-            <form onSubmit={handleLoginSubmit} className="space-y-4">
-              {/* NIM Field */}
-              <div>
-                <label className="block font-lexend font-bold text-xs uppercase text-gray-600 mb-1">NIM Anggota (Identifier)</label>
-                <input 
-                  type="text" 
-                  value={loginNim}
-                  onChange={(e) => setLoginNim(e.target.value)}
-                  placeholder="Masukkan NIM Anda"
-                  required
-                  className="w-full px-3 py-2 border-3 border-black rounded-lg font-lexend font-bold text-black focus:outline-none focus:ring-4 focus:ring-[#FFBE0B]/30 focus:border-[#FFBE0B] bg-white text-sm"
-                />
-              </div>
-
-              {/* Tanggal Lahir Field */}
-              <div>
-                <label className="block font-lexend font-bold text-xs uppercase text-gray-600 mb-1">Tanggal Lahir (Login DOB)</label>
-                <input 
-                  type="text" 
-                  value={loginDob}
-                  onChange={(e) => setLoginDob(e.target.value)}
-                  placeholder="YYYY-MM-DD (Contoh: 2004-01-01)"
-                  required
-                  className="w-full px-3 py-2 border-3 border-black rounded-lg font-lexend font-bold text-black focus:outline-none focus:ring-4 focus:ring-[#FFBE0B]/30 focus:border-[#FFBE0B] bg-white text-sm"
-                />
-              </div>
-
-              {/* Password Field for Chairman, Vice Chairman, and Koor */}
-              {requiresPassword && (
-                <div>
-                  <label className="block font-lexend font-bold text-xs uppercase text-gray-600 mb-1">Password Akses</label>
-                  <input 
-                    type="password" 
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder="Masukkan Password Anda"
-                    required
-                    className="w-full px-3 py-2 border-3 border-black rounded-lg font-lexend font-bold text-black focus:outline-none focus:ring-4 focus:ring-[#FFBE0B]/30 focus:border-[#FFBE0B] bg-white text-sm"
-                  />
+      {/* ── Confirm Modal ── */}
+      <AnimatePresence>
+        {confirmModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-[#FFFDF0] border-4 border-black rounded-2xl shadow-neo-xl p-6 w-full max-w-sm"
+            >
+              <div className="text-center mb-4">
+                <div className="w-16 h-16 bg-[#FFBE0B] border-4 border-black rounded-full flex items-center justify-center mx-auto mb-3 shadow-neo-sm">
+                  <Vote className="w-8 h-8 text-black" />
                 </div>
-              )}
+                <h3 className="font-lilita text-2xl uppercase">Konfirmasi Vote</h3>
+                <p className="font-lexend text-xs text-gray-600 mt-1">
+                  Pastikan pilihan sudah benar. <strong>Vote tidak dapat diubah!</strong>
+                </p>
+              </div>
 
-              {loginError && (
-                <div className="bg-[#FF6B6B] border-3 border-black p-3 rounded-lg text-xs font-lexend font-black text-black shadow-neo-sm animate-bounce">
-                  ⚠️ {loginError}
-                </div>
-              )}
+              <div className="space-y-1.5 mb-4 max-h-52 overflow-y-auto">
+                {selectedVotes.map((v, idx) => (
+                  <div key={v.id} className="flex items-center gap-2 bg-white border-2 border-black p-2 rounded-xl">
+                    <div className={`w-7 h-7 rounded-full border-2 border-black flex items-center justify-center font-lilita text-xs flex-shrink-0
+                      ${idx === 0 ? "bg-[#FFBE0B]" : idx === 1 ? "bg-[#C0C0C0]" : idx === 2 ? "bg-[#CD7F32] text-white" : "bg-gray-100"}`}>
+                      {idx + 1}
+                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={v.foto_url} alt={v.nama} className="w-8 h-8 rounded-full border-2 border-black object-cover flex-shrink-0" />
+                    <p className="font-lexend font-black text-[11px] text-black flex-1 leading-tight min-w-0 truncate">{v.nama}</p>
+                    <span className="font-lexend font-black text-[10px] text-[#FF006E] flex-shrink-0">+{RANK_WEIGHTS[idx]}pt</span>
+                  </div>
+                ))}
+              </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2">
                 <button
-                  type="button"
-                  onClick={() => setLoginModalOpen(false)}
-                  className="flex-1 bg-white hover:bg-gray-100 text-black font-lexend font-black py-2.5 border-3 border-black rounded-lg shadow-neo-sm text-sm active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+                  onClick={() => setConfirmModal(false)}
+                  className="flex-1 bg-white border-3 border-black rounded-xl py-2.5 font-lexend font-black text-sm shadow-neo-sm cursor-pointer hover:bg-gray-50 transition-colors"
                 >
-                  Batal
+                  ← Cek Lagi
                 </button>
                 <button
-                  type="submit"
+                  onClick={handleSubmit}
                   disabled={isSubmitting}
-                  className="flex-1 bg-[#FFBE0B] hover:bg-[#e6ab0a] text-black font-lexend font-black py-2.5 border-3 border-black rounded-lg shadow-neo-sm text-sm flex items-center justify-center gap-1.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer disabled:opacity-50"
+                  className="flex-1 bg-[#FF006E] text-white border-3 border-black rounded-xl py-2.5 font-lexend font-black text-sm shadow-neo-sm cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 hover:bg-[#d4005e] transition-colors"
                 >
-                  {isSubmitting ? "Memuat..." : (
+                  {isSubmitting ? (
                     <>
-                      Masuk
-                      <ArrowRight className="w-4 h-4" />
+                      <div className="w-3.5 h-3.5 border-2 border-t-white border-white/30 rounded-full animate-spin" />
+                      Mengirim...
+                    </>
+                  ) : (
+                    <>
+                      <Vote className="w-4 h-4" />
+                      Kirim Vote!
                     </>
                   )}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Memo Modal Removed */}
-
-
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

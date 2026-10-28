@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Website Evaluasi & Apresiasi Anggota HMIF",
-  description: "Platform Internal Evaluasi, Apresiasi, dan Umpan Balik Akhir Kepengurusan HMIF 2026",
+  title: "Voting Calon Kahim & Wakahim HMIF 2026",
+  description: "Platform Voting Internal Penentuan Calon Ketua & Wakil Ketua Himpunan HMIF 2026",
 };
 
 export default function RootLayout({ children }) {

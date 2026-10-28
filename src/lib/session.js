@@ -56,3 +56,11 @@ export function isKoor() {
   const user = getSession();
   return user ? user.role === 'koor' : false;
 }
+
+/**
+ * Checks if the logged-in user is Super Admin (Aedil).
+ */
+export function isSuperAdmin() {
+  const user = getSession();
+  return user ? user.nim === '103112400101' || user.nama?.toLowerCase().includes('aedil') : false;
+}

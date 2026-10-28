@@ -1,4 +1,4 @@
-// Database client wrapper with automatic Mock Fallback
+// Database client wrapper - Voting System (Kahim/Wakahim HMIF 2026)
 import { createClient } from '@supabase/supabase-js';
 import { members as initialMembers } from './members_data.js';
 
@@ -13,135 +13,128 @@ if (isSupabaseConfigured) {
 }
 
 // ----------------------------------------------------
-// LOCAL STORAGE MOCK DATABASE IMPLEMENTATION
+// LOCAL STORAGE - MEMBERS
 // ----------------------------------------------------
 const MOCK_MEMBERS_KEY = 'hmif_eval_members_db';
-const MOCK_FEEDBACK_KEY = 'hmif_eval_feedback_db';
 
 function getLocalMembers() {
-  if (typeof window === 'undefined') return initialMembers.map(m => ({ ...m, stamps: m.stamps || "", buka_pesan_pada: m.buka_pesan_pada || null }));
+  if (typeof window === 'undefined') return initialMembers.map(m => ({ ...m }));
   let data = localStorage.getItem(MOCK_MEMBERS_KEY);
   if (!data) {
-    const normalizedInitial = initialMembers.map(m => ({ ...m, stamps: m.stamps || "", buka_pesan_pada: m.buka_pesan_pada || null }));
-    localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(normalizedInitial));
-    return normalizedInitial;
+    localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(initialMembers));
+    return initialMembers;
   }
   try {
     const parsed = JSON.parse(data);
-    const hasOldNims = parsed.some(m => m.nim.startsWith('101220'));
     const countMismatch = parsed.length !== initialMembers.length;
-    if (hasOldNims || countMismatch) {
-      const normalizedInitial = initialMembers.map(m => ({ ...m, stamps: m.stamps || "", buka_pesan_pada: m.buka_pesan_pada || null }));
-      localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(normalizedInitial));
-      return normalizedInitial;
+    if (countMismatch) {
+      localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(initialMembers));
+      return initialMembers;
     }
-    return parsed.map(m => ({ ...m, stamps: m.stamps || "", buka_pesan_pada: m.buka_pesan_pada || null }));
+    return parsed;
   } catch (e) {
-    const normalizedInitial = initialMembers.map(m => ({ ...m, stamps: m.stamps || "", buka_pesan_pada: m.buka_pesan_pada || null }));
-    localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(normalizedInitial));
-    return normalizedInitial;
+    localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(initialMembers));
+    return initialMembers;
   }
 }
 
-function saveLocalMembers(members) {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(members));
-  }
-}
+// ----------------------------------------------------
+// LOCAL STORAGE - VOTES
+// Format: [{ voter_id, voter_nim, votes: [{candidate_id, candidate_nim, candidate_nama, rank}], submitted_at }]
+// ----------------------------------------------------
+const VOTING_DB_KEY = 'hmif_voting_db';
 
-function getLocalFeedback() {
+function getLocalVotes() {
   if (typeof window === 'undefined') return [];
-  let data = localStorage.getItem(MOCK_FEEDBACK_KEY);
-  if (!data) {
-    localStorage.setItem(MOCK_FEEDBACK_KEY, JSON.stringify([]));
+  const data = localStorage.getItem(VOTING_DB_KEY);
+  if (!data) return [];
+  try {
+    return JSON.parse(data);
+  } catch {
     return [];
   }
-  return JSON.parse(data);
 }
 
-function saveLocalFeedback(feedback) {
+function saveLocalVotes(votes) {
   if (typeof window !== 'undefined') {
-    localStorage.setItem(MOCK_FEEDBACK_KEY, JSON.stringify(feedback));
+    localStorage.setItem(VOTING_DB_KEY, JSON.stringify(votes));
   }
 }
 
 // ----------------------------------------------------
-// EXPORTED DB ACTIONS (AUTOMATIC MOCK/REAL SWITCH)
+// AUTHENTICATION
+// Password format: NIM (12 chars) + DDMMYYYY (8 chars) = 20 chars total
+// Example: NIM=103112400101, DOB=2006-06-24 → password = "10311240010124062006"
+//          (DDMMYYYY of 2006-06-24 is "24062006")
 // ----------------------------------------------------
+export async function signIn(identifierOrPassword, maybePassword) {
+  let nim = '';
+  let ddmmyyyy = '';
 
-// SHA-256 hashes of the admin & koor passwords (QA-01 Security Fix)
-const hashedPasswordsMap = {
-  "Fatir Gibran": "0729ed86c0352636f82128c395d6352134f50b3a2067b48d8610a5873b642649",
-  "Aedil Riski Ansyah": "b79faf8e688326e8990ebd1c1f6c465f3a37e39a8df89c11b51ed4a4bf0d31b3",
-  "Muhammad Fachri Auravyano Saka": "fa716147666babcf677cba4099df5ca98f6a0bbaf78ed62f9ccc9784f36e74df",
-  "Chilya Fadhilatin Nisa": "b68e84dfbf4fc6e3b0239860e02ac90e2f2b3170b95d71c5e9babcd397a26a4f",
-  "Syahla Kheisya Mayastria": "72f488e8c74f07a6bfb6b3643b56811afb8d78920768c4b6dbdde7db4912db72",
-  "Damanik, Yohanes Geovan Ondova": "48828bab5d0ab7cfe4303a3b505ca27b4bb16b6c937cb6104c8549341c7cfef6",
-  "Ridha Akifah": "1f00aa253f6d9d8fc27b2ed5cdd3b2cdb1a057f6948463e41b9016cb6a13a22d",
-  "Dafa Awal Wahyu Pambudi": "f0dd9b598dc192fcee2cb8fc9500dac94cdd1bad0b38e6477763b410bd64ed71"
-};
+  if (maybePassword !== undefined && maybePassword !== null && maybePassword !== '') {
+    const cleanId = (identifierOrPassword || '').trim();
+    const cleanPass = (maybePassword || '').trim();
 
-// Helper to hash password using browser Web Crypto API
-async function hashPassword(pw) {
-  const msgBuffer = new TextEncoder().encode(pw);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
+    if (cleanPass.length === 20) {
+      nim = cleanPass.slice(0, 12);
+      ddmmyyyy = cleanPass.slice(12, 20);
+    } else if (cleanPass.length === 8) {
+      nim = cleanId;
+      ddmmyyyy = cleanPass;
+    } else if (cleanPass.length > 20) {
+      nim = cleanPass.slice(0, 12);
+      ddmmyyyy = cleanPass.slice(12, 20);
+    } else {
+      throw new Error(
+        'Format password salah! Format: NIM (12 digit) + Tanggal Lahir (DDMMYYYY, 8 digit). Contoh: 10311240010124062006'
+      );
+    }
+  } else {
+    const clean = (identifierOrPassword || '').trim();
+    if (clean.length < 20) {
+      throw new Error(
+        'Format password salah! Gunakan NIM (12 digit) + Tanggal Lahir (DDMMYYYY, 8 digit). Contoh: 10311240010124062006'
+      );
+    }
+    nim = clean.slice(0, 12);
+    ddmmyyyy = clean.slice(12, 20);
+  }
 
-/**
- * Validates credentials and returns user details.
- */
-export async function signIn(nim, dob, password) {
-  const cleanNim = nim.trim();
-  const cleanDob = dob.trim(); // Format: YYYY-MM-DD
+  if (ddmmyyyy.length !== 8) {
+    throw new Error('Tanggal lahir harus 8 digit (DDMMYYYY). Contoh: 24062006');
+  }
+
+  // Parse DDMMYYYY → YYYY-MM-DD
+  const day   = ddmmyyyy.slice(0, 2);
+  const month = ddmmyyyy.slice(2, 4);
+  const year  = ddmmyyyy.slice(4, 8);
+  const dob   = `${year}-${month}-${day}`;
 
   if (isSupabaseConfigured) {
-    // Note: Since this is pre-registered authentication via NIM/DOB,
-    // we query the anggota table to find a matching member.
     const { data, error } = await supabase
       .from('anggota')
       .select('*')
-      .eq('nim', cleanNim)
-      .eq('tanggal_lahir', cleanDob)
+      .eq('nim', nim)
+      .eq('tanggal_lahir', dob)
       .maybeSingle();
 
     if (error) throw new Error(error.message);
-    if (!data) throw new Error('NIM atau Tanggal Lahir salah!');
-
-    // If role is admin or koor, require password verification
-    if (data.role === 'admin' || data.role === 'koor') {
-      const expectedHash = hashedPasswordsMap[data.nama];
-      const inputHash = await hashPassword(password);
-      if (!expectedHash || inputHash !== expectedHash) {
-        throw new Error('Password salah!');
-      }
-    }
+    if (!data) throw new Error('Password salah! Pastikan NIM dan Tanggal Lahir sudah benar.');
     return data;
   } else {
-    // Mock Database Authentication
     const members = getLocalMembers();
-    const found = members.find(
-      (m) => m.nim === cleanNim && m.tanggal_lahir === cleanDob
-    );
-    if (!found) {
-      throw new Error('NIM atau Tanggal Lahir salah! Silakan periksa credentials.md');
-    }
-
-    // If role is admin or koor, require password verification
-    if (found.role === 'admin' || found.role === 'koor') {
-      const expectedHash = hashedPasswordsMap[found.nama];
-      const inputHash = await hashPassword(password);
-      if (!expectedHash || inputHash !== expectedHash) {
-        throw new Error('Password salah!');
-      }
-    }
+    const found = members.find(m => m.nim === nim && m.tanggal_lahir === dob);
+    if (!found) throw new Error('Password salah! Pastikan NIM dan Tanggal Lahir sudah benar.');
     return found;
   }
 }
 
+// ----------------------------------------------------
+// MEMBERS
+// ----------------------------------------------------
+
 /**
- * Fetches all members (for gallery or admin view).
+ * Fetches all members, optionally filtered by departemen.
  */
 export async function getMembers(departemen = null) {
   if (isSupabaseConfigured) {
@@ -149,19 +142,13 @@ export async function getMembers(departemen = null) {
       .from('anggota')
       .select('*')
       .order('no_urut', { ascending: true });
-      
-    if (departemen) {
-      query = query.eq('departemen', departemen);
-    }
-    
+    if (departemen) query = query.eq('departemen', departemen);
     const { data, error } = await query;
     if (error) throw new Error(error.message);
     return data;
   } else {
     const members = getLocalMembers();
-    if (departemen) {
-      return members.filter((m) => m.departemen === departemen);
-    }
+    if (departemen) return members.filter(m => m.departemen === departemen);
     return members;
   }
 }
@@ -176,19 +163,199 @@ export async function getMemberById(id) {
       .select('*')
       .eq('id', id)
       .maybeSingle();
-      
     if (error) throw new Error(error.message);
     return data;
   } else {
     const members = getLocalMembers();
-    return members.find((m) => m.id === id) || null;
+    return members.find(m => m.id === id) || null;
+  }
+}
+
+// ----------------------------------------------------
+// VOTING FUNCTIONS
+// Bobot: Rank 1 = 5 poin, Rank 2 = 4 poin, ..., Rank 5 = 1 poin
+// Kandidat: hanya angkatan 25 (NIM prefix "109")
+// Voter: semua anggota (ang24 & ang25)
+// Aturan: ang24 pilih ang25; ang25 pilih ang25 lain (bukan diri sendiri)
+// ----------------------------------------------------
+
+/**
+ * Submit a vote for the current user.
+ * @param {string} voterId - Member UUID
+ * @param {string} voterNim - Member NIM
+ * @param {Array}  votes - [{ candidate_id, candidate_nim, candidate_nama, rank }]
+ *                         rank goes from 1 (highest) to max 5 (lowest)
+ */
+export async function submitVote(voterId, voterNim, votes) {
+  if (!votes || votes.length < 3 || votes.length > 5) {
+    throw new Error('Pilih minimal 3 dan maksimal 5 kandidat!');
+  }
+
+  // Validate no duplicate candidates
+  const candidateIds = votes.map(v => v.candidate_id);
+  if (new Set(candidateIds).size !== candidateIds.length) {
+    throw new Error('Terdapat duplikasi kandidat dalam pilihan!');
+  }
+
+  // Validate cannot vote for self
+  if (votes.some(v => v.candidate_id === voterId || v.candidate_nim === voterNim)) {
+    throw new Error('Anda tidak dapat memilih diri Anda sendiri!');
+  }
+
+  // Validate candidate is angkatan 25 (NIM starts with 109)
+  if (votes.some(v => !v.candidate_nim || !v.candidate_nim.startsWith('109'))) {
+    throw new Error('Opsi kandidat yang tersedia hanya anggota angkatan 25 (NIM 109...)!');
+  }
+
+  // Validate ranks are sequential starting from 1
+  const ranks = votes.map(v => v.rank).sort((a, b) => a - b);
+  for (let i = 0; i < ranks.length; i++) {
+    if (ranks[i] !== i + 1) throw new Error('Urutan rank tidak valid!');
+  }
+
+  const voteRecord = {
+    voter_id: voterId,
+    voter_nim: voterNim,
+    votes: votes,
+    submitted_at: new Date().toISOString(),
+  };
+
+  if (isSupabaseConfigured) {
+    const { data: existing } = await supabase
+      .from('votes')
+      .select('id')
+      .eq('voter_id', voterId)
+      .maybeSingle();
+
+    if (existing) throw new Error('Kamu sudah pernah melakukan voting sebelumnya!');
+
+    const { data, error } = await supabase
+      .from('votes')
+      .insert([{
+        voter_id: voterId,
+        voter_nim: voterNim,
+        votes: votes,
+      }])
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return { ...voteRecord, ...data };
+  } else {
+    const allVotes = getLocalVotes();
+    const existing = allVotes.find(v => v.voter_id === voterId);
+    if (existing) throw new Error('Kamu sudah pernah melakukan voting sebelumnya!');
+
+    allVotes.push(voteRecord);
+    saveLocalVotes(allVotes);
+    return voteRecord;
   }
 }
 
 /**
- * Updates a member record. Used by Coords to edit pesan_koor,
- * or by Admin to edit credentials and other messages.
+ * Get a voter's existing vote record. Returns null if not voted yet.
+ * This is a synchronous function (reads from localStorage directly).
  */
+export function getMyVote(voterId) {
+  if (typeof window === 'undefined') return null;
+  const allVotes = getLocalVotes();
+  return allVotes.find(v => v.voter_id === voterId) || null;
+}
+
+/**
+ * Get aggregated voting results with weighted scores.
+ * For admin use only (Aedil).
+ * @param {Array} allMembers - All members from getMembers()
+ * @returns {{ candidates: Array, allVotes: Array, totalEligibleVoters: number }}
+ */
+export function getVotingResults(allMembers) {
+  if (typeof window === 'undefined') {
+    return { candidates: [], allVotes: [], totalEligibleVoters: 0 };
+  }
+
+  const RANK_WEIGHTS = { 1: 5, 2: 4, 3: 3, 4: 2, 5: 1 };
+  const allVotes = getLocalVotes();
+
+  // All members are eligible voters
+  const totalEligibleVoters = allMembers.length;
+
+  // Aggregate weighted scores per candidate
+  const scoreMap = {};
+
+  for (const voteRecord of allVotes) {
+    for (const v of voteRecord.votes) {
+      if (!scoreMap[v.candidate_id]) {
+        scoreMap[v.candidate_id] = {
+          candidateId:    v.candidate_id,
+          candidateNama:  v.candidate_nama,
+          candidateNim:   v.candidate_nim,
+          totalScore:     0,
+          rankBreakdown:  { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+          voteCount:      0,
+        };
+      }
+      const weight = RANK_WEIGHTS[v.rank] || 0;
+      scoreMap[v.candidate_id].totalScore += weight;
+      scoreMap[v.candidate_id].rankBreakdown[v.rank] =
+        (scoreMap[v.candidate_id].rankBreakdown[v.rank] || 0) + 1;
+      scoreMap[v.candidate_id].voteCount += 1;
+    }
+  }
+
+  // Sort candidates by totalScore descending, then by voteCount as tiebreaker
+  const candidates = Object.values(scoreMap).sort((a, b) => {
+    if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
+    return b.voteCount - a.voteCount;
+  });
+
+  return { candidates, allVotes, totalEligibleVoters };
+}
+
+/**
+ * Reset all vote data. Admin-only action.
+ */
+export function resetVotes() {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(VOTING_DB_KEY);
+  }
+}
+
+// ----------------------------------------------------
+// LEGACY COMPATIBILITY HELPERS (For /dashboard, /memo, /letter)
+// ----------------------------------------------------
+const MOCK_FEEDBACK_KEY = 'hmif_eval_feedback_db';
+const MOCK_STICKY_NOTES_KEY = 'hmif_eval_sticky_notes_db';
+
+function saveLocalMembers(members) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(MOCK_MEMBERS_KEY, JSON.stringify(members));
+  }
+}
+
+function getLocalFeedback() {
+  if (typeof window === 'undefined') return [];
+  let data = localStorage.getItem(MOCK_FEEDBACK_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+function saveLocalFeedback(feedbacks) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(MOCK_FEEDBACK_KEY, JSON.stringify(feedbacks));
+  }
+}
+
+function getLocalStickyNotes() {
+  if (typeof window === 'undefined') return [];
+  let data = localStorage.getItem(MOCK_STICKY_NOTES_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+function saveLocalStickyNotes(notes) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(MOCK_STICKY_NOTES_KEY, JSON.stringify(notes));
+  }
+}
+
 export async function updateMember(id, updatedFields) {
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
@@ -197,45 +364,32 @@ export async function updateMember(id, updatedFields) {
       .eq('id', id)
       .select()
       .single();
-      
     if (error) throw new Error(error.message);
     return data;
   } else {
     const members = getLocalMembers();
     const index = members.findIndex((m) => m.id === id);
     if (index === -1) throw new Error('Member not found');
-    
     members[index] = { ...members[index], ...updatedFields };
     saveLocalMembers(members);
     return members[index];
   }
 }
 
-/**
- * Fetches all feedback entries.
- */
 export async function getFeedbacks(tujuan = null, departemen_pengirim = null) {
   if (isSupabaseConfigured) {
     let query = supabase
       .from('feedback_surat')
       .select('*, anggota:pengirim_id(nama, nim, departemen)')
       .order('created_at', { ascending: false });
-      
-    if (tujuan) {
-      query = query.eq('tujuan', tujuan);
-    }
-    if (departemen_pengirim) {
-      query = query.eq('departemen_pengirim', departemen_pengirim);
-    }
-    
+    if (tujuan) query = query.eq('tujuan', tujuan);
+    if (departemen_pengirim) query = query.eq('departemen_pengirim', departemen_pengirim);
     const { data, error } = await query;
     if (error) throw new Error(error.message);
     return data;
   } else {
     const feedbacks = getLocalFeedback();
     const members = getLocalMembers();
-    
-    // Join with members to simulate the relation
     let joined = feedbacks.map(f => {
       const sender = members.find(m => m.id === f.pengirim_id);
       return {
@@ -243,29 +397,19 @@ export async function getFeedbacks(tujuan = null, departemen_pengirim = null) {
         anggota: sender ? { nama: sender.nama, nim: sender.nim, departemen: sender.departemen } : null
       };
     }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    
-    if (tujuan) {
-      joined = joined.filter(f => f.tujuan === tujuan);
-    }
-    if (departemen_pengirim) {
-      joined = joined.filter(f => f.departemen_pengirim === departemen_pengirim);
-    }
+    if (tujuan) joined = joined.filter(f => f.tujuan === tujuan);
+    if (departemen_pengirim) joined = joined.filter(f => f.departemen_pengirim === departemen_pengirim);
     return joined;
   }
 }
 
-/**
- * Submits a new feedback response.
- */
 export async function addFeedback(feedbackData) {
-  // feedbackData: { pengirim_id, tujuan, departemen_pengirim, isi_balasan, is_anonim }
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
       .from('feedback_surat')
       .insert([feedbackData])
       .select()
       .single();
-      
     if (error) throw new Error(error.message);
     return data;
   } else {
@@ -281,9 +425,6 @@ export async function addFeedback(feedbackData) {
   }
 }
 
-/**
- * Deletes a feedback response by ID.
- */
 export async function deleteFeedback(id) {
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
@@ -292,7 +433,6 @@ export async function deleteFeedback(id) {
       .eq('id', id)
       .select()
       .maybeSingle();
-      
     if (error) throw new Error(error.message);
     return data;
   } else {
@@ -300,27 +440,6 @@ export async function deleteFeedback(id) {
     const filtered = feedbacks.filter((f) => f.id !== id);
     saveLocalFeedback(filtered);
     return { id };
-  }
-}
-
-// ----------------------------------------------------
-// STICKY NOTES IMPLEMENTATION (MOCK & SUPABASE)
-// ----------------------------------------------------
-const MOCK_STICKY_NOTES_KEY = 'hmif_eval_sticky_notes_db';
-
-function getLocalStickyNotes() {
-  if (typeof window === 'undefined') return [];
-  let data = localStorage.getItem(MOCK_STICKY_NOTES_KEY);
-  if (!data) {
-    localStorage.setItem(MOCK_STICKY_NOTES_KEY, JSON.stringify([]));
-    return [];
-  }
-  return JSON.parse(data);
-}
-
-function saveLocalStickyNotes(notes) {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(MOCK_STICKY_NOTES_KEY, JSON.stringify(notes));
   }
 }
 
@@ -338,16 +457,10 @@ export async function getStickyNotes() {
 }
 
 export async function addStickyNote(noteData) {
-  const randomRotation = Math.floor(Math.random() * 12) - 6; // -6 to 5 degrees
-  const randomX = Math.floor(Math.random() * 80) + 10; // 10% to 90%
-  const randomY = Math.floor(Math.random() * 60) + 10; // 10% to 70%
-  
-  const finalNote = {
-    ...noteData,
-    rotation: randomRotation,
-    x_pos: randomX,
-    y_pos: randomY
-  };
+  const randomRotation = Math.floor(Math.random() * 12) - 6;
+  const randomX = Math.floor(Math.random() * 80) + 10;
+  const randomY = Math.floor(Math.random() * 60) + 10;
+  const finalNote = { ...noteData, rotation: randomRotation, x_pos: randomX, y_pos: randomY };
 
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
