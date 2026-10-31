@@ -34,7 +34,7 @@ export default function VotingDashboard() {
     try {
       const members = await getMembers();
       setAllMembers(members);
-      const r = getVotingResults(members);
+      const r = await getVotingResults(members);
       setResults(r);
     } catch (err) {
       console.error("Dashboard load error", err);
@@ -56,7 +56,8 @@ export default function VotingDashboard() {
         if (!isMounted) return;
         setCurrentUser(session);
         setAllMembers(members);
-        setResults(getVotingResults(members));
+        const r = await getVotingResults(members);
+        setResults(r);
       } catch (err) {
         console.error("Dashboard load error", err);
       } finally {
@@ -72,15 +73,15 @@ export default function VotingDashboard() {
     router.push("/");
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (resetStep === 1) {
       setResetStep(2);
       return;
     }
-    resetVotes();
+    await resetVotes();
     setResetConfirm(false);
     setResetStep(1);
-    loadData();
+    await loadData();
   };
 
   // Export results as CSV
@@ -120,7 +121,7 @@ export default function VotingDashboard() {
   const maxScore          = candidateResults[0]?.totalScore || 1;
 
   // Split members: who voted, who hasn't
-  const votedSet = new Set(allVotes.map(v => v.voter_id));
+  const votedSet = new Set(allVotes.map(v => v.voter_id).concat(allVotes.map(v => v.voter_nim)));
 
   return (
     <div className="min-h-screen y2k-mesh-bg flex flex-col">
@@ -322,8 +323,8 @@ export default function VotingDashboard() {
             </div>
 
             {allMembers.map(member => {
-              const vote    = allVotes.find(v => v.voter_id === member.id);
-              const hasVote = votedSet.has(member.id);
+              const vote    = allVotes.find(v => v.voter_id === member.id || (v.voter_nim && v.voter_nim === member.nim));
+              const hasVote = votedSet.has(member.id) || (member.nim && votedSet.has(member.nim));
 
               return (
                 <div
@@ -355,7 +356,7 @@ export default function VotingDashboard() {
                   {vote && (
                     <div className="border-t-2 border-black/10 px-3 pb-3 pt-2">
                       <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5">
-                        {vote.votes.map((v, idx) => {
+                        {Array.isArray(vote.votes) && vote.votes.map((v, idx) => {
                           const cand = allMembers.find(m => m.id === v.candidate_id);
                           return (
                             <div key={idx} className="flex items-center gap-1.5 bg-gray-50 border border-black rounded-lg p-1.5">

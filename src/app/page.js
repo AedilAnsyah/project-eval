@@ -45,7 +45,7 @@ export default function VotingPage() {
         if (session) {
           setCurrentUser(session);
           setCandidates(buildCandidates(session, members));
-          const vote = getMyVote(session.id);
+          const vote = await getMyVote(session.id);
           setExistingVote(vote);
         }
       } catch (err) {
@@ -81,7 +81,7 @@ export default function VotingPage() {
       setSession(user);
       setCurrentUser(user);
       setCandidates(buildCandidates(user, allMembers));
-      const vote = getMyVote(user.id);
+      const vote = await getMyVote(user.id);
       setExistingVote(vote);
     } catch (err) {
       setLoginError(err.message);

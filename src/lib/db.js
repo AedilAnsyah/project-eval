@@ -248,13 +248,17 @@ export async function submitVote(voterId, voterNim, votes) {
 
       if (existing) throw new Error('Kamu sudah pernah melakukan voting sebelumnya!');
 
-      await supabase
+      const { error: insertError } = await supabase
         .from('votes')
         .insert([{
           voter_id: voterId,
           voter_nim: voterNim,
           votes: votes,
         }]);
+
+      if (insertError) {
+        console.warn('Supabase insert error, falling back to local:', insertError.message);
+      }
     } catch (err) {
       if (err.message && err.message.includes('sudah pernah')) throw err;
       console.warn('Supabase submitVote failed, storing locally:', err);
@@ -268,27 +272,136 @@ export async function submitVote(voterId, voterNim, votes) {
 
 /**
  * Get a voter's existing vote record. Returns null if not voted yet.
- * This is a synchronous function (reads from localStorage directly).
+ * Queries Supabase first if configured, with auto-sync from local storage.
  */
-export function getMyVote(voterId) {
-  if (typeof window === 'undefined') return null;
-  const allVotes = getLocalVotes();
-  return allVotes.find(v => v.voter_id === voterId) || null;
+export async function getMyVote(voterId) {
+  let vote = null;
+
+  // 1. Check Supabase first if configured
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase
+        .from('votes')
+        .select('*')
+        .eq('voter_id', voterId)
+        .maybeSingle();
+
+      if (!error && data) {
+        vote = data;
+        if (typeof vote.votes === 'string') {
+          try { vote.votes = JSON.parse(vote.votes); } catch {}
+        }
+        // Save/update to local cache
+        if (typeof window !== 'undefined') {
+          const allVotes = getLocalVotes();
+          const idx = allVotes.findIndex(v => v.voter_id === voterId);
+          if (idx >= 0) {
+            allVotes[idx] = vote;
+          } else {
+            allVotes.push(vote);
+          }
+          saveLocalVotes(allVotes);
+        }
+        return vote;
+      }
+    } catch (err) {
+      console.warn('Supabase getMyVote error, checking local fallback:', err);
+    }
+  }
+
+  // 2. Check Local Storage
+  if (typeof window !== 'undefined') {
+    const allVotes = getLocalVotes();
+    const local = allVotes.find(v => v.voter_id === voterId);
+    if (local) {
+      vote = local;
+      if (typeof vote.votes === 'string') {
+        try { vote.votes = JSON.parse(vote.votes); } catch {}
+      }
+
+      // AUTO-SYNC: If local vote exists and Supabase is configured, push to Supabase in background
+      if (isSupabaseConfigured) {
+        supabase
+          .from('votes')
+          .select('id')
+          .eq('voter_id', voterId)
+          .maybeSingle()
+          .then(({ data: existing }) => {
+            if (!existing) {
+              return supabase.from('votes').insert([{
+                voter_id: local.voter_id,
+                voter_nim: local.voter_nim,
+                votes: local.votes,
+              }]);
+            }
+          })
+          .then((res) => {
+            if (res && res.error) console.warn('Auto-sync to Supabase warning:', res.error);
+            else if (res) console.log('Auto-synced local vote to Supabase successfully!');
+          })
+          .catch(e => console.warn('Auto-sync failed:', e));
+      }
+    }
+  }
+
+  return vote;
 }
 
 /**
  * Get aggregated voting results with weighted scores.
  * For admin use only (Aedil).
+ * Fetches from Supabase votes table with fallback to local storage.
  * @param {Array} allMembers - All members from getMembers()
- * @returns {{ candidates: Array, allVotes: Array, totalEligibleVoters: number }}
+ * @returns {Promise<{ candidates: Array, allVotes: Array, totalEligibleVoters: number }>}
  */
-export function getVotingResults(allMembers) {
-  if (typeof window === 'undefined') {
-    return { candidates: [], allVotes: [], totalEligibleVoters: 0 };
+export async function getVotingResults(allMembers = []) {
+  const RANK_WEIGHTS = { 1: 5, 2: 4, 3: 3, 4: 2, 5: 1 };
+  let allVotes = [];
+
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase
+        .from('votes')
+        .select('*')
+        .order('submitted_at', { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        allVotes = data;
+      } else if (error) {
+        console.warn('Supabase getVotingResults error, falling back to local DB:', error.message);
+        allVotes = getLocalVotes();
+      }
+    } catch (err) {
+      console.warn('Supabase getVotingResults failed to fetch, using local fallback:', err);
+      allVotes = getLocalVotes();
+    }
+  } else {
+    allVotes = getLocalVotes();
   }
 
-  const RANK_WEIGHTS = { 1: 5, 2: 4, 3: 3, 4: 2, 5: 1 };
-  const allVotes = getLocalVotes();
+  // Include any local votes not yet in allVotes (e.g. votes stored during offline/fallback)
+  if (typeof window !== 'undefined') {
+    const localVotes = getLocalVotes();
+    for (const lv of localVotes) {
+      const alreadyPresent = allVotes.some(
+        v => v.voter_id === lv.voter_id || (v.voter_nim && lv.voter_nim && v.voter_nim === lv.voter_nim)
+      );
+      if (!alreadyPresent) {
+        allVotes.push(lv);
+      }
+    }
+  }
+
+  // Normalize vote records (parse votes JSON if returned as string)
+  for (const voteRecord of allVotes) {
+    if (typeof voteRecord.votes === 'string') {
+      try {
+        voteRecord.votes = JSON.parse(voteRecord.votes);
+      } catch {
+        voteRecord.votes = [];
+      }
+    }
+  }
 
   // All members are eligible voters
   const totalEligibleVoters = allMembers.length;
@@ -297,6 +410,7 @@ export function getVotingResults(allMembers) {
   const scoreMap = {};
 
   for (const voteRecord of allVotes) {
+    if (!Array.isArray(voteRecord.votes)) continue;
     for (const v of voteRecord.votes) {
       if (!scoreMap[v.candidate_id]) {
         scoreMap[v.candidate_id] = {
@@ -331,10 +445,11 @@ export function getVotingResults(allMembers) {
 export async function resetMyVote(voterId) {
   if (isSupabaseConfigured) {
     try {
-      await supabase
+      const { error } = await supabase
         .from('votes')
         .delete()
         .eq('voter_id', voterId);
+      if (error) console.error("Error resetting vote in Supabase:", error);
     } catch (e) {
       console.error("Error resetting vote in Supabase:", e);
     }
@@ -352,10 +467,11 @@ export async function resetMyVote(voterId) {
 export async function resetVotes() {
   if (isSupabaseConfigured) {
     try {
-      await supabase
+      const { error } = await supabase
         .from('votes')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+        .neq('voter_nim', 'NONE');
+      if (error) console.error("Error resetting all votes in Supabase:", error);
     } catch (e) {
       console.error("Error resetting all votes in Supabase:", e);
     }
